@@ -39,6 +39,9 @@ model Bakery {
   // content_id. 등록 안 된(주로 소규모) 빵집은 NULL로 두고 자체 조사 데이터만 쓴다 — 이름으로
   // 자동 매칭하지 않는다 (동명이인 매장 오매칭 위험).
   tourContentId String? @map("tour_content_id")
+  // 빵집 외관 사진 URL (R2 공개 URL 또는 TourAPI 이미지 URL 그대로). 관리자가 직접 채워 넣는다 —
+  // bread_items.image_url과 동일하게 자동 채움 파이프라인 없이 값이 있으면 쓰고 없으면 null.
+  photoUrl String? @map("photo_url")
 
   breadItems BreadItem[]
   tourStops  TourStop[]

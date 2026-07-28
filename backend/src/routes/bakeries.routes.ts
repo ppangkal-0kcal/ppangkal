@@ -104,6 +104,7 @@ bakeriesRouter.get(
           rating: bakery.rating,
           review_count: bakery.reviewCount,
           opening_hours: bakery.openingHours,
+          photo_url: bakery.photoUrl,
           distance_m: Math.round(distanceM),
           is_open_now: isOpenNow,
           walk_recommended: walkRecommended,
@@ -155,6 +156,7 @@ bakeriesRouter.get(
       rating: bakery.rating,
       review_count: bakery.reviewCount,
       opening_hours: bakery.openingHours,
+      photo_url: bakery.photoUrl,
       is_open_now: isBakeryOpenNow(bakery.openingHours),
       tour_info: tourInfo,
     });
