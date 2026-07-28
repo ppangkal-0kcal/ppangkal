@@ -1,3 +1,5 @@
+import 'suggested_walk.dart';
+
 /// Mirrors the TourStop shape, which also differs by endpoint
 /// (FRONTEND_API_GUIDE.md §2 step 7; backend/src/routes/tours.routes.ts):
 /// - `POST /tours/:tourId/stops` → `{id, tour_id, bakery_id, distance_m,
@@ -20,7 +22,7 @@ class TourStop {
   final int steps;
   final int caloriesBurned;
   final DateTime visitedAt;
-  final Map<String, dynamic>? suggestedWalk;
+  final SuggestedWalk? suggestedWalk;
 
   const TourStop({
     required this.id,
@@ -45,6 +47,8 @@ class TourStop {
         steps: json['steps'] as int,
         caloriesBurned: json['calories_burned'] as int,
         visitedAt: DateTime.parse(json['visited_at'] as String),
-        suggestedWalk: json['suggested_walk'] as Map<String, dynamic>?,
+        suggestedWalk: json['suggested_walk'] != null
+            ? SuggestedWalk.fromJson(json['suggested_walk'] as Map<String, dynamic>)
+            : null,
       );
 }

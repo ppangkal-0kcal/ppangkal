@@ -204,3 +204,8 @@ without derailing a diet/calorie goal.
 ### 6. 세션 마무리 습관 — `/recap`
 
 ### 7. 리뷰는 "위젯 하나"가 아니라 "흐름 전체"로 — `/review`
+
+## 알려진 성능 고려사항
+- GlassCard는 BackdropFilter를 사용하므로 개당 렌더 비용이 있음.
+  현재 데이터 규모(빵집 2곳, 메뉴 9종)에서는 문제없으나,
+  긴 목록에 적용 시 스크롤 성능 확인 필요.

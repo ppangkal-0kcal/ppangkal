@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../screens/bakery_detail_screen.dart';
 import '../screens/bakery_list_screen.dart';
+import '../screens/bread_menu_screen.dart';
 import '../screens/coming_soon_screen.dart';
 import '../screens/debug_screen.dart';
 import '../screens/home_screen.dart';
@@ -70,6 +71,14 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
                     builder: (context, state) => BakeryDetailScreen(
                       bakeryId: state.pathParameters['bakeryId']!,
                     ),
+                    routes: [
+                      GoRoute(
+                        path: 'menu',
+                        builder: (context, state) => BreadMenuScreen(
+                          bakeryId: state.pathParameters['bakeryId']!,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -56,9 +56,10 @@ class _TourFlowScreenState extends State<TourFlowScreen> {
         durationMinutes: 20,
         steps: 2000,
       );
+      final walk = stop.suggestedWalk;
       _append(
         '-> id=${stop.id} calories_burned=${stop.caloriesBurned} '
-        'suggested_walk=${stop.suggestedWalk}',
+        'suggested_walk=${walk == null ? null : '${walk.title} ${walk.roundTripDistanceM}m ${walk.estimatedCaloriesBurned}kcal'}',
       );
 
       _append('\nPOST /food-logs 호출...');
