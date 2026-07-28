@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../models/bakery.dart';
 import '../providers/auth_provider.dart';
 import '../services/bakery_service.dart';
-import 'bakery_detail_screen.dart';
 
 /// Data-verification screen only — no design pass yet. Confirms
 /// GET /api/bakeries round-trips through the DB by dumping raw fields.
@@ -55,9 +55,7 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
             itemBuilder: (context, i) {
               final b = bakeries[i];
               return InkWell(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => BakeryDetailScreen(bakeryId: b.id)),
-                ),
+                onTap: () => context.push('/bakeries/${b.id}'),
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: Column(
