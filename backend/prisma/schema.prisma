@@ -1,0 +1,158 @@
+// 빵칼(0-kcal) 데이터 모델 — idea.md/tech-stack.md(v2)를 반영한다.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  name              String
+  gender            String
+  age               Int
+  height            Float
+  weight            Float
+  activityLevel     String   @map("activity_level")
+  dailyGoalCalories Int      @map("daily_goal_calories")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  tours    Tour[]
+  foodLogs FoodLog[]
+
+  @@map("users")
+}
+
+model Bakery {
+  id           String   @id @default(cuid())
+  name         String
+  latitude     Float
+  longitude    Float
+  address      String
+  rating       Float?
+  reviewCount  Int?     @map("review_count")
+  openingHours String?  @map("opening_hours")
+  createdAt    DateTime @default(now()) @map("created_at")
+  // 기획팀이 한국관광공사 TourAPI(음식점, contentTypeId=39)에서 이 빵집을 직접 찾아 매칭한
+  // content_id. 등록 안 된(주로 소규모) 빵집은 NULL로 두고 자체 조사 데이터만 쓴다 — 이름으로
+  // 자동 매칭하지 않는다 (동명이인 매장 오매칭 위험).
+  tourContentId String? @map("tour_content_id")
+
+  breadItems BreadItem[]
+  tourStops  TourStop[]
+
+  @@map("bakeries")
+}
+
+model BreadItem {
+  id          String  @id @default(cuid())
+  bakeryId    String  @map("bakery_id")
+  name        String
+  category    String?
+  price       Int
+  calories    Int
+  baseWeightG Int?    @map("base_weight_g")
+  carbG       Float?  @map("carb_g")
+  proteinG    Float?  @map("protein_g")
+  fatG        Float?  @map("fat_g")
+  // 데이터 출처 신뢰도: A(공식 제휴/영양성분표) / B(직접 조사·정제) / C(추정치, source_note 필수)
+  sourceGrade String? @map("source_grade")
+  sourceNote  String? @map("source_note")
+  imageUrl    String? @map("image_url")
+  isAvailable Boolean @default(true) @map("is_available")
+
+  bakery   Bakery    @relation(fields: [bakeryId], references: [id])
+  foodLogs FoodLog[]
+
+  @@unique([bakeryId, name])
+  @@map("bread_items")
+}
+
+// 한국관광공사 TourAPI 응답 캐시 — detail 조회(detailCommon2/detailImage2)를 매 요청마다
+// 라이브 호출하지 않기 위한 read-through 캐시. fetchedAt이 오래되면 재조회 후 UPDATE로 갱신하고,
+// 절대 행을 삭제하지 않는다(TourStop 등 향후 참조 FK가 깨지는 것을 막기 위함).
+model TouristSpot {
+  contentId     String   @id @map("content_id")
+  contentTypeId String?  @map("content_type_id")
+  title         String
+  latitude      Float
+  longitude     Float
+  overview      String?
+  openingHours  String?  @map("opening_hours")
+  fetchedAt     DateTime @map("fetched_at")
+
+  images SpotImage[]
+
+  @@map("tourist_spots")
+}
+
+model SpotImage {
+  id        String @id @default(cuid())
+  contentId String @map("content_id")
+  originUrl String @map("origin_url")
+  seq       Int
+
+  spot TouristSpot @relation(fields: [contentId], references: [contentId], onDelete: Cascade)
+
+  @@unique([contentId, seq])
+  @@map("spot_images")
+}
+
+// 빵투어 세션 — 한 번의 투어에 여러 빵집(TourStop)을 방문할 수 있다. 집계 필드(total_*)는
+// 매번 자식 레코드를 합산하지 않고 투어 종료 시점에 스냅샷으로 저장한다 — 이후 food_logs가
+// 수정돼도 이미 종료된 투어의 리포트 숫자는 바뀌지 않아야 하기 때문.
+model Tour {
+  id                    String    @id @default(cuid())
+  userId                String    @map("user_id")
+  startedAt             DateTime  @default(now()) @map("started_at")
+  completedAt           DateTime? @map("completed_at")
+  totalSteps            Int?      @map("total_steps")
+  totalDistanceM        Int?      @map("total_distance_m")
+  totalCaloriesBurned   Int?      @map("total_calories_burned")
+  totalCaloriesConsumed Int?      @map("total_calories_consumed")
+  // 0-kcal 밸런스 매칭 = total_calories_burned - total_calories_consumed (투어 종료 시 함께 확정)
+  balanceKcal           Int?      @map("balance_kcal")
+
+  user  User       @relation(fields: [userId], references: [id])
+  stops TourStop[]
+
+  @@map("tours")
+}
+
+// 한 투어 내 빵집 방문 1건 — 거리/시간/걸음 수는 전부 클라이언트 센서(만보기 + GPS 속도 필터,
+// 시속 20km 이하만 인정) 실측값이다. 도보만 추적하므로 이동수단 필드는 없다.
+model TourStop {
+  id              String   @id @default(cuid())
+  tourId          String   @map("tour_id")
+  bakeryId        String   @map("bakery_id")
+  distanceM       Int      @map("distance_m")
+  durationMinutes Int      @map("duration_minutes")
+  steps           Int
+  caloriesBurned  Int      @map("calories_burned")
+  visitedAt       DateTime @default(now()) @map("visited_at")
+
+  tour     Tour      @relation(fields: [tourId], references: [id])
+  bakery   Bakery    @relation(fields: [bakeryId], references: [id])
+  foodLogs FoodLog[]
+
+  @@map("tour_stops")
+}
+
+// 섭취 사진은 서버에 업로드하지 않는다 — 사용자 기기 갤러리에만 보관 (프론트엔드 전용 기능).
+model FoodLog {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  breadItemId String  @map("bread_item_id")
+  tourStopId String?  @map("tour_stop_id")
+  calories   Int
+  quantity   Int      @default(1)
+  loggedAt   DateTime @default(now()) @map("logged_at")
+
+  user      User      @relation(fields: [userId], references: [id])
+  breadItem BreadItem @relation(fields: [breadItemId], references: [id])
+  tourStop  TourStop? @relation(fields: [tourStopId], references: [id])
+
+  @@map("food_logs")
+}

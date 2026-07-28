@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter pub get:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter format:*)",
+      "Bash(dart format:*)",
+      "Bash(flutter devices:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Read(lib/**)",
+      "Read(test/**)",
+      "Read(*.md)",
+      "Edit(lib/**)",
+      "Edit(test/**)"
+    ],
+    "ask": [
+      "Edit(pubspec.yaml)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(flutter pub add:*)",
+      "Bash(flutter pub remove:*)",
+      "Bash(flutter build:*)",
+      "Bash(flutter run:*)",
+      "Bash(rm:*)",
+      "Bash(Remove-Item:*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/secrets/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Edit(.env)",
+      "Edit(.env.*)",
+      "Edit(build/**)",
+      "Write(build/**)",
+      "Edit(android/**)",
+      "Edit(ios/**)"
+    ]
+  }
+}

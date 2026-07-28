@@ -1,0 +1,17 @@
+.claude/
+CLAUDE.md
+idea.md
+tech-stack.md
+legacy/
+*.pdf
+
+node_modules/
+dist/
+coverage/
+.env
+.env.local
+*.log
+
+# 관리자가 로컬에만 두고 R2로 업로드하는 원본 이미지 — 레포에는 커밋하지 않는다
+prisma/assets/bread-images/*
+!prisma/assets/bread-images/.gitkeep
