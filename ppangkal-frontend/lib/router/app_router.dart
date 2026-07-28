@@ -1,16 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
+import '../models/bread_selection.dart';
 import '../providers/auth_provider.dart';
 import '../screens/bakery_detail_screen.dart';
 import '../screens/bakery_list_screen.dart';
 import '../screens/bread_menu_screen.dart';
 import '../screens/coming_soon_screen.dart';
 import '../screens/debug_screen.dart';
+import '../screens/food_confirm_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/tour_progress_screen.dart';
+import '../screens/tour_report_screen.dart';
 import '../widgets/main_shell.dart';
 
 /// Central route table — replaces the screen-by-screen `Navigator.push` +
@@ -96,6 +100,25 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
           ),
         ],
       ),
+      // Active-tour flow — deliberately plain top-level routes, not nested
+      // under the tab shell: a tour spans multiple round trips through the
+      // 빵집 tab, and TourFlowController is a single app-root instance (see
+      // lib/main.dart), not scoped to any one branch of the shell.
+      GoRoute(
+        path: '/tour/progress/:bakeryId',
+        builder: (context, state) => TourProgressScreen(
+          bakeryId: state.pathParameters['bakeryId']!,
+          selections: state.extra as List<BreadSelection>? ?? const [],
+        ),
+      ),
+      GoRoute(
+        path: '/tour/confirm/:tourStopId',
+        builder: (context, state) => FoodConfirmScreen(
+          tourStopId: state.pathParameters['tourStopId']!,
+          selections: state.extra as List<BreadSelection>? ?? const [],
+        ),
+      ),
+      GoRoute(path: '/tour/report', builder: (context, state) => const TourReportScreen()),
     ],
   );
 }

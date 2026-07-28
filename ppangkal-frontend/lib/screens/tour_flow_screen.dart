@@ -48,17 +48,18 @@ class _TourFlowScreenState extends State<TourFlowScreen> {
       final tour = await controller.startTour(token);
       _append('-> id=${tour.id} started_at=${tour.startedAt}');
 
+      // steps/distance/duration are now derived inside the controller from
+      // its StepCounter + a wall-clock leg timer — wait a few fake ticks so
+      // this debug run demonstrates a non-zero delta instead of racing it.
+      _append('\n(StepCounter가 걸음을 쌓을 시간을 잠깐 기다립니다...)');
+      await Future.delayed(const Duration(seconds: 3));
+
       _append('\nPOST /tours/${tour.id}/stops 호출...');
-      final stop = await controller.arriveAtBakery(
-        token: token,
-        bakeryId: 'bak_sungsimdang',
-        distanceM: 1500,
-        durationMinutes: 20,
-        steps: 2000,
-      );
+      final stop = await controller.arriveAtBakery(token: token, bakeryId: 'bak_sungsimdang');
       final walk = stop.suggestedWalk;
       _append(
-        '-> id=${stop.id} calories_burned=${stop.caloriesBurned} '
+        '-> id=${stop.id} steps=${stop.steps} distance_m=${stop.distanceM} '
+        'calories_burned=${stop.caloriesBurned} '
         'suggested_walk=${walk == null ? null : '${walk.title} ${walk.roundTripDistanceM}m ${walk.estimatedCaloriesBurned}kcal'}',
       );
 
@@ -90,6 +91,7 @@ class _TourFlowScreenState extends State<TourFlowScreen> {
     } catch (e) {
       _append('\n에러: $e');
     } finally {
+      controller.dispose();
       setState(() => _running = false);
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../core/api_exception.dart';
 import '../models/bread_item.dart';
@@ -90,19 +91,32 @@ class _BreadMenuScreenState extends State<BreadMenuScreen> {
                   ),
                 ),
               ),
-              if (selections.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: GlassCard(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('예상 섭취 칼로리', style: Theme.of(context).textTheme.titleMedium),
-                        Text('$totalCalories kcal', style: Theme.of(context).textTheme.titleMedium),
-                      ],
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  children: [
+                    if (selections.isNotEmpty) ...[
+                      GlassCard(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('예상 섭취 칼로리', style: Theme.of(context).textTheme.titleMedium),
+                            Text('$totalCalories kcal', style: Theme.of(context).textTheme.titleMedium),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    FilledButton(
+                      onPressed: () => context.push(
+                        '/tour/progress/${widget.bakeryId}',
+                        extra: selections,
+                      ),
+                      child: const Text('투어 진행하기'),
                     ),
-                  ),
+                  ],
                 ),
+              ),
             ],
           );
         },
