@@ -68,6 +68,18 @@ flutter run -d chrome
 어떤 화면/코드가 어떤 API와 연결되는지는 `ppangkal-frontend/API_INTEGRATION.md`에 정리돼 있다
 — 새 화면 만들 때 이 문서부터 볼 것. 작업 규칙은 `ppangkal-frontend/CLAUDE.md` 참고.
 
+## 브랜치 전략 (Git Flow)
+
+- **`main`** — 항상 배포 가능한 상태. 직접 커밋하지 않는다.
+- **`develop`** — 통합 브랜치. 새 작업은 전부 여기서 갈라져 나가고, 여기로 다시 합쳐진다.
+- **`feature/<설명>`** — `develop`에서 분기, 작업 끝나면 `develop`로 PR/머지 (예:
+  `feature/bakery-list-ui`, `feature/tour-flow-ui`).
+- **`release/<버전>`** — 배포 준비할 때 `develop`에서 분기, QA 끝나면 `main`과 `develop` 양쪽에 머지.
+- **`hotfix/<설명>`** — `main`에서 긴급 수정할 때만 분기, 끝나면 `main`과 `develop` 양쪽에 머지.
+
+작업 시작할 땐 `git checkout develop && git pull && git checkout -b feature/작업명`으로 시작하고,
+직접 `main`/`develop`에 push하지 말고 PR로 머지하는 걸 권장.
+
 ## 참고 문서 모음
 
 | 문서 | 내용 |
