@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../controllers/tour_flow_controller.dart';
 import '../providers/auth_provider.dart';
-import '../services/food_log_service.dart';
-import '../services/calories_service.dart';
-import '../services/tour_service.dart';
+import '../theme/app_theme.dart';
 
-/// Data-verification only — runs the full step 1/7/8 tour sequence
-/// (start tour → arrive at a stop → log food → check balance → complete →
-/// fetch report) against fixed test ids and dumps each raw response in
-/// order. bak_sungsimdang / its 소보로빵 item are the known-seeded ids from
-/// earlier verification passes.
+/// Data-verification only — drives [TourFlowController] through the full
+/// step 1/7/8 tour sequence (start → arrive at a stop → log food → check
+/// balance → complete → fetch report) against fixed test ids and dumps
+/// each step's key fields in order. bak_sungsimdang / its 소보로빵 item are
+/// the known-seeded ids from earlier verification passes.
+///
+/// Doubles as a live check that [TourFlowController] itself sequences
+/// calls correctly, since this screen no longer threads `tour_id`/
+/// `tour_stop_id` by hand — the controller does.
 class TourFlowScreen extends StatefulWidget {
   const TourFlowScreen({super.key});
 
@@ -38,48 +41,49 @@ class _TourFlowScreenState extends State<TourFlowScreen> {
       _log.clear();
     });
 
-    final tourService = TourService();
-    final foodLogService = FoodLogService();
-    final caloriesService = CaloriesService();
+    final controller = TourFlowController();
 
     try {
       _append('POST /tours 호출...');
-      final tour = await tourService.startTour(token);
-      _append('-> $tour');
-      final tourId = tour['id'] as String;
+      final tour = await controller.startTour(token);
+      _append('-> id=${tour.id} started_at=${tour.startedAt}');
 
-      _append('\nPOST /tours/$tourId/stops 호출...');
-      final stop = await tourService.addStop(
+      _append('\nPOST /tours/${tour.id}/stops 호출...');
+      final stop = await controller.arriveAtBakery(
         token: token,
-        tourId: tourId,
         bakeryId: 'bak_sungsimdang',
         distanceM: 1500,
         durationMinutes: 20,
         steps: 2000,
       );
-      _append('-> $stop');
-      final tourStopId = stop['id'] as String;
+      _append(
+        '-> id=${stop.id} calories_burned=${stop.caloriesBurned} '
+        'suggested_walk=${stop.suggestedWalk}',
+      );
 
       _append('\nPOST /food-logs 호출...');
-      final foodLog = await foodLogService.create(
+      final foodLog = await controller.logFood(
         token: token,
         breadItemId: 'itm_bak_sungsimdang_소보로빵',
-        tourStopId: tourStopId,
         quantity: 1,
       );
-      _append('-> $foodLog');
+      _append('-> id=${foodLog.id} calories=${foodLog.calories} quantity=${foodLog.quantity}');
 
       _append('\nGET /calories/balance 호출...');
-      final balance = await caloriesService.getBalance(token);
-      _append('-> $balance');
+      final balance = await controller.checkBalance(token);
+      _append('-> remaining_calories=${balance.remainingCalories} status=${balance.status}');
 
-      _append('\nPATCH /tours/$tourId/complete 호출...');
-      final completed = await tourService.completeTour(token, tourId);
-      _append('-> $completed');
+      _append('\nPATCH /tours/${tour.id}/complete 호출...');
+      final completed = await controller.complete(token);
+      _append(
+        '-> total_steps=${completed.totalSteps} '
+        'total_calories_burned=${completed.totalCaloriesBurned} '
+        'balance_kcal=${completed.balanceKcal}',
+      );
 
-      _append('\nGET /tours/$tourId 호출...');
-      final report = await tourService.getTour(token, tourId);
-      _append('-> $report');
+      _append('\nGET /tours/${tour.id} 호출...');
+      final report = await controller.fetchReport(token);
+      _append('-> stops=${report.stops?.length} balance_kcal=${report.balanceKcal}');
 
       _append('\n=== 완료 ===');
     } catch (e) {
@@ -96,7 +100,7 @@ class _TourFlowScreenState extends State<TourFlowScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             child: ElevatedButton(
               onPressed: _running ? null : _run,
               child: Text(_running ? '실행 중...' : '투어 플로우 실행'),
@@ -104,7 +108,7 @@ class _TourFlowScreenState extends State<TourFlowScreen> {
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               child: SelectableText(_log.join('\n')),
             ),
           ),

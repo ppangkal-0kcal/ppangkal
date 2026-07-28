@@ -1,26 +1,28 @@
 import '../core/api_client.dart';
+import '../models/tour.dart';
+import '../models/tour_stop.dart';
 
 /// POST/GET/PATCH /api/tours* (FRONTEND_API_GUIDE.md §2 steps 1, 7~8) — all
-/// auth required. Raw-map passthrough for now (data-verification pass, no
-/// design/models yet).
+/// auth required.
 class TourService {
   final ApiClient _client;
 
   TourService({ApiClient? client}) : _client = client ?? ApiClient();
 
-  Future<Map<String, dynamic>> startTour(String token) {
-    return _client.post('/tours', token: token);
+  Future<Tour> startTour(String token) async {
+    final json = await _client.post('/tours', token: token);
+    return Tour.fromJson(json);
   }
 
-  Future<Map<String, dynamic>> addStop({
+  Future<TourStop> addStop({
     required String token,
     required String tourId,
     required String bakeryId,
     required int distanceM,
     required int durationMinutes,
     required int steps,
-  }) {
-    return _client.post(
+  }) async {
+    final json = await _client.post(
       '/tours/$tourId/stops',
       token: token,
       body: {
@@ -30,13 +32,16 @@ class TourService {
         'steps': steps,
       },
     );
+    return TourStop.fromJson(json);
   }
 
-  Future<Map<String, dynamic>> completeTour(String token, String tourId) {
-    return _client.patch('/tours/$tourId/complete', token: token);
+  Future<Tour> completeTour(String token, String tourId) async {
+    final json = await _client.patch('/tours/$tourId/complete', token: token);
+    return Tour.fromJson(json);
   }
 
-  Future<Map<String, dynamic>> getTour(String token, String tourId) {
-    return _client.get('/tours/$tourId', token: token);
+  Future<Tour> getTour(String token, String tourId) async {
+    final json = await _client.get('/tours/$tourId', token: token);
+    return Tour.fromJson(json);
   }
 }

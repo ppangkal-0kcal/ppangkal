@@ -1,4 +1,5 @@
 import '../core/api_client.dart';
+import '../models/food_log.dart';
 
 /// POST/GET /api/food-logs (FRONTEND_API_GUIDE.md §2 step 7). Auth required.
 class FoodLogService {
@@ -6,13 +7,13 @@ class FoodLogService {
 
   FoodLogService({ApiClient? client}) : _client = client ?? ApiClient();
 
-  Future<Map<String, dynamic>> create({
+  Future<FoodLog> create({
     required String token,
     required String breadItemId,
     String? tourStopId,
     int quantity = 1,
-  }) {
-    return _client.post(
+  }) async {
+    final json = await _client.post(
       '/food-logs',
       token: token,
       body: {
@@ -21,10 +22,11 @@ class FoodLogService {
         'quantity': quantity,
       },
     );
+    return FoodLog.fromJson(json);
   }
 
-  Future<Map<String, dynamic>> list(String token, {String? from, String? to}) {
-    return _client.get(
+  Future<List<FoodLog>> list(String token, {String? from, String? to}) async {
+    final json = await _client.get(
       '/food-logs',
       token: token,
       query: {
@@ -32,5 +34,7 @@ class FoodLogService {
         'to': ?to,
       },
     );
+    final list = json['food_logs'] as List<dynamic>;
+    return list.map((e) => FoodLog.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

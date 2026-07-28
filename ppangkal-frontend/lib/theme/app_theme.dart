@@ -123,6 +123,34 @@ class GlassStyle extends ThemeExtension<GlassStyle> {
   }
 }
 
+/// Full-screen background gradient that sits behind the tab shell
+/// (`lib/widgets/main_shell.dart`) — [GlassCard]'s `BackdropFilter` has
+/// nothing to blur without a busy-enough layer underneath it.
+@immutable
+class AppBackground extends ThemeExtension<AppBackground> {
+  final Gradient gradient;
+
+  const AppBackground({required this.gradient});
+
+  static const AppBackground grayscale = AppBackground(
+    // TODO(design): 팀원이 브랜드 컬러 그라데이션으로 교체할 지점
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Color(0xFFF2F2F2), Color(0xFFD8D8D8)],
+    ),
+  );
+
+  @override
+  AppBackground copyWith({Gradient? gradient}) => AppBackground(gradient: gradient ?? this.gradient);
+
+  @override
+  AppBackground lerp(ThemeExtension<AppBackground>? other, double t) {
+    if (other is! AppBackground) return this;
+    return AppBackground(gradient: Gradient.lerp(gradient, other.gradient, t) ?? gradient);
+  }
+}
+
 /// App-wide [ThemeData]. Previously inlined in `main.dart`.
 ThemeData buildAppTheme() {
   // TODO(design): 팀원이 브랜드 시드컬러로 교체할 지점. 이 한 줄만 바꾸면 전체 톤이 바뀜.
@@ -134,6 +162,7 @@ ThemeData buildAppTheme() {
     extensions: const [
       CalorieStatusColors.grayscale,
       GlassStyle.standard,
+      AppBackground.grayscale,
     ],
   );
 }
