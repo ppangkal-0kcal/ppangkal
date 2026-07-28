@@ -5,9 +5,18 @@ repository.
 
 ## Repository status
 
-A freshly scaffolded Flutter project (`flutter create`, Flutter 3.44.8 stable, Dart 3.12.2).
-Only the default counter-app boilerplate exists under `lib/` so far — the actual 빵칼(0-kcal)
-screens/services have not been built yet. Common commands:
+No longer boilerplate (as of 2026-07-28) — the counter-app default is gone. Currently implemented:
+auth flow (`login_screen.dart`/`signup_screen.dart`/`home_screen.dart`, backed by
+`AuthProvider`/`AuthService`, real screens), plus four **"디자인 없음" data-verification screens**
+(`bakery_list_screen.dart`, `bakery_detail_screen.dart`, `tour_flow_screen.dart`,
+`stats_screen.dart`) that exercise the rest of the API surface with plain `Text` dumps — these are
+reference code for a design pass, not final UI; don't polish them, replace them. Full
+service-layer ↔ endpoint mapping is in `API_INTEGRATION.md` — read that before adding a new
+screen, it's the actual up-to-date map of what's built vs. what a new screen still needs to call.
+
+Dependencies added beyond the Flutter defaults: `http`, `provider`, `flutter_secure_storage`.
+Flutter 3.44.8 stable, Dart 3.12.2 (verify with `flutter --version` if this drifts). Common
+commands:
 
 - `flutter pub get` — install dependencies.
 - `flutter run` — run on a connected device/emulator (see **Toolchain status** below for what's
@@ -20,22 +29,21 @@ screens/services have not been built yet. Common commands:
 **Project identity**: package name `ppangkal`, org `com.ppangkal` (Android applicationId /
 iOS bundle id `com.ppangkal.ppangkal`).
 
-## Repo location: `C:\ppangkal\ppangkal-frontend`, sibling to `backend`
+## Repo location: `C:\ppangkal\ppangkal-frontend`, inside the `ppangkal` monorepo
 
-Both repos now live under `C:\ppangkal` (ASCII-only, no spaces): this one at
-`C:\ppangkal\ppangkal-frontend`, backend at `C:\ppangkal\backend`. Originally this Flutter project
-was kept on a separate ASCII path because the backend repo lived under
-`OneDrive\바탕 화면\관광데이터\backend` (Korean characters + a space), which crashed Flutter's Dart
-analysis server (LSP) — `flutter analyze` failed with `FormatException: Unterminated string`
-because the LSP byte-stream channel miscounts the message-length header once the file URI gets
-percent-encoded (multi-byte Korean chars + space; the same class of problem is known to also hit
-Android/Gradle builds on Windows). The backend repo has since been moved to `C:\ppangkal\backend`,
-so that specific hazard no longer applies — but keep both repos on ASCII-only, space-free paths
-regardless; re-verify with `flutter analyze` first if a path change is ever considered.
+Both this project and `backend` live under `C:\ppangkal` (ASCII-only, no spaces — kept that way
+because a Korean-character/space OneDrive path used to crash Flutter's Dart analysis server; see
+git history if the details matter again). **As of 2026-07-28 this is no longer a standalone git
+repo** — `.git` here was removed and both projects were folded into one monorepo at
+`github.com/ppangkal-0kcal/ppangkal` (pushed from `C:\ppangkal` as the repo root, `main` branch).
+This repo's prior detailed history (there wasn't much — it had never been pushed anywhere) is
+gone; `backend`'s old standalone history is still preserved at the old
+`github.com/ppangkal-0kcal/backend` repo if ever needed, just no longer the actively-pushed copy.
 
-Consequence: this is still a **separate git repo** from `backend` (no shared history, no
-submodule) — being siblings on disk doesn't change that. Not yet pushed to GitHub — still
-local-only, standalone `git init`, no commits yet.
+Practical consequence: `git commit`/`git push` from inside `ppangkal-frontend/` now affect the
+**shared monorepo** (also containing `backend/`) — always check `git status` from the repo root
+(`C:\ppangkal`) before committing, not just this subfolder, since a change in one project's
+working tree doesn't imply the other project's tree is clean.
 
 ## What this app is for
 
@@ -81,16 +89,26 @@ without derailing a diet/calorie goal.
 - Map pin rendering for the bakery list screen is **still undecided** — backend only returns raw
   lat/lng. Don't pick a map SDK unilaterally; flag it for discussion first.
 
-## Toolchain status (as of scaffolding, verify with `flutter doctor -v` if stale)
+## Toolchain status (verify with `flutter doctor -v` if stale)
 
 - Flutter SDK installed at `C:\flutter` (added to user PATH) — ASCII path, keep it that way for
   the same LSP-encoding reason as above.
-- Working now, no extra setup: **Windows desktop** and **Chrome (web)** run targets.
-- **Android**: SDK present at `%LOCALAPPDATA%\Android\sdk`, but `cmdline-tools` component is
-  missing and licenses aren't accepted (`flutter doctor` flags both). Since this app is
-  mobile-first (background service, pedometer, GPS), Android is the real target platform — finish
-  that setup before doing serious device-facing work; Chrome/Windows runs are fine for pure-UI
-  iteration in the meantime.
+- **Chrome (web)**: working, the fastest iteration loop. Backend has `cors()` wide open for this.
+- **Windows desktop**: `flutter run -d windows` **fails** — Visual Studio ("Desktop development
+  with C++" workload) isn't installed. Not fixed yet; not currently blocking anything since Chrome
+  and Android both work.
+- **Android**: **fully working now** (fixed 2026-07-28) — `cmdline-tools` installed, licenses
+  accepted, SDK 36 + build-tools present. Tested live on a physical Samsung device
+  (`SM_S928N`/API 36) over USB, full signup→home→bakeries flow confirmed. Two things to remember
+  for physical-device testing specifically (not needed for the emulator):
+  - `http://localhost:4000` on the phone means the phone itself, not the PC — run
+    `adb reverse tcp:4000 tcp:4000` (over the same USB debugging connection) so the app's
+    `apiBaseUrl` reaches the backend running on the dev machine. This **resets on USB
+    reconnect/reboot** — if API calls start failing on-device, check this first before assuming a
+    code bug.
+  - Samsung phones need Windows to auto-resolve the "SAMSUNG Android ADB Interface" driver over
+    USB; if `adb devices` shows nothing, toggling the phone's USB mode (notification shade → USB
+    options) sometimes retriggers driver enumeration.
 - **iOS**: not evaluated (Windows dev machine — iOS builds need a Mac or CI).
 
 ## Claude Code 작업 습관
@@ -129,10 +147,12 @@ without derailing a diet/calorie goal.
 ### 4. 종단 검증 (verify before done)
 
 - `flutter analyze` + `flutter test`로 기본 검증.
-- 실제 화면 동작 확인은 `flutter run -d chrome`(빠른 UI 반복) 또는
-  `flutter run -d windows`로 — Android 에뮬레이터는 위 **Toolchain status** 정리 전까지 사용 불가.
-- 백엔드 연동 확인이 필요하면 backend repo를 별도로 `npm run dev`로 띄워두고 이 앱에서
-  `http://localhost:4000/api`로 호출해 확인한다 (두 레포는 별개 프로세스/레포이므로 동시 실행 필요).
+- 실제 화면 동작 확인은 `flutter run -d chrome`(빠른 UI 반복)로. `flutter run -d windows`는 지금
+  안 됨(위 **Toolchain status** 참고). 실기기(Android)로 확인할 땐 `adb reverse tcp:4000 tcp:4000`
+  먼저 걸어야 함 — 안 걸려있으면 앱에서 API 호출이 전부 실패함(코드 문제로 착각하지 말 것).
+- 백엔드 연동 확인이 필요하면 `../backend`를 별도 터미널에서 `npm run dev`로 띄워두고 이 앱에서
+  `http://localhost:4000/api`로 호출해 확인한다 (같은 모노레포 안이지만 여전히 별개 프로세스라
+  둘 다 띄워야 함).
 
 ### 5. 위험한 작업 전에는 확인부터 — `.claude/settings.json`의 `permissions.ask`로도 강제됨
 
