@@ -20,7 +20,7 @@ class MainShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final background = theme.extension<AppBackground>() ?? AppBackground.grayscale;
+    final background = theme.extension<AppBackground>() ?? AppBackground.brand;
 
     return Scaffold(
       body: Stack(

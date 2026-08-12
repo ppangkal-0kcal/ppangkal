@@ -29,13 +29,12 @@ class CalorieStatusColors extends ThemeExtension<CalorieStatusColors> {
     required this.over,
   });
 
-  static const CalorieStatusColors grayscale = CalorieStatusColors(
-    // TODO(design): 초록/노랑/빨강으로 교체
-    safe: Color(0xFFBDBDBD),
-    // TODO(design): 초록/노랑/빨강으로 교체
-    warning: Color(0xFF9E9E9E),
-    // TODO(design): 초록/노랑/빨강으로 교체
-    over: Color(0xFF616161),
+  /// 신호등 3색. 배경이 밝은 크림 계열이라 파스텔톤은 묻혀서 안 보이므로,
+  /// 셋 다 명도를 낮추고 채도를 맞춰 서로 같은 무게로 읽히게 잡았다.
+  static const CalorieStatusColors brand = CalorieStatusColors(
+    safe: Color(0xFF2F9E5F),
+    warning: Color(0xFFE0A008),
+    over: Color(0xFFD64545),
   );
 
   @override
@@ -132,12 +131,15 @@ class AppBackground extends ThemeExtension<AppBackground> {
 
   const AppBackground({required this.gradient});
 
-  static const AppBackground grayscale = AppBackground(
-    // TODO(design): 팀원이 브랜드 컬러 그라데이션으로 교체할 지점
+  /// 위쪽은 거의 흰 크림, 아래로 갈수록 시드컬러(#E8C39E)에 수렴한다.
+  /// 중간 스톱을 하나 둔 건 [GlassCard]의 `BackdropFilter`가 흐릴 만한
+  /// 명암 변화를 만들어 주기 위한 것 — 2색 그라데이션은 너무 밋밋해서
+  /// 유리 질감이 거의 드러나지 않는다.
+  static const AppBackground brand = AppBackground(
     gradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFFF2F2F2), Color(0xFFD8D8D8)],
+      colors: [Color(0xFFFFF6EA), Color(0xFFF3D9BC), Color(0xFFE8C39E)],
     ),
   );
 
@@ -153,16 +155,16 @@ class AppBackground extends ThemeExtension<AppBackground> {
 
 /// App-wide [ThemeData]. Previously inlined in `main.dart`.
 ThemeData buildAppTheme() {
-  // TODO(design): 팀원이 브랜드 시드컬러로 교체할 지점. 이 한 줄만 바꾸면 전체 톤이 바뀜.
-  const seedColor = Color(0xFF757575);
+  // 브랜드 시드컬러 — 구운 빵 껍질 색(크림/베이지). 이 한 줄만 바꾸면 전체 톤이 바뀜.
+  const seedColor = Color(0xFFE8C39E);
 
   return ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(seedColor: seedColor),
     extensions: const [
-      CalorieStatusColors.grayscale,
+      CalorieStatusColors.brand,
       GlassStyle.standard,
-      AppBackground.grayscale,
+      AppBackground.brand,
     ],
   );
 }

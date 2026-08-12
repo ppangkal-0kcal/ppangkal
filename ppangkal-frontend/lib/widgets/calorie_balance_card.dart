@@ -18,7 +18,7 @@ class CalorieBalanceCard extends StatelessWidget {
   static const double _statusDotSize = 10;
 
   Color _statusColor(BuildContext context) {
-    final colors = Theme.of(context).extension<CalorieStatusColors>() ?? CalorieStatusColors.grayscale;
+    final colors = Theme.of(context).extension<CalorieStatusColors>() ?? CalorieStatusColors.brand;
     return switch (balance.status) {
       'green' => colors.safe,
       'yellow' => colors.warning,

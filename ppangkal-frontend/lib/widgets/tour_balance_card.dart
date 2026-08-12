@@ -26,7 +26,7 @@ class TourBalanceCard extends StatelessWidget {
   static const int _warningThresholdKcal = 150;
 
   Color _color(BuildContext context) {
-    final colors = Theme.of(context).extension<CalorieStatusColors>() ?? CalorieStatusColors.grayscale;
+    final colors = Theme.of(context).extension<CalorieStatusColors>() ?? CalorieStatusColors.brand;
     if (balanceKcal >= -_safeThresholdKcal) return colors.safe;
     if (balanceKcal >= -_warningThresholdKcal) return colors.warning;
     return colors.over;
