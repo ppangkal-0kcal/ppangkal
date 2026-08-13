@@ -1,19 +1,7 @@
-import 'suggested_walk.dart';
-import 'tour_info.dart';
-
-/// Mirrors both `GET /bakeries` list items and `GET /bakeries/:id` detail
-/// (FRONTEND_API_GUIDE.md §2 steps 2~3; backend/src/routes/bakeries.routes.ts)
-/// — the two responses aren't the same shape:
-/// - list items include `distance_m`/`walk_recommended`/
-///   `estimated_walk_calories`/`suggested_walk` (computed from the query's
-///   `lat`/`lng`/`user_weight`), but never `tour_info`
-/// - the detail response adds `tour_info` but omits all 4 of those
-///   distance-derived fields entirely
-///
-/// so those 5 fields are all nullable, and which ones are populated
-/// depends on which endpoint produced this instance. `isOpenNow` is the
-/// one extra field guaranteed non-null from both — `geo.isBakeryOpenNow`
-/// always returns a plain `boolean`, never `null`.
+/// Mirrors GET /api/bakeries list items (FRONTEND_API_GUIDE.md §2). Kept
+/// close to the raw response shape since this is a data-verification pass,
+/// not a UI pass — `suggestedWalk`/`estimatedWalkCalories` stay as raw
+/// dynamic values rather than sub-models for now.
 class Bakery {
   final String id;
   final String name;
@@ -23,13 +11,11 @@ class Bakery {
   final double? rating;
   final int? reviewCount;
   final String? openingHours;
-  final String? photoUrl;
-  final bool isOpenNow;
   final double? distanceM;
+  final bool? isOpenNow;
   final bool? walkRecommended;
   final num? estimatedWalkCalories;
-  final SuggestedWalk? suggestedWalk;
-  final TourInfo? tourInfo;
+  final Map<String, dynamic>? suggestedWalk;
 
   const Bakery({
     required this.id,
@@ -40,13 +26,11 @@ class Bakery {
     this.rating,
     this.reviewCount,
     this.openingHours,
-    this.photoUrl,
-    required this.isOpenNow,
     this.distanceM,
+    this.isOpenNow,
     this.walkRecommended,
     this.estimatedWalkCalories,
     this.suggestedWalk,
-    this.tourInfo,
   });
 
   factory Bakery.fromJson(Map<String, dynamic> json) => Bakery(
@@ -58,15 +42,10 @@ class Bakery {
         rating: (json['rating'] as num?)?.toDouble(),
         reviewCount: json['review_count'] as int?,
         openingHours: json['opening_hours'] as String?,
-        photoUrl: json['photo_url'] as String?,
-        isOpenNow: json['is_open_now'] as bool,
         distanceM: (json['distance_m'] as num?)?.toDouble(),
+        isOpenNow: json['is_open_now'] as bool?,
         walkRecommended: json['walk_recommended'] as bool?,
         estimatedWalkCalories: json['estimated_walk_calories'] as num?,
-        suggestedWalk: json['suggested_walk'] != null
-            ? SuggestedWalk.fromJson(json['suggested_walk'] as Map<String, dynamic>)
-            : null,
-        tourInfo:
-            json['tour_info'] != null ? TourInfo.fromJson(json['tour_info'] as Map<String, dynamic>) : null,
+        suggestedWalk: json['suggested_walk'] as Map<String, dynamic>?,
       );
 }
