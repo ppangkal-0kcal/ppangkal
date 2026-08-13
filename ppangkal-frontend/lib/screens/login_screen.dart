@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
-import 'home_screen.dart';
-import 'signup_screen.dart';
 
 /// MVP login is user_id-based, no password (FRONTEND_API_GUIDE.md §1) —
 /// the id shown on the home screen after signup is what gets typed back
-/// in here on a later visit.
+/// in here on a later visit. Navigating to `/home` on success is handled
+/// by the router's redirect (`lib/router/app_router.dart`), not here.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -32,11 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final ok = await auth.login(userId);
 
     if (!mounted) return;
-    if (ok) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } else {
+    if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.errorMessage ?? '로그인에 실패했습니다.')),
       );
@@ -74,9 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   : const Text('로그인'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SignupScreen()),
-              ),
+              onPressed: () => context.push('/signup'),
               child: const Text('계정이 없으신가요? 회원가입'),
             ),
           ],
