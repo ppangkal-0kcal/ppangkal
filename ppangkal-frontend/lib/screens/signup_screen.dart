@@ -3,9 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../models/activity_level.dart';
 import '../providers/auth_provider.dart';
+import 'home_screen.dart';
 
-/// Navigating to `/home` on success is handled by the router's redirect
-/// (`lib/router/app_router.dart`), not here.
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -46,7 +45,11 @@ class _SignupScreenState extends State<SignupScreen> {
     );
 
     if (!mounted) return;
-    if (!ok) {
+    if (ok) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.errorMessage ?? '회원가입에 실패했습니다.')),
       );
