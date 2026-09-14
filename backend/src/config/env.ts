@@ -1,12 +1,20 @@
-function required(name: string, fallback?: string): string {
-  const value = process.env[name] ?? fallback;
-  if (value === undefined) {
+const isProduction = process.env.NODE_ENV === 'production';
+
+/**
+ * Dev fallbacks keep `npm run dev` zero-config, but in production a missing
+ * secret must fail at boot — silently signing JWTs with the public
+ * 'dev-secret-change-me' would let anyone forge a login token.
+ */
+function required(name: string, devFallback?: string): string {
+  const value = process.env[name] ?? (isProduction ? undefined : devFallback);
+  if (value === undefined || value === '') {
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;
 }
 
 export const env = {
+  isProduction,
   port: Number(process.env.PORT ?? 4000),
   databaseUrl: required('DATABASE_URL', 'postgresql://localhost:5432/ppangkal'),
   jwtSecret: required('JWT_SECRET', 'dev-secret-change-me'),

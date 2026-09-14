@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+.env
+.env.*
+!.env.example
+*.log
+.claude
+legacy
+*.pdf
+idea.md
+tech-stack.md
+CLAUDE.md
+prisma/assets
+prisma/scripts
