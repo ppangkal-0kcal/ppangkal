@@ -42,7 +42,11 @@
 - 만보기/GPS 센서 가동은 **백엔드 API 없음** — 전부 프론트 책임 (§4 참고).
 
 ### 2~3단계 — 빵집 검색 & 거리 기반 가이드
-- `GET /api/bakeries?lat={위도}&lng={경도}&radius_km={반경}&sort={distance|rating|recommended}&user_weight={체중}`
+- **권장 (앱 1.0.0 출시 버전이 사용): `GET /api/bakeries` — 파라미터 없음, 사용자 위치를 서버로 보내지 않는다.**
+  - 전체 빵집 + `nearby_park`(빵집 근처 공원 `{content_id, title, round_trip_distance_m}` 또는 `null`, 체중 무관)를 준다. `distance_m`/`walk_recommended`/`estimated_walk_calories`/`suggested_walk`는 **응답에 없다.**
+  - 앱이 기기 안에서 계산한다: 거리(haversine), 1.2km 도보 컷오프, 4km/h 예상 시간, `3.5 MET × kg × h × 1.05` 칼로리, 1.2km 초과 빵집에만 `nearby_park`로 산책 제안, 반경 필터·정렬(거리/평점/추천 = 거리 30% + 평점 20%). 공식은 `backend/src/services/calorieService.ts`와 `ppangkal-frontend/lib/core/walk_calories.dart`를 같이 맞춘다.
+  - 공원 조회(TourAPI)는 서버에서 빵집 좌표 기준으로 12시간 캐시된다.
+- 구버전 호환 (이미 설치된 테스트 앱·모니터링용): `GET /api/bakeries?lat={위도}&lng={경도}&radius_km={반경}&sort={distance|rating|recommended}&user_weight={체중}` — 아래는 이 모드의 동작
   - `radius_km` 기본값 3 — 5km로 보고 싶으면 그냥 `radius_km=5`로 호출 (별도 대응 불필요, 이미 지원됨).
   - `user_weight`를 같이 보내면 각 빵집에 `estimated_walk_calories`(도보 예상 소모 칼로리)가 계산돼서 옴. 안 보내면 `null`.
   - 응답의 `walk_recommended: true/false`가 곧 1.2km 컷오프 배지 — `true`면 "걸어가기 딱 좋은 거리예요!" 문구를 보여주면 됨.

@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+import '../core/geo.dart';
 
 /// One GPS fix, decoupled from any location package so [WalkFilter] stays
 /// pure Dart and unit-testable.
@@ -77,15 +77,5 @@ class WalkFilter {
     if (speedKmh >= minWalkingSpeedKmh) {
       _walkedDuration += elapsed;
     }
-  }
-
-  static double haversineM(double lat1, double lng1, double lat2, double lng2) {
-    const earthRadiusM = 6371000.0;
-    double rad(double deg) => deg * math.pi / 180;
-    final dLat = rad(lat2 - lat1);
-    final dLng = rad(lng2 - lng1);
-    final a = math.pow(math.sin(dLat / 2), 2) +
-        math.cos(rad(lat1)) * math.cos(rad(lat2)) * math.pow(math.sin(dLng / 2), 2);
-    return 2 * earthRadiusM * math.asin(math.sqrt(a));
   }
 }

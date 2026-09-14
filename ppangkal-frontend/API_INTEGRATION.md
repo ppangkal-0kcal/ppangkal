@@ -91,7 +91,7 @@ final token = context.read<AuthProvider>().token; // String? — null이면 비�
 | --- | --- | --- |
 | 로그인/회원가입 | `login_screen.dart`, `signup_screen.dart` (`widgets/auth_layout.dart`) | `/auth/*`, `/users/me` |
 | 홈 (칼로리 잔액 + 투어 진입) | `home_screen.dart` | `/calories/balance` |
-| 빵집 목록 | `bakery_list_screen.dart` | `/bakeries` (현재 위치, 실패 시 대전 중심 좌표) |
+| 빵집 목록 | `bakery_list_screen.dart` | `/bakeries` (**좌표 없이** 전체 목록 → 거리·도보 추천·칼로리·정렬은 `Bakery.withUserPosition`으로 기기 안에서 계산. 위치 실패 시 대전 중심 좌표) |
 | 빵집 상세 | `bakery_detail_screen.dart` | `/bakeries/:id`, `/bakeries/:id/items`, 네이버 지도 딥링크 |
 | 빵 메뉴 선택 | `bread_menu_screen.dart` | 없음 (예상 칼로리는 클라이언트 계산) |
 | 투어 진행 | `tour_progress_screen.dart` | `/tours`, `/tours/:id/stops` |

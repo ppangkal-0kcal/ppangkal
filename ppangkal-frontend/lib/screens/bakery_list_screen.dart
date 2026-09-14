@@ -65,14 +65,40 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
       if (usingFallback != _usingFallbackLocation && mounted) {
         setState(() => _usingFallbackLocation = usingFallback);
       }
-      return BakeryService().fetchNearby(
-        lat: _center.$1,
-        lng: _center.$2,
-        radiusKm: _radiusKm,
-        sort: _sort,
-        userWeight: weight,
-      );
+      final all = _allBakeries ??= BakeryService().fetchAll();
+      return all.then((bakeries) => _arrange(bakeries, weight));
     });
+  }
+
+  /// Fetched once per screen, location-free. Re-sorting only re-arranges locally;
+  /// [_retry] clears it so a failed request isn't reused.
+  Future<List<Bakery>>? _allBakeries;
+
+  void _retry() {
+    _allBakeries = null;
+    _load();
+  }
+
+  /// Distance, radius filter and sort — all on-device (the server never sees
+  /// [_center]). Mirrors the ordering the server used to apply.
+  List<Bakery> _arrange(List<Bakery> bakeries, double? weight) {
+    final nearby = bakeries
+        .map((b) => b.withUserPosition(latitude: _center.$1, longitude: _center.$2, userWeightKg: weight))
+        .where((b) => b.distanceM! <= _radiusKm * 1000)
+        .toList();
+
+    switch (_sort) {
+      case 'rating':
+        nearby.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
+      case 'recommended':
+        // 거리 30% + 평점 20% — backend legacy sort=recommended와 같은 가중치
+        final maxDistance = nearby.fold<double>(1, (m, b) => b.distanceM! > m ? b.distanceM! : m);
+        double score(Bakery b) => 0.3 * (1 - b.distanceM! / maxDistance) + 0.2 * ((b.rating ?? 0) / 5);
+        nearby.sort((a, b) => score(b).compareTo(score(a)));
+      default:
+        nearby.sort((a, b) => a.distanceM!.compareTo(b.distanceM!));
+    }
+    return nearby;
   }
 
   void _changeSort(String sort) {
@@ -143,7 +169,7 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
                               code: 'UNKNOWN_ERROR',
                               message: '빵집 목록을 불러오지 못했습니다.',
                             ),
-                      onRetry: () => setState(_load),
+                      onRetry: () => setState(_retry),
                     );
                   }
                   final bakeries = snapshot.data!;

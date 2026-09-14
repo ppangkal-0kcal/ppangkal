@@ -107,6 +107,15 @@ without derailing a diet/calorie goal.
 - `null` is a normal value for optional fields (`suggested_walk`, `tour_info`) — don't treat it as
   an error case.
 
+## 위치 정보 규칙 (2026-09-15, 출시 전제)
+
+- 사용자 좌표는 **서버로 보내지 않는다.** 빵집 목록은 `GET /bakeries`(파라미터 없음)로 받고, 거리·도보 추천·
+  예상 칼로리·산책 제안·정렬은 `Bakery.withUserPosition`(공식: `lib/core/walk_calories.dart`, 서버
+  `calorieService.ts`와 동일)으로 기기 안에서 계산한다. `test/bread_info_test.dart`가 요청에 쿼리가 없음을 고정한다.
+- 투어 GPS 좌표도 기기 안에서만 쓰고 서버에는 거리·시간·걸음 합산값만 보낸다.
+- `SightseeingService.nearby`는 좌표를 쿼리로 보내는 구현이라 **화면에 연결하기 전에** 같은 방식으로 바꿀 것 (현재 미사용).
+- 출시 절차·서명 키·수집 항목 표는 `RELEASE.md`.
+
 ## 모델 규칙
 
 - API 응답은 반드시 모델 클래스로 감싼다. raw Map을 위젯에 넘기지 않는다.
