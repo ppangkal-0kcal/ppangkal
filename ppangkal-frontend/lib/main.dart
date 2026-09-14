@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'controllers/tour_flow_controller.dart';
 import 'providers/auth_provider.dart';
 import 'router/app_router.dart';
+import 'services/location_service.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -24,7 +25,8 @@ class _PpangkalAppState extends State<PpangkalApp> {
   // Single app-wide instance — an active tour has to survive the user
   // bouncing between the bakery tab and the tour screens (see
   // lib/controllers/tour_flow_controller.dart's class doc).
-  final _tourFlowController = TourFlowController();
+  final PositionSource _positionSource = GeolocatorPositionSource();
+  late final _tourFlowController = TourFlowController(positionSource: _positionSource);
 
   late final GoRouter _router = buildAppRouter(_authProvider);
 
@@ -41,6 +43,7 @@ class _PpangkalAppState extends State<PpangkalApp> {
       providers: [
         ChangeNotifierProvider.value(value: _authProvider),
         ChangeNotifierProvider.value(value: _tourFlowController),
+        Provider<PositionSource>.value(value: _positionSource),
       ],
       child: MaterialApp.router(
         title: '빵칼',

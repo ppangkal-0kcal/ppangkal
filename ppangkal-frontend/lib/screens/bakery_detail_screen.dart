@@ -5,6 +5,7 @@ import '../core/api_exception.dart';
 import '../models/bakery.dart';
 import '../models/bread_item.dart';
 import '../services/bakery_service.dart';
+import '../services/naver_map_launcher.dart';
 import '../theme/app_theme.dart';
 import '../widgets/error_view.dart';
 import '../widgets/glass_card.dart';
@@ -120,6 +121,23 @@ class _BasicInfoCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text('영업시간 ${bakery.openingHours}', style: textTheme.bodySmall),
           ],
+          const SizedBox(height: AppSpacing.md),
+          OutlinedButton.icon(
+            onPressed: () async {
+              final opened = await NaverMapLauncher.walkTo(
+                latitude: bakery.latitude,
+                longitude: bakery.longitude,
+                name: bakery.name,
+              );
+              if (!opened && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('네이버 지도를 열 수 없습니다.')),
+                );
+              }
+            },
+            icon: const Icon(Icons.directions_walk),
+            label: const Text('네이버 지도로 길찾기'),
+          ),
         ],
       ),
     );
@@ -141,6 +159,8 @@ class _MenuPreviewCard extends StatelessWidget {
         children: [
           Text('빵 메뉴 (${items.length}종)', style: textTheme.titleMedium),
           const SizedBox(height: AppSpacing.sm),
+          if (items.isEmpty)
+            Text('아직 등록된 메뉴 정보가 없어요.', style: textTheme.bodySmall),
           for (final item in items)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),

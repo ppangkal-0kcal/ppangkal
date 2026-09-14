@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import '../controllers/tour_flow_controller.dart';
 import '../core/api_exception.dart';
 import '../models/bread_selection.dart';
 import '../providers/auth_provider.dart';
+import '../services/food_photo_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/tour_balance_card.dart';
@@ -31,7 +33,18 @@ class FoodConfirmScreen extends StatefulWidget {
 class _FoodConfirmScreenState extends State<FoodConfirmScreen> {
   bool _confirmed = false;
   bool _busy = false;
+  bool _photoSaved = false;
   String? _errorMessage;
+
+  Future<void> _takePhoto() async {
+    final result = await FoodPhotoService().captureAndSave();
+    if (!mounted || result == FoodPhotoResult.cancelled) return;
+    final saved = result == FoodPhotoResult.saved;
+    if (saved) setState(() => _photoSaved = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(saved ? '갤러리의 빵칼 앨범에 저장했어요.' : '사진을 저장하지 못했습니다.')),
+    );
+  }
 
   Future<void> _confirm(TourFlowController controller, String token) async {
     setState(() {
@@ -108,6 +121,14 @@ class _FoodConfirmScreenState extends State<FoodConfirmScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
+          if (!kIsWeb) ...[
+            OutlinedButton.icon(
+              onPressed: _busy ? null : _takePhoto,
+              icon: const Icon(Icons.photo_camera_outlined),
+              label: Text(_photoSaved ? '사진 한 장 더 찍기' : '빵 사진 남기기 (갤러리에만 저장)'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
           if (_errorMessage != null) ...[
             Text(_errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
             const SizedBox(height: AppSpacing.sm),

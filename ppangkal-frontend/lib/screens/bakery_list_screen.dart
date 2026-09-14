@@ -6,13 +6,15 @@ import '../core/api_exception.dart';
 import '../models/bakery.dart';
 import '../providers/auth_provider.dart';
 import '../services/bakery_service.dart';
+import '../services/location_service.dart';
+import '../services/walk_filter.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bakery_card.dart';
 import '../widgets/empty_view.dart';
 import '../widgets/error_view.dart';
 import '../widgets/loading_view.dart';
 
-// TODO(4단계): 실제 사용자 위치로 교체 — 지금은 대전 시내 중심 좌표로 고정.
+// 위치 권한이 없거나 GPS를 못 잡을 때 쓰는 대전 시내 중심 좌표.
 const double _fallbackLat = 36.3504;
 const double _fallbackLng = 127.3845;
 
@@ -36,6 +38,11 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
   String _sort = 'distance';
   late Future<List<Bakery>> _future;
 
+  /// Resolved once per screen — re-sorting reuses it instead of waiting on
+  /// GPS again. Null result means "use the fallback coordinate".
+  late final Future<GeoSample?> _location = context.read<PositionSource>().current();
+  bool _usingFallbackLocation = false;
+
   @override
   void initState() {
     super.initState();
@@ -44,13 +51,19 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
 
   void _load() {
     final weight = context.read<AuthProvider>().user?.weight;
-    _future = BakeryService().fetchNearby(
-      lat: _fallbackLat,
-      lng: _fallbackLng,
-      radiusKm: 5,
-      sort: _sort,
-      userWeight: weight,
-    );
+    _future = _location.then((sample) {
+      final usingFallback = sample == null;
+      if (usingFallback != _usingFallbackLocation && mounted) {
+        setState(() => _usingFallbackLocation = usingFallback);
+      }
+      return BakeryService().fetchNearby(
+        lat: sample?.latitude ?? _fallbackLat,
+        lng: sample?.longitude ?? _fallbackLng,
+        radiusKm: 5,
+        sort: _sort,
+        userWeight: weight,
+      );
+    });
   }
 
   void _changeSort(String sort) {
@@ -78,6 +91,21 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
               selected: {_sort},
               onSelectionChanged: (selection) => _changeSort(selection.first),
             ),
+            if (_usingFallbackLocation) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Icon(Icons.location_off_outlined, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      '현재 위치를 확인할 수 없어 대전 시내 기준으로 보여드려요.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             Expanded(
               child: FutureBuilder<List<Bakery>>(
