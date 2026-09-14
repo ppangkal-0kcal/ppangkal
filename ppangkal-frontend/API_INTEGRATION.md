@@ -54,7 +54,8 @@ final token = context.read<AuthProvider>().token; // String? — null이면 비�
 | --- | --- | --- | --- | --- | --- |
 | `services/auth_service.dart` | `signup(...)` | POST | `/auth/signup` | ✗ | 성공 시 토큰을 `flutter_secure_storage`에 저장까지 함 |
 | | `login(userId: ...)` | POST | `/auth/login` | ✗ | 응답에 유저 정보 없음 — 로그인 후 `fetchMe` 필요 |
-| | `fetchMe(token)` | GET | `/users/me` | ✓ | |
+| | `fetchMe(token)` | GET | `/users/me` | ✓ | 회원가입 직후에도 호출 — signup 응답엔 id/name/목표만 있음 |
+| | `updateMe(token, fields)` | PATCH | `/users/me` | ✓ | 응답이 부분 필드라 성공 후 `fetchMe`로 전체 프로필 재조회 |
 | | `readStoredToken()` / `logout()` | — | (로컬) | — | secure storage 읽기/삭제, API 호출 아님 |
 | `services/bakery_service.dart` | `fetchNearby(...)` | GET | `/bakeries` | ✗ | `userWeight` 넘기면 `estimated_walk_calories`/`suggested_walk` 채워짐 |
 | | `fetchDetail(bakeryId)` | GET | `/bakeries/:id` | ✗ | `tour_info`는 raw Map, TourAPI 미등록이면 `null` |
@@ -72,53 +73,47 @@ final token = context.read<AuthProvider>().token; // String? — null이면 비�
 | `services/sightseeing_service.dart` | `nearby(...)` | GET | `/tour/nearby` | ✓ | **`/tour`(단수, TourAPI 프록시)** — `/tours`(투어 세션)와 다른 리소스 |
 | | `spotDetail(token, contentId)` | GET | `/tour/spots/:contentId` | ✓ | |
 
-이 표에 없는 엔드포인트(`PATCH /users/me`)는 아직 클라이언트 서비스 메서드가 없다 — §6 참고.
+---
+
+## 4. 모델
+
+화면에서 쓰는 응답은 전부 `models/`의 모델 클래스(수동 `fromJson`)로 감싼다: `User`,
+`Bakery`, `BreadItem`, `TourInfo`, `SuggestedWalk`, `Tour`, `TourStop`, `FoodLog`,
+`CalorieBalance`, `DailyStats`, `WeeklyStats`, `BreadSelection`(클라이언트 전용 선택 상태),
+`ActivityLevel`(문자열 상수 3개). 아직 화면이 없는 `tour/nearby`, `tour/spots/:id`만 raw Map으로
+남아 있다 — 화면을 붙일 때 같은 패턴으로 모델을 추가할 것.
 
 ---
 
-## 4. 모델 vs raw Map 사용 기준
+## 5. 화면·흐름 안내
 
-| 타입 모델 있음 (`models/`) | raw `Map<String, dynamic>` 그대로 반환 |
-| --- | --- |
-| `User` (`user.dart`) | 투어 관련 전체 응답 (tour 시작/도착/완료/상세) |
-| `Bakery` (`bakery.dart`) | `bakeries/:id`의 `tour_info` |
-| `BreadItem` (`bread_item.dart`) | `food-logs`, `calories/balance`, `stats/*`, `tour/nearby`, `tour/spots/:id` 전체 응답 |
-| `ActivityLevel` (문자열 상수 3개) | `suggested_walk` (bakeries 응답 내부 필드) |
-
-오른쪽 목록은 필드가 많고 화면 요구사항에 따라 어떻게 쪼갤지가 아직 정해지지 않아서 일부러
-모델화하지 않고 raw Map으로 남겨뒀다. **새 화면을 만들면서 이 데이터를 UI에 바인딩하려면,
-그 화면에 맞는 모델 클래스를 새로 만들어서 `Map.fromJson` 패턴(기존 `Bakery`/`BreadItem`
-참고)으로 감싸는 걸 권장** — raw Map을 위젯 트리 깊숙이 그대로 넘기지 말 것.
-
----
-
-## 5. 화면 파일 안내 (`screens/`)
-
-| 파일 | 상태 | 설명 |
+| 화면 | 파일 | 호출 |
 | --- | --- | --- |
-| `login_screen.dart` | 실사용 | user_id 기반 간편 로그인 (MVP, 비밀번호 없음) |
-| `signup_screen.dart` | 실사용 | 회원가입 폼 |
-| `home_screen.dart` | 실사용 | 로그인 후 첫 화면. 현재는 아래 디버그 화면 3개로 가는 버튼만 있음 — **디자인 새로 입힐 때 이 버튼들을 실제 네비게이션(빵집 검색 화면 등)으로 교체하면 됨** |
-| `bakery_list_screen.dart` | **디자인 없음, API 확인용** | `BakeryService.fetchNearby` 호출 예제. 위경도는 대전 시내 좌표로 하드코딩(GPS 미연동) |
-| `bakery_detail_screen.dart` | **디자인 없음, API 확인용** | `fetchDetail` + `fetchItems`를 나란히 호출하는 예제 |
-| `tour_flow_screen.dart` | **디자인 없음, API 확인용** | 투어 시작→도착기록→섭취기록→밸런스조회→완료→상세조회 **6단계를 순서대로 호출하는 예제** — 새 투어 화면을 만들 때 호출 순서와 각 단계에서 이전 응답의 어떤 필드(`tour.id`, `stop.id` 등)를 다음 요청에 넘겨야 하는지 그대로 참고하면 됨 |
-| `stats_screen.dart` | **디자인 없음, API 확인용** | 통계 + TourAPI 프록시 호출 예제 |
+| 로그인/회원가입 | `login_screen.dart`, `signup_screen.dart` (`widgets/auth_layout.dart`) | `/auth/*`, `/users/me` |
+| 홈 (칼로리 잔액 + 투어 진입) | `home_screen.dart` | `/calories/balance` |
+| 빵집 목록 | `bakery_list_screen.dart` | `/bakeries` (현재 위치, 실패 시 대전 중심 좌표) |
+| 빵집 상세 | `bakery_detail_screen.dart` | `/bakeries/:id`, `/bakeries/:id/items`, 네이버 지도 딥링크 |
+| 빵 메뉴 선택 | `bread_menu_screen.dart` | 없음 (예상 칼로리는 클라이언트 계산) |
+| 투어 진행 | `tour_progress_screen.dart` | `/tours`, `/tours/:id/stops` |
+| 섭취 확정 | `food_confirm_screen.dart` | `/food-logs`, 갤러리 저장 |
+| 투어 리포트 | `tour_report_screen.dart` | `/tours/:id/complete`, `/tours/:id` |
+| 통계 | `stats_screen.dart` | `/stats/daily`, `/stats/weekly` |
+| 마이페이지 | `profile_screen.dart` | `PATCH /users/me` |
 
-"디자인 없음" 4개 화면은 텍스트만 나열하는 검증용 코드다. 실제 UI 개발 시 그대로 쓰지 말고
-**API 호출 부분(어떤 서비스를, 어떤 순서로, 어떤 파라미터로 부르는지)만 참고해서 새 위젯으로
-교체**하는 걸 권장한다.
+투어 API 호출 순서와 ID 전달(`tour_id`, `tour_stop_id`)은 화면이 아니라
+`controllers/tour_flow_controller.dart`가 전담한다. 화면을 갈아엎어도 이 컨트롤러는 그대로 둘 것.
+`tour_flow_screen.dart`는 `kDebugMode`에서만 열리는 raw 호출 검증용이다.
 
 ---
 
 ## 6. 새 엔드포인트 추가하는 법
 
-기존 서비스 파일과 같은 패턴을 따르면 된다. 예: `PATCH /users/me`를 추가한다면
-`auth_service.dart`에 아래처럼 메서드 하나 추가:
+기존 서비스 파일과 같은 패턴을 따르면 된다. 예: `auth_service.dart`의 `updateMe`:
 
 ```dart
 Future<User> updateMe(String token, Map<String, dynamic> fields) async {
-  final json = await _client.patch('/users/me', token: token, body: fields);
-  return User.fromJson(json);
+  await _client.patch('/users/me', token: token, body: fields);
+  return fetchMe(token);
 }
 ```
 
@@ -159,14 +154,27 @@ try {
 
 ---
 
-## 9. 아직 없는 것 (다음 개발자가 채워야 할 부분)
+## 9. 백엔드 API 없이 클라이언트가 구현한 것 (`backend/FRONTEND_API_GUIDE.md` §4)
 
-- `PATCH /users/me` 클라이언트 서비스 메서드 (프로필 수정 화면 필요 시)
-- 실제 지도/GPS 연동 — 지금 좌표는 전부 하드코딩(대전 시내)이고, 백엔드도 마찬가지로 프론트가
-  GPS를 넣어줄 거라 가정하고 만들어져 있음
-- 네이버 지도 딥링크(`url_launcher`), 백그라운드 만보기/GPS 속도 필터, 촬영 후 갤러리 저장
-  — 백엔드 API가 아예 없는 영역이라 (`backend/FRONTEND_API_GUIDE.md` §4) 이 레포에 아직
-  코드 없음
-- 상태 관리는 지금 `AuthProvider` 하나뿐 — 빵집/투어 등 새 도메인 상태를 전역으로 관리하려면
-  같은 `ChangeNotifier` 패턴으로 `BakeryProvider`/`TourProvider` 등을 추가하는 걸 권장
-  (강제는 아님, 화면 로컬 상태로도 충분하면 그렇게 해도 됨)
+| 기능 | 파일 | 비고 |
+| --- | --- | --- |
+| GPS 속도 필터 (20km/h 초과 제외) | `services/walk_filter.dart` | 순수 Dart, `test/walk_filter_test.dart`. 정확도 50m 초과 fix·5분 초과 공백은 무시, 1km/h 미만은 대기 시간으로 보고 시간에서 제외 |
+| 위치 추적 + 상주 알림 | `services/location_service.dart` | `geolocator`의 Android 위치 포그라운드 서비스로 화면 꺼짐에도 유지 (아래 참고) |
+| 만보기 | `services/step_counter.dart` | `pedometer`. 첫 값(부팅 후 누적)은 기준점으로만 사용, 차량 이동 중 걸음은 버림. 웹/데스크톱은 `FakeStepCounter` |
+| 네이버 지도 길찾기 | `services/naver_map_launcher.dart` | `nmap://route/walk` → 실패 시 `m.map.naver.com` 검색 |
+| 섭취 사진 | `services/food_photo_service.dart` | `image_picker` 촬영 → `gal`로 "빵칼" 앨범에만 저장, 업로드 없음 |
+
+센서가 없거나 권한이 거부되면 투어는 실패하지 않고 대체값을 쓴다: 거리 = 걸음 × 0.7m,
+시간 = 경과 시각. 권한 프롬프트는 15초 안에 응답이 없으면 거부로 간주한다.
+
+**백그라운드 방식 결정**: 스펙 문서는 `flutter_background_service`를 적었지만, 추적 로직이 UI
+isolate의 `TourFlowController`에 있어 별도 isolate로 옮기면 상태 동기화가 크게 복잡해진다.
+대신 `geolocator`의 포그라운드 서비스(상주 알림 + wake lock)로 위치 스트림을 유지하고, 걸음은
+센서 허브가 누적하는 `TYPE_STEP_COUNTER`로 받는다. 백엔드 `FRONTEND_API_GUIDE.md` §4 갱신을
+backend 세션에서 제안할 것.
+
+## 10. 아직 없는 것
+
+- 빵집 목록 지도 핀 — 지도 SDK 미정 (논의 필요)
+- 투어 히스토리 — 백엔드에 투어 목록 API 없음
+- 실기기에서 확인 필요: 화면 꺼짐 상태 추적 지속, 네이버 지도 앱/웹 폴백 URL, 갤러리 저장
