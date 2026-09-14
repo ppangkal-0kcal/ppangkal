@@ -78,13 +78,15 @@ class GlassStyle extends ThemeExtension<GlassStyle> {
     required this.borderRadius,
   });
 
+  /// 그림자는 진한 테두리 대신 은은한 drop shadow로 입체감만 준다
+  /// (2026-09 디자인 가이드: `0 2px 8px rgba(0,0,0,0.05)`).
   static const GlassStyle standard = GlassStyle(
     blurSigma: 16,
     backgroundOpacity: 0.55,
     borderColor: Color(0x33FFFFFF),
     borderWidth: 1,
     shadows: [
-      BoxShadow(color: Color(0x14000000), blurRadius: 24, offset: Offset(0, 8)),
+      BoxShadow(color: Color(0x0D000000), blurRadius: 8, offset: Offset(0, 2)),
     ],
     borderRadius: BorderRadius.all(Radius.circular(20)),
   );
@@ -157,14 +159,32 @@ class AppBackground extends ThemeExtension<AppBackground> {
 ThemeData buildAppTheme() {
   // 브랜드 시드컬러 — 구운 빵 껍질 색(크림/베이지). 이 한 줄만 바꾸면 전체 톤이 바뀜.
   const seedColor = Color(0xFFE8C39E);
+  final colorScheme = ColorScheme.fromSeed(seedColor: seedColor);
 
   return ThemeData(
     useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(seedColor: seedColor),
+    colorScheme: colorScheme,
     extensions: const [
       CalorieStatusColors.brand,
       GlassStyle.standard,
       AppBackground.brand,
     ],
+    // 선택된 탭만 포인트 컬러로 강조하고 나머지는 회색 — pill 인디케이터 없이
+    // 아이콘/라벨 색과 굵기만으로 활성 상태를 표시한다 (2026-09 디자인 가이드).
+    navigationBarTheme: NavigationBarThemeData(
+      indicatorColor: Colors.transparent,
+      iconTheme: WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          color: states.contains(WidgetState.selected) ? colorScheme.primary : colorScheme.onSurfaceVariant,
+        ),
+      ),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => TextStyle(
+          fontSize: 12,
+          fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w400,
+          color: states.contains(WidgetState.selected) ? colorScheme.primary : colorScheme.onSurfaceVariant,
+        ),
+      ),
+    ),
   );
 }

@@ -90,6 +90,20 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateProfile(Map<String, dynamic> fields) async {
+    if (token == null) return false;
+    errorMessage = null;
+    try {
+      user = await _service.updateMe(token!, fields);
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     await _service.logout();
     token = null;

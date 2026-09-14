@@ -6,13 +6,14 @@ import '../providers/auth_provider.dart';
 import '../screens/bakery_detail_screen.dart';
 import '../screens/bakery_list_screen.dart';
 import '../screens/bread_menu_screen.dart';
-import '../screens/coming_soon_screen.dart';
 import '../screens/debug_screen.dart';
 import '../screens/food_confirm_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
+import '../screens/profile_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/stats_screen.dart';
 import '../screens/tour_progress_screen.dart';
 import '../screens/tour_report_screen.dart';
 import '../widgets/main_shell.dart';
@@ -90,12 +91,12 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
           ),
           StatefulShellBranch(
             routes: [
-              GoRoute(path: '/stats', builder: (context, state) => const ComingSoonScreen(title: '통계')),
+              GoRoute(path: '/stats', builder: (context, state) => const StatsScreen()),
             ],
           ),
           StatefulShellBranch(
             routes: [
-              GoRoute(path: '/profile', builder: (context, state) => const ComingSoonScreen(title: '마이페이지')),
+              GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
             ],
           ),
         ],
