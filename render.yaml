@@ -1,0 +1,31 @@
+# Render Blueprint — 대시보드 New > Blueprint 에서 이 저장소를 고르면 아래 서비스가 만들어진다.
+# 절차·환경변수 설명은 backend/DEPLOYMENT.md.
+services:
+  - type: web
+    name: ppangkal-api
+    runtime: docker
+    # Blueprint의 Docker 경로와 buildFilter는 rootDir과 무관하게 항상 저장소 루트 기준
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # 한국 사용자와 가장 가까운 리전 (Supabase도 ap-northeast-2라 왕복 지연이 작다)
+    region: singapore
+    plan: free
+    # 지금은 실기기 테스트 서버라 통합 브랜치(develop)를 배포한다. 정식 배포 때 main으로 바꾼다.
+    branch: develop
+    healthCheckPath: /health
+    # 백엔드 폴더가 바뀔 때만 재배포 (프론트 커밋으로는 재배포하지 않음)
+    buildFilter:
+      paths:
+        - backend/**
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # 아래 값은 저장소에 두지 않는다 — 대시보드에서 직접 입력 (sync: false)
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: TOUR_API_SERVICE_KEY
+        sync: false
+      - key: TOUR_API_BASE_URL
+        value: https://apis.data.go.kr/B551011/KorService2

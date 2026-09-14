@@ -25,6 +25,9 @@ cd ppangkal-frontend
 
 USB를 뽑았다 꽂으면 `adb reverse`가 풀린다 — API 호출이 전부 실패하면 스크립트를 다시 실행.
 
+**케이블 없이(야외·LTE) 테스트**: 백엔드를 배포하고(`backend/DEPLOYMENT.md`) `dart_defines.json`의
+`API_BASE_URL`을 배포 주소로 바꾸면, 스크립트가 `adb reverse` 없이 그 주소로 빌드한다.
+
 APK로 직접 설치할 때는 주소를 빌드에 넣어야 한다:
 `flutter build apk --release --split-per-abi --dart-define-from-file=dart_defines.json`
 → `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`
