@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/bread_selection.dart';
@@ -6,15 +7,17 @@ import '../providers/auth_provider.dart';
 import '../screens/bakery_detail_screen.dart';
 import '../screens/bakery_list_screen.dart';
 import '../screens/bread_menu_screen.dart';
-import '../screens/coming_soon_screen.dart';
 import '../screens/debug_screen.dart';
 import '../screens/food_confirm_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
+import '../screens/profile_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/stats_screen.dart';
 import '../screens/tour_progress_screen.dart';
 import '../screens/tour_report_screen.dart';
+import '../widgets/brand_background.dart';
 import '../widgets/main_shell.dart';
 
 /// Central route table — replaces the screen-by-screen `Navigator.push` +
@@ -45,42 +48,42 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
       return null;
     },
     routes: [
-      GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(path: '/signup', builder: (context, state) => const SignupScreen()),
+      GoRoute(path: '/splash', builder: (context, state) => _page(const SplashScreen())),
+      GoRoute(path: '/login', builder: (context, state) => _page(const LoginScreen())),
+      GoRoute(path: '/signup', builder: (context, state) => _page(const SignupScreen())),
       GoRoute(
         path: '/debug',
         // Belt-and-suspenders: HomeScreen only shows the entry button under
         // kDebugMode, and this redirect also blocks direct navigation
         // (e.g. a typed URL on web) outside debug builds.
         redirect: (context, state) => kDebugMode ? null : '/home',
-        builder: (context, state) => const DebugScreen(),
+        builder: (context, state) => _page(const DebugScreen()),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => MainShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
             routes: [
-              GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+              GoRoute(path: '/home', builder: (context, state) => _page(const HomeScreen())),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/bakeries',
-                builder: (context, state) => const BakeryListScreen(),
+                builder: (context, state) => _page(const BakeryListScreen()),
                 routes: [
                   GoRoute(
                     path: ':bakeryId',
-                    builder: (context, state) => BakeryDetailScreen(
+                    builder: (context, state) => _page(BakeryDetailScreen(
                       bakeryId: state.pathParameters['bakeryId']!,
-                    ),
+                    )),
                     routes: [
                       GoRoute(
                         path: 'menu',
-                        builder: (context, state) => BreadMenuScreen(
+                        builder: (context, state) => _page(BreadMenuScreen(
                           bakeryId: state.pathParameters['bakeryId']!,
-                        ),
+                        )),
                       ),
                     ],
                   ),
@@ -90,12 +93,12 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
           ),
           StatefulShellBranch(
             routes: [
-              GoRoute(path: '/stats', builder: (context, state) => const ComingSoonScreen(title: '통계')),
+              GoRoute(path: '/stats', builder: (context, state) => _page(const StatsScreen())),
             ],
           ),
           StatefulShellBranch(
             routes: [
-              GoRoute(path: '/profile', builder: (context, state) => const ComingSoonScreen(title: '마이페이지')),
+              GoRoute(path: '/profile', builder: (context, state) => _page(const ProfileScreen())),
             ],
           ),
         ],
@@ -106,19 +109,22 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
       // lib/main.dart), not scoped to any one branch of the shell.
       GoRoute(
         path: '/tour/progress/:bakeryId',
-        builder: (context, state) => TourProgressScreen(
+        builder: (context, state) => _page(TourProgressScreen(
           bakeryId: state.pathParameters['bakeryId']!,
           selections: state.extra as List<BreadSelection>? ?? const [],
-        ),
+        )),
       ),
       GoRoute(
         path: '/tour/confirm/:tourStopId',
-        builder: (context, state) => FoodConfirmScreen(
+        builder: (context, state) => _page(FoodConfirmScreen(
           tourStopId: state.pathParameters['tourStopId']!,
           selections: state.extra as List<BreadSelection>? ?? const [],
-        ),
+        )),
       ),
-      GoRoute(path: '/tour/report', builder: (context, state) => const TourReportScreen()),
+      GoRoute(path: '/tour/report', builder: (context, state) => _page(const TourReportScreen())),
     ],
   );
 }
+
+/// Every page paints its own opaque brand background — see [BrandBackground].
+Widget _page(Widget screen) => BrandBackground(child: screen);

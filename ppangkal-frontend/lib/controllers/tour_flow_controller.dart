@@ -8,8 +8,10 @@ import '../models/tour.dart';
 import '../models/tour_stop.dart';
 import '../services/calories_service.dart';
 import '../services/food_log_service.dart';
+import '../services/location_service.dart';
 import '../services/step_counter.dart';
 import '../services/tour_service.dart';
+import '../services/walk_filter.dart';
 
 /// Owns the tour session lifecycle end to end — start → (arrive at a
 /// bakery → log food eaten there)×N → complete → fetch report — so a
@@ -44,25 +46,33 @@ import '../services/tour_service.dart';
 /// "legs", that's a domain concept) and not the screen (steps directly
 /// feeds the API call this class already owns — splitting that across a
 /// screen would undo the "screen doesn't know the API shape" goal this
-/// class exists for). `distance_m` has no real source yet either (GPS is
-/// 4단계) — estimated from the same step delta via a fixed stride length,
-/// clearly marked for replacement.
+/// class exists for).
+///
+/// **GPS speed filter** (4단계): while a tour is active, [PositionSource]
+/// fixes run through [WalkFilter] — only ≤20km/h movement adds to
+/// `distance_m`/`duration_minutes`, and steps that arrive while the filter
+/// says the user is in a vehicle are dropped. When GPS is unavailable
+/// (permission denied, Chrome dev target without a fix yet) distance falls
+/// back to steps × stride and duration to wall-clock time, so a tour never
+/// fails just because a sensor is missing.
 class TourFlowController extends ChangeNotifier {
   final TourService _tourService;
   final FoodLogService _foodLogService;
   final CaloriesService _caloriesService;
   final StepCounter _stepCounter;
   final bool _ownsStepCounter;
+  final PositionSource? _positionSource;
 
   TourFlowController({
     TourService? tourService,
     FoodLogService? foodLogService,
     CaloriesService? caloriesService,
     StepCounter? stepCounter,
+    this._positionSource,
   })  : _tourService = tourService ?? TourService(),
         _foodLogService = foodLogService ?? FoodLogService(),
         _caloriesService = caloriesService ?? CaloriesService(),
-        _stepCounter = stepCounter ?? FakeStepCounter(),
+        _stepCounter = stepCounter ?? createStepCounter(),
         _ownsStepCounter = stepCounter == null;
 
   Tour? _tour;
@@ -70,12 +80,31 @@ class TourFlowController extends ChangeNotifier {
   final List<FoodLog> _foodLogs = [];
 
   StreamSubscription<int>? _stepSubscription;
-  int _latestCumulativeSteps = 0;
+  StreamSubscription<GeoSample>? _positionSubscription;
+  WalkFilter _walkFilter = WalkFilter();
+  bool _gpsPermitted = false;
+
+  /// Raw cumulative value from the sensor (steps since boot on Android) —
+  /// only used to compute deltas, never shown.
+  int? _lastRawSteps;
+
+  /// Steps this app counted as walking since the tour started.
+  int _countedSteps = 0;
   int _legStepBaseline = 0;
+  double _legDistanceBaselineM = 0;
+  Duration _legWalkDurationBaseline = Duration.zero;
   DateTime? _legStartedAt;
 
-  // TODO(4단계): 실제 GPS 거리로 교체 — 지금은 걸음수 × 평균 보폭으로만 추정.
-  static const double _fakeStrideLengthM = 0.7;
+  /// Fallback only, when there's no GPS fix to measure distance with.
+  static const double _fallbackStrideLengthM = 0.7;
+
+  int _dataRevision = 0;
+
+  /// Bumps whenever something the server aggregates changes (a stop, a
+  /// food log, a completed tour). Screens that show server-side totals —
+  /// 홈 balance, 통계 — `select` this and refetch when it moves, since the
+  /// tab shell keeps them alive instead of rebuilding them.
+  int get dataRevision => _dataRevision;
 
   Tour? get tour => _tour;
   List<TourStop> get stops => List.unmodifiable(_stops);
@@ -95,12 +124,26 @@ class TourFlowController extends ChangeNotifier {
 
   /// Steps walked since the current leg started (tour start, or the
   /// previous [arriveAtBakery] — whichever was most recent).
-  int get currentLegSteps {
-    final delta = _latestCumulativeSteps - _legStepBaseline;
-    return delta < 0 ? 0 : delta;
-  }
+  int get currentLegSteps => _countedSteps - _legStepBaseline;
 
-  int get currentLegDistanceM => (currentLegSteps * _fakeStrideLengthM).round();
+  /// Whether distance is GPS-measured (true) or estimated from steps.
+  bool get isGpsTracking => _gpsPermitted && _walkFilter.hasFix;
+
+  /// The latest GPS interval was faster than walking — shown so the user
+  /// understands why the numbers stopped moving on a bus.
+  bool get isInVehicle => isGpsTracking && _walkFilter.isInVehicle;
+
+  int get currentLegDistanceM => isGpsTracking
+      ? (_walkFilter.walkedDistanceM - _legDistanceBaselineM).round()
+      : (currentLegSteps * _fallbackStrideLengthM).round();
+
+  int get currentLegDurationMinutes {
+    if (isGpsTracking) {
+      return (_walkFilter.walkedDuration - _legWalkDurationBaseline).inMinutes;
+    }
+    final startedAt = _legStartedAt;
+    return startedAt == null ? 0 : DateTime.now().difference(startedAt).inMinutes;
+  }
 
   int get totalConfirmedSteps => _stops.fold(0, (sum, s) => sum + s.steps);
   int get totalConfirmedDistanceM => _stops.fold(0, (sum, s) => sum + s.distanceM);
@@ -123,9 +166,51 @@ class TourFlowController extends ChangeNotifier {
     _tour = tour;
     _stops.clear();
     _foodLogs.clear();
+    _countedSteps = 0;
+    _walkFilter = WalkFilter();
+    await _startSensors();
     _beginLeg();
     notifyListeners();
     return tour;
+  }
+
+  Future<void> _startSensors() async {
+    // Unanswered permission prompts must not block the tour from starting —
+    // it just runs without that sensor (see the class doc's fallbacks).
+    const promptTimeout = Duration(seconds: 15);
+    await _stepCounter.ensurePermission().timeout(promptTimeout, onTimeout: () => false);
+    _stepSubscription ??= _stepCounter.stepStream.listen(_onRawSteps);
+
+    final source = _positionSource;
+    if (source == null) return;
+    _gpsPermitted = await source.ensurePermission().timeout(promptTimeout, onTimeout: () => false);
+    if (_gpsPermitted) {
+      await _positionSubscription?.cancel();
+      _positionSubscription = source.watch().listen(
+        (sample) {
+          _walkFilter.add(sample);
+          notifyListeners();
+        },
+        // Losing GPS mid-tour degrades to the step estimate, not an error.
+        onError: (Object _) {},
+      );
+    }
+  }
+
+  void _onRawSteps(int raw) {
+    final last = _lastRawSteps;
+    _lastRawSteps = raw;
+    // First event only establishes the baseline (Android reports steps
+    // since boot); a negative delta means the device rebooted.
+    if (last == null || raw < last || !isStarted) return;
+    if (isInVehicle) return;
+    _countedSteps += raw - last;
+    notifyListeners();
+  }
+
+  Future<void> _stopPositionTracking() async {
+    await _positionSubscription?.cancel();
+    _positionSubscription = null;
   }
 
   /// Records arrival at [bakeryId]. `steps`/`distance_m`/`duration_minutes`
@@ -136,10 +221,9 @@ class TourFlowController extends ChangeNotifier {
     required String bakeryId,
   }) async {
     final tour = _requireTour();
-    final startedAt = _legStartedAt ?? DateTime.now();
     final steps = currentLegSteps;
     final distanceM = currentLegDistanceM;
-    final durationMinutes = DateTime.now().difference(startedAt).inMinutes;
+    final durationMinutes = currentLegDurationMinutes;
 
     final stop = await _tourService.addStop(
       token: token,
@@ -151,6 +235,7 @@ class TourFlowController extends ChangeNotifier {
     );
     _stops.add(stop);
     _beginLeg();
+    _dataRevision++;
     notifyListeners();
     return stop;
   }
@@ -171,6 +256,7 @@ class TourFlowController extends ChangeNotifier {
       quantity: quantity,
     );
     _foodLogs.add(log);
+    _dataRevision++;
     notifyListeners();
     return log;
   }
@@ -187,6 +273,8 @@ class TourFlowController extends ChangeNotifier {
     final tour = _requireTour();
     final completed = await _tourService.completeTour(token, tour.id);
     _tour = completed;
+    await _stopPositionTracking();
+    _dataRevision++;
     notifyListeners();
     return completed;
   }
@@ -200,12 +288,10 @@ class TourFlowController extends ChangeNotifier {
   }
 
   void _beginLeg() {
-    _legStepBaseline = _latestCumulativeSteps;
+    _legStepBaseline = _countedSteps;
+    _legDistanceBaselineM = _walkFilter.walkedDistanceM;
+    _legWalkDurationBaseline = _walkFilter.walkedDuration;
     _legStartedAt = DateTime.now();
-    _stepSubscription ??= _stepCounter.stepStream.listen((cumulative) {
-      _latestCumulativeSteps = cumulative;
-      notifyListeners();
-    });
   }
 
   Tour _requireTour() {
@@ -219,6 +305,7 @@ class TourFlowController extends ChangeNotifier {
   @override
   void dispose() {
     _stepSubscription?.cancel();
+    _positionSubscription?.cancel();
     if (_ownsStepCounter) {
       _stepCounter.dispose();
     }

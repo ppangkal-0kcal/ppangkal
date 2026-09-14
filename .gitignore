@@ -1,3 +1,6 @@
 .tmp_remote_check/
 .DS_Store
 Thumbs.db
+
+# 현장 조사 원본 문서 (docx, 사진 포함 ~600MB) — 추출 결과는 backend/prisma/data/curated-bakeries.json
+빵칼_빵집_빵 사진 정리/

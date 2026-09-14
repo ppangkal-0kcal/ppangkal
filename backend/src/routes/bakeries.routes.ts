@@ -35,7 +35,7 @@ export const bakeriesRouter = Router();
  *         description: 제공 시 각 빵집의 예상 도보 소모 칼로리(estimated_walk_calories)를 함께 계산
  *     responses:
  *       200:
- *         description: 빵집 목록 (walk_recommended, estimated_walk_calories, suggested_walk 포함 — suggested_walk는 도보 비권장(1.2km 초과) 빵집에 user_weight 제공 시에만 채워짐)
+ *         description: 빵집 목록 (photo_url, bread_item_count(판매 중 메뉴 수), walk_recommended, estimated_walk_calories, suggested_walk 포함 — suggested_walk는 도보 비권장(1.2km 초과) 빵집에 user_weight 제공 시에만 채워짐)
  *       400:
  *         description: lat, lng 누락
  */
@@ -56,7 +56,9 @@ bakeriesRouter.get(
       throw ApiError.badRequest('user_weight는 숫자여야 합니다.');
     }
 
-    const bakeries = await prisma.bakery.findMany();
+    const bakeries = await prisma.bakery.findMany({
+      include: { _count: { select: { breadItems: { where: { isAvailable: true } } } } },
+    });
 
     const withDistance = bakeries
       .map((bakery) => ({
@@ -105,6 +107,7 @@ bakeriesRouter.get(
           review_count: bakery.reviewCount,
           opening_hours: bakery.openingHours,
           photo_url: bakery.photoUrl,
+          bread_item_count: bakery._count.breadItems,
           distance_m: Math.round(distanceM),
           is_open_now: isOpenNow,
           walk_recommended: walkRecommended,
@@ -203,7 +206,11 @@ async function fetchTourInfoSafely(contentId: string) {
 bakeriesRouter.get(
   '/:bakeryId/items',
   asyncHandler(async (req, res) => {
-    const items = await prisma.breadItem.findMany({ where: { bakeryId: req.params.bakeryId } });
+    // 판매중지(is_available=false) 메뉴는 과거 food_logs 참조 때문에 행만 남겨둔 것이라 목록에서 뺀다.
+    const items = await prisma.breadItem.findMany({
+      where: { bakeryId: req.params.bakeryId, isAvailable: true },
+      orderBy: [{ category: 'asc' }, { name: 'asc' }],
+    });
 
     res.json({
       bread_items: items.map((item) => ({

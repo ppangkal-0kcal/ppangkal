@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/api_exception.dart';
+import '../core/formatters.dart';
 import '../models/bread_item.dart';
 import '../models/bread_selection.dart';
 import '../services/bakery_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/bread_detail_sheet.dart';
 import '../widgets/empty_view.dart';
 import '../widgets/error_view.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/loading_view.dart';
+import '../widgets/network_photo.dart';
 import '../widgets/quantity_stepper.dart';
 
 /// Bread-menu selection for one bakery (`GET /bakeries/:id/items` —
@@ -29,6 +32,7 @@ class BreadMenuScreen extends StatefulWidget {
 class _BreadMenuScreenState extends State<BreadMenuScreen> {
   late Future<List<BreadItem>> _future;
   final Map<String, int> _quantities = {};
+  String? _category; // null = 전체
 
   @override
   void initState() {
@@ -77,17 +81,39 @@ class _BreadMenuScreenState extends State<BreadMenuScreen> {
 
           final selections = _selections(items);
           final totalCalories = selections.fold<int>(0, (sum, s) => sum + s.estimatedCalories);
+          final categories = items.map((i) => i.category).whereType<String>().toSet().toList()..sort();
+          final visible = _category == null ? items : items.where((i) => i.category == _category).toList();
 
           return Column(
             children: [
+              if (categories.length > 1)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
+                  child: Row(
+                    children: [
+                      for (final category in [null, ...categories])
+                        Padding(
+                          padding: const EdgeInsets.only(right: AppSpacing.sm),
+                          child: ChoiceChip(
+                            label: Text(category == null
+                                ? '전체 ${items.length}'
+                                : '$category ${items.where((i) => i.category == category).length}'),
+                            selected: _category == category,
+                            onSelected: (_) => setState(() => _category = category),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(AppSpacing.md),
-                  itemCount: items.length,
+                  itemCount: visible.length,
                   itemBuilder: (context, i) => _BreadItemRow(
-                    item: items[i],
-                    quantity: _quantities[items[i].id] ?? 0,
-                    onChanged: (q) => setState(() => _quantities[items[i].id] = q),
+                    item: visible[i],
+                    quantity: _quantities[visible[i].id] ?? 0,
+                    onChanged: (q) => setState(() => _quantities[visible[i].id] = q),
                   ),
                 ),
               ),
@@ -140,18 +166,32 @@ class _BreadItemRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: GlassCard(
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: Row(
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.name, style: textTheme.titleSmall),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text('${item.price}원 · ${item.calories}kcal', style: textTheme.bodySmall),
-                  if (quantity > 0)
-                    Text('선택 시 ${estimatedCalories}kcal', style: textTheme.bodySmall),
-                ],
+              child: InkWell(
+                onTap: () => showBreadDetailSheet(context, item),
+                borderRadius: BorderRadius.circular(12),
+                child: Row(
+                  children: [
+                    NetworkPhoto(url: item.imageUrl, width: 64, height: 64),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(item.name, style: textTheme.titleSmall),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text('${formatThousands(item.price)}원', style: textTheme.bodySmall),
+                          CalorieLine(item: item, style: textTheme.bodySmall),
+                          if (quantity > 0)
+                            Text('선택 시 ${estimatedCalories}kcal', style: textTheme.labelSmall),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             QuantityStepper(quantity: quantity, onChanged: onChanged),

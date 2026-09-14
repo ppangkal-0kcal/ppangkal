@@ -47,10 +47,13 @@
   - `user_weight`를 같이 보내면 각 빵집에 `estimated_walk_calories`(도보 예상 소모 칼로리)가 계산돼서 옴. 안 보내면 `null`.
   - 응답의 `walk_recommended: true/false`가 곧 1.2km 컷오프 배지 — `true`면 "걸어가기 딱 좋은 거리예요!" 문구를 보여주면 됨.
   - "1.2km 초과 시 도착 후 산책 제안" 미리보기도 이 응답에 `suggested_walk`로 같이 온다 — `user_weight`를 보내야 채워지고(칼로리 계산에 필요), `walk_recommended: true`인 빵집은 항상 `null`(이미 도보로 가니 산책 제안이 필요 없음).
+  - 목록 카드용: `photo_url`(외관 사진, 없으면 `null`), `bread_item_count`(판매 중 메뉴 수 — 0이면 메뉴 데이터 준비 중). 등록 빵집이 둔산~관평까지 퍼져 있어 앱은 `radius_km=15`로 부른다.
 - 빵집 상세(소개글/사진/영업정보): `GET /api/bakeries/{bakeryId}` — `tour_info` 필드에 TourAPI 등록된 유명 빵집만 소개글/사진/대표메뉴/영업시간 등이 채워짐, 미등록이면 `tour_info: null` (정상 동작, 에러 아님).
 
 ### 4단계 — 빵 선택 & 예상 칼로리 산출
-- `GET /api/bakeries/{bakeryId}/items` → `bread_items[]` (id, name, price, calories 등)
+- `GET /api/bakeries/{bakeryId}/items` → `bread_items[]` (id, name, category, price, calories, image_url, source_grade, source_note 등)
+  - 판매 중(`is_available: true`)인 메뉴만, 카테고리 → 이름 순으로 온다. 판매중지 메뉴는 과거 `food_logs` 참조 때문에 DB에만 남는다.
+  - `source_grade: "C"`는 매장이 칼로리를 공개하지 않아 유사 제품 기준으로 추정한 값 — 화면에 "추정" 표시를 권장.
 - **"예상 섭취 칼로리"는 저장하지 않는다.** `calories × 수량`을 프론트에서 그냥 화면에 계산해서 보여주면 끝 — 이 시점엔 서버에 아무것도 안 보냄.
 
 ### 5단계 — 네이버 지도 외부 호출
@@ -108,13 +111,13 @@
 
 | 기능 | 구현 방식 |
 | --- | --- |
-| 백그라운드 센서 유지 (화면 꺼져도 동작) | `flutter_background_service` |
+| 백그라운드 센서 유지 (화면 꺼져도 동작) | `flutter_background_service` 대신 **`geolocator`의 위치 포그라운드 서비스**로 구현됨 (상주 알림 + wake lock, 추적 로직이 UI isolate 컨트롤러에 있어서) — 사유는 `ppangkal-frontend/API_INTEGRATION.md` §9 |
 | 만보기 | 플랫폼 만보기 센서 패키지 |
 | GPS 속도 필터 (시속 20km 이하만 걸음 인정) | 위치 스트림에서 속도 계산 후 필터링, 결과만 7단계에서 서버로 전송 |
 | 길안내 | `url_launcher`로 네이버 지도 앱 딥링크 (미설치 시 `m.map.naver.com` 웹 폴백 필수) |
 | 상주 알림 (OS 강제종료 방지) | Android Foreground Service Notification |
 | 섭취 사진 | 촬영 후 **기기 갤러리에만 저장** — 서버 업로드 없음, `food_logs`에 사진 관련 필드 자체가 없음 |
-| 지도에 빵집 핀 표시 (목록 화면) | **아직 미정.** 지금 백엔드는 위경도 숫자만 내려주고, 실제 지도 렌더링(SDK)은 프론트에서 결정 안 됨 — 필요하면 별도로 논의 |
+| 지도에 빵집 핀 표시 (목록 화면) | **네이버 지도 SDK(`flutter_naver_map`)로 결정** (2026-09-14). 백엔드는 위경도만 내려주고 경로 계산은 여전히 없다. NCP Maps Client ID는 앱 빌드 옵션(`--dart-define`)으로 주입 — 키가 없으면 앱은 네이버 지도 앱 호출로 대체 |
 
 ---
 

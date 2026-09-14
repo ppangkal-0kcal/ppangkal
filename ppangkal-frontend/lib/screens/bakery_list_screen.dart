@@ -6,13 +6,16 @@ import '../core/api_exception.dart';
 import '../models/bakery.dart';
 import '../providers/auth_provider.dart';
 import '../services/bakery_service.dart';
+import '../services/location_service.dart';
+import '../services/walk_filter.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bakery_card.dart';
+import '../widgets/bakery_map_view.dart';
 import '../widgets/empty_view.dart';
 import '../widgets/error_view.dart';
 import '../widgets/loading_view.dart';
 
-// TODO(4단계): 실제 사용자 위치로 교체 — 지금은 대전 시내 중심 좌표로 고정.
+// 위치 권한이 없거나 GPS를 못 잡을 때 쓰는 대전 시내 중심 좌표.
 const double _fallbackLat = 36.3504;
 const double _fallbackLng = 127.3845;
 
@@ -33,8 +36,20 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
     'recommended': '추천순',
   };
 
+  /// Curated bakeries span 둔산 to 관평·테크노밸리 (~10km apart), so the
+  /// search radius covers the city rather than just walking distance —
+  /// walkability is still shown per bakery via `walk_recommended`.
+  static const double _radiusKm = 15;
+
   String _sort = 'distance';
+  bool _showMap = false;
   late Future<List<Bakery>> _future;
+  (double, double) _center = (_fallbackLat, _fallbackLng);
+
+  /// Resolved once per screen — re-sorting reuses it instead of waiting on
+  /// GPS again. Null result means "use the fallback coordinate".
+  late final Future<GeoSample?> _location = context.read<PositionSource>().current();
+  bool _usingFallbackLocation = false;
 
   @override
   void initState() {
@@ -44,13 +59,20 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
 
   void _load() {
     final weight = context.read<AuthProvider>().user?.weight;
-    _future = BakeryService().fetchNearby(
-      lat: _fallbackLat,
-      lng: _fallbackLng,
-      radiusKm: 5,
-      sort: _sort,
-      userWeight: weight,
-    );
+    _future = _location.then((sample) {
+      final usingFallback = sample == null;
+      _center = (sample?.latitude ?? _fallbackLat, sample?.longitude ?? _fallbackLng);
+      if (usingFallback != _usingFallbackLocation && mounted) {
+        setState(() => _usingFallbackLocation = usingFallback);
+      }
+      return BakeryService().fetchNearby(
+        lat: _center.$1,
+        lng: _center.$2,
+        radiusKm: _radiusKm,
+        sort: _sort,
+        userWeight: weight,
+      );
+    });
   }
 
   void _changeSort(String sort) {
@@ -64,20 +86,45 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('빵집')),
+      appBar: AppBar(
+        title: const Text('빵집'),
+        actions: [
+          IconButton(
+            tooltip: _showMap ? '목록으로 보기' : '지도로 보기',
+            icon: Icon(_showMap ? Icons.view_list_outlined : Icons.map_outlined),
+            onPressed: () => setState(() => _showMap = !_showMap),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SegmentedButton<String>(
-              showSelectedIcon: false,
-              segments: _sortOptions.entries
-                  .map((e) => ButtonSegment(value: e.key, label: Text(e.value)))
-                  .toList(),
-              selected: {_sort},
-              onSelectionChanged: (selection) => _changeSort(selection.first),
-            ),
+            if (!_showMap)
+              SegmentedButton<String>(
+                showSelectedIcon: false,
+                segments: _sortOptions.entries
+                    .map((e) => ButtonSegment(value: e.key, label: Text(e.value)))
+                    .toList(),
+                selected: {_sort},
+                onSelectionChanged: (selection) => _changeSort(selection.first),
+              ),
+            if (_usingFallbackLocation) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Icon(Icons.location_off_outlined, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      '현재 위치를 확인할 수 없어 대전 시내 기준으로 보여드려요.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             Expanded(
               child: FutureBuilder<List<Bakery>>(
@@ -104,6 +151,14 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
                     return const EmptyView(
                       message: '주변에 등록된 빵집이 없습니다.',
                       icon: Icons.bakery_dining_outlined,
+                    );
+                  }
+                  if (_showMap) {
+                    return BakeryMapView(
+                      bakeries: bakeries,
+                      centerLatitude: _center.$1,
+                      centerLongitude: _center.$2,
+                      onOpenBakery: (bakery) => context.push('/bakeries/${bakery.id}'),
                     );
                   }
                   return ListView.separated(

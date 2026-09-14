@@ -9,6 +9,7 @@ import '../models/bread_selection.dart';
 import '../models/tour_stop.dart';
 import '../providers/auth_provider.dart';
 import '../services/bakery_service.dart';
+import '../services/naver_map_launcher.dart';
 import '../theme/app_theme.dart';
 import '../widgets/arrival_result_card.dart';
 import '../widgets/error_view.dart';
@@ -19,8 +20,8 @@ import '../widgets/loading_view.dart';
 /// Active-tour screen for one bakery leg. Starts the tour if needed
 /// (`POST /tours`), shows live steps/distance while walking, then records
 /// arrival (`POST /tours/:tourId/stops`) and the resulting park-walk
-/// suggestion. Map/real-time route display is out of scope (4단계) — see
-/// the placeholder card below.
+/// suggestion. Directions are handed off to the Naver Map app
+/// ([_NavigationCard]); there is no in-app map.
 class TourProgressScreen extends StatefulWidget {
   final String bakeryId;
   final List<BreadSelection> selections;
@@ -113,7 +114,7 @@ class _TourProgressScreenState extends State<TourProgressScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              const _RouteMapPlaceholder(),
+              _NavigationCard(bakery: bakery),
               const SizedBox(height: AppSpacing.md),
               if (_errorMessage != null) ...[
                 Text(_errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
@@ -150,20 +151,43 @@ class _TourProgressScreenState extends State<TourProgressScreen> {
   }
 }
 
-class _RouteMapPlaceholder extends StatelessWidget {
-  const _RouteMapPlaceholder();
+/// Step 5 handoff — directions live in the Naver Map app, not in-app
+/// (no map SDK by design, see `NaverMapLauncher`).
+class _NavigationCard extends StatelessWidget {
+  final Bakery bakery;
+
+  const _NavigationCard({required this.bakery});
+
+  Future<void> _open(BuildContext context) async {
+    final opened = await NaverMapLauncher.walkTo(
+      latitude: bakery.latitude,
+      longitude: bakery.longitude,
+      name: bakery.name,
+    );
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('네이버 지도를 열 수 없습니다.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return GlassCard(
-      child: SizedBox(
-        height: 120,
-        child: Center(
-          child: Text(
-            '실시간 경로 지도는 4단계에서 제공됩니다.',
-            style: Theme.of(context).textTheme.bodySmall,
+      child: Row(
+        children: [
+          Icon(Icons.directions_walk, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text('걸어서 가는 길은 네이버 지도에서 안내해 드려요.', style: textTheme.bodyMedium),
           ),
-        ),
+          const SizedBox(width: AppSpacing.sm),
+          FilledButton.tonal(
+            onPressed: () => _open(context),
+            child: const Text('길찾기'),
+          ),
+        ],
       ),
     );
   }

@@ -38,6 +38,10 @@ class BreadItem {
     required this.isAvailable,
   });
 
+  /// Grade C = the bakery doesn't publish calories; the value is an estimate
+  /// from similar products. Shown to users so they don't read it as exact.
+  bool get isCalorieEstimated => sourceGrade == 'C';
+
   factory BreadItem.fromJson(Map<String, dynamic> json) => BreadItem(
         id: json['id'] as String,
         bakeryId: json['bakery_id'] as String,

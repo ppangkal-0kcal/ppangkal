@@ -5,44 +5,49 @@ repository.
 
 ## Repository status
 
-No longer boilerplate (as of 2026-07-28) — the counter-app default is gone. Structural pass (as of
-2026-07-29) added the scaffolding a design pass builds on top of, ahead of 7 new screens:
+As of 2026-09-14 the full 8-step tour flow, 통계, and 마이페이지 are built with the brand design,
+and the client-only device features (GPS speed filter, pedometer, Naver Map handoff, gallery-only
+photos) are implemented — see `API_INTEGRATION.md` §5 (screens) and §9 (device features).
+`SCREEN_STATUS.md` is a 2026-07-29 snapshot kept for history, not the current state.
 
 - **Routing**: centralized in `lib/router/app_router.dart` (`go_router`) — no more
   screen-by-screen `Navigator.push`/`MaterialPageRoute`, no `AuthGate` widget. Auth gating is a
   `redirect` keyed off `AuthProvider` via `refreshListenable`; login/signup screens just flip
   `AuthProvider.status` and the router follows, they don't navigate themselves.
 - **Bottom-tab shell**: `StatefulShellRoute.indexedStack` (`lib/widgets/main_shell.dart`), 4 tabs —
-  홈/빵집/통계/마이페이지. Each tab keeps its own navigation stack across tab switches. 통계/
-  마이페이지 are `ComingSoonScreen` placeholders; 홈 (`home_screen.dart`) is a real screen but only
-  proves the auth/router wiring — the calorie-balance bar itself isn't built yet; 빵집 is the real
-  `bakery_list_screen.dart`.
-- **Theme**: `lib/theme/app_theme.dart` — `ThemeData` moved out of `main.dart`. Seed color is a
-  placeholder grayscale value (`Color(0xFF757575)`, marked with a `TODO(design)`) pending a design
-  pass; changing that one line re-tones the whole app. Two `ThemeExtension`s live here:
-  `CalorieStatusColors` (안전/주의/초과, currently grayscale, each shade tagged
-  `TODO(design)`) and `GlassStyle` (blur/opacity/border/shadow/radius constants for the
-  glassmorphism look). `AppSpacing` holds the 4/8/16/24/32 spacing scale — screens shouldn't write
-  raw `EdgeInsets` numbers.
+  홈/빵집/통계/마이페이지. Each tab keeps its own navigation stack across tab switches, so tab
+  screens stay alive: 홈/통계 refetch by `select`ing `TourFlowController.dataRevision`, which bumps
+  on every stop/food log/tour completion. The tour screens are top-level routes outside the shell.
+- **Background**: every route builder wraps its screen in `_page(...)` → `BrandBackground`
+  (opaque gradient per page + transparent Scaffold + 600px max content width). Don't apply the
+  gradient once around the whole app — a pushed page's transparent Scaffold would show the page
+  beneath it. New routes must use `_page` too.
+- **Theme**: `lib/theme/app_theme.dart` — brand seed color `#E8C39E` (구운 빵 껍질), one line
+  re-tones the app. `ThemeExtension`s: `CalorieStatusColors` (안전/주의/초과 신호등 3색),
+  `GlassStyle` (glassmorphism constants), `AppBackground` (gradient). `AppSpacing` holds the
+  4/8/16/24/32 spacing scale — screens shouldn't write raw `EdgeInsets` numbers.
 - **Common widgets** (`lib/widgets/`): `GlassCard` (the only place that should touch
   `BackdropFilter`+`GlassStyle` directly — nests safely, skips re-blurring if already inside
   another `GlassCard`), `LoadingView`, `ErrorView` (renders `ApiException.message` + optional
   retry), `EmptyView` (icon + message). New screens should reach for these instead of building
   loading/error/empty states inline.
-- **Debug tools**: the four **"디자인 없음" data-verification screens**
-  (`bakery_list_screen.dart` doubles as the real 빵집 tab; `bakery_detail_screen.dart`,
-  `tour_flow_screen.dart`, `stats_screen.dart` are debug-only) are reachable through
-  `lib/screens/debug_screen.dart`, gated behind `kDebugMode` twice over — the entry button on
-  `home_screen.dart` only renders in debug mode, and the `/debug` route itself redirects away
-  outside of it. These are still reference code for a design pass, not final UI — don't polish
-  them, replace them (except `bakery_list_screen.dart`, which is live production UI now via the
-  빵집 tab).
+- **Debug tools**: `tour_flow_screen.dart` (raw API-sequence dump) is the only remaining
+  verification screen, reachable through `lib/screens/debug_screen.dart` and gated behind
+  `kDebugMode` twice (home's entry button + the `/debug` redirect). Don't polish it.
 
 Full service-layer ↔ endpoint mapping is in `API_INTEGRATION.md` — read that before adding a new
 screen, it's the actual up-to-date map of what's built vs. what a new screen still needs to call.
 
 Dependencies added beyond the Flutter defaults: `http`, `provider`, `flutter_secure_storage`,
-`go_router`. Flutter 3.44.8 stable, Dart 3.12.2 (verify with `flutter --version` if this drifts).
+`go_router`, `geolocator`, `pedometer`, `permission_handler`, `url_launcher`, `image_picker`, `gal`,
+`flutter_naver_map`, `cached_network_image`. Build-time config (`API_BASE_URL`,
+`NAVER_MAP_CLIENT_ID`) comes from `--dart-define` / `dart_defines.json` (gitignored) — real-device
+steps are in `DEVICE_TESTING.md` and `tool/run_on_device.ps1`. Photos use `NetworkPhoto`
+(disk-cached on mobile; on web it falls back to `<img>` because the R2 bucket sends no CORS headers).
+`permission_handler_android` is pinned to 13.0.1 via `dependency_overrides` — 14.x needs
+compileSdk 37, which AGP 9.0.1 can't resolve (the SDK installs as `android-37.0`, AGP looks for
+`android-37`). Remove the override once AGP is upgraded. Flutter 3.44.8 stable, Dart 3.12.2
+(verify with `flutter --version` if this drifts).
 Common commands:
 
 - `flutter pub get` — install dependencies.
@@ -56,20 +61,20 @@ Common commands:
 **Project identity**: package name `ppangkal`, org `com.ppangkal` (Android applicationId /
 iOS bundle id `com.ppangkal.ppangkal`).
 
-## Repo location: `C:\src\ppangkal\ppangkal-frontend`, inside the `ppangkal` monorepo
+## Repo location: `C:\ppangkal\ppangkal-frontend`, inside the `ppangkal` monorepo
 
-Both this project and `backend` live under `C:\src\ppangkal` (ASCII-only, no spaces — kept that way
+Both this project and `backend` live under `C:\ppangkal` (ASCII-only, no spaces — kept that way
 because a Korean-character/space OneDrive path used to crash Flutter's Dart analysis server; see
 git history if the details matter again). **As of 2026-07-28 this is no longer a standalone git
 repo** — `.git` here was removed and both projects were folded into one monorepo at
-`github.com/ppangkal-0kcal/ppangkal` (pushed from `C:\src\ppangkal` as the repo root, `main` branch).
+`github.com/ppangkal-0kcal/ppangkal` (pushed from `C:\ppangkal` as the repo root, `main` branch).
 This repo's prior detailed history (there wasn't much — it had never been pushed anywhere) is
 gone; `backend`'s old standalone history is still preserved at the old
 `github.com/ppangkal-0kcal/backend` repo if ever needed, just no longer the actively-pushed copy.
 
 Practical consequence: `git commit`/`git push` from inside `ppangkal-frontend/` now affect the
 **shared monorepo** (also containing `backend/`) — always check `git status` from the repo root
-(`C:\src\ppangkal`) before committing, not just this subfolder, since a change in one project's
+(`C:\ppangkal`) before committing, not just this subfolder, since a change in one project's
 working tree doesn't imply the other project's tree is clean.
 
 ## What this app is for
@@ -78,10 +83,10 @@ working tree doesn't imply the other project's tree is clean.
 Full product concept, the 8-step tour flow, and calorie-balance logic are documented in the
 backend repo, not duplicated here:
 
-- `C:\src\ppangkal\backend\idea.md` — service concept, 8-step flow, 0-kcal balance concept, roadmap.
-- `C:\src\ppangkal\backend\tech-stack.md` — architecture rationale, including *why* there's no in-app
+- `C:\ppangkal\backend\idea.md` — service concept, 8-step flow, 0-kcal balance concept, roadmap.
+- `C:\ppangkal\backend\tech-stack.md` — architecture rationale, including *why* there's no in-app
   map SDK and no server-side routing.
-- `C:\src\ppangkal\backend\FRONTEND_API_GUIDE.md` — **the contract for this app**: which screen calls
+- `C:\ppangkal\backend\FRONTEND_API_GUIDE.md` — **the contract for this app**: which screen calls
   which endpoint, in what order, full endpoint table, and exactly what has no backend API and must
   be built client-side. Read this before wiring up any screen.
 - These are read from the backend repo live (absolute path above) — treat them as the source of
@@ -117,17 +122,22 @@ without derailing a diet/calorie goal.
 
 ## What this app must implement itself (no backend API — see `FRONTEND_API_GUIDE.md` §4)
 
-- Background sensor tracking that survives screen-off (`flutter_background_service` + Android
-  Foreground Service notification).
+- Background sensor tracking that survives screen-off — **implemented with `geolocator`'s Android
+  location foreground service** (ongoing notification + wake lock), not `flutter_background_service`
+  as the spec names; rationale in `API_INTEGRATION.md` §9. The backend guide still needs updating
+  to match (propose in a backend session).
 - Step counting (platform pedometer).
 - GPS speed filter: only count movement ≤20km/h as walking (bike/bus speeds excluded); aggregate
   distance/duration/steps client-side and report the summary via `POST /api/tours/:tourId/stops`.
 - Naver Map handoff via `url_launcher` deep link, with `m.map.naver.com` web fallback if the app
-  isn't installed. **No embedded map SDK, no server-side routing** — this is a deliberate
-  architecture decision (`tech-stack.md` §5), not a gap.
+  isn't installed. **Turn-by-turn directions stay in the external app, no server-side routing**
+  (`tech-stack.md` §5).
 - Consumption photos: camera → device gallery only. Never uploaded; `food_logs` has no photo field.
-- Map pin rendering for the bakery list screen is **still undecided** — backend only returns raw
-  lat/lng. Don't pick a map SDK unilaterally; flag it for discussion first.
+- Bakery map pins: **decided 2026-09-14 — Naver Maps SDK (`flutter_naver_map`)**, pins only, no
+  routing. Needs an NCP "Dynamic Map" Client ID passed as `--dart-define=NAVER_MAP_CLIENT_ID`
+  (`lib/core/api_config.dart`); `lib/services/naver_map_setup.dart` tracks whether auth actually
+  succeeded and `BakeryMapView` falls back to a Naver-app handoff list on web/desktop, without a
+  key, or on auth failure. The SDK doesn't support web — keep that fallback working.
 
 ## Toolchain status (verify with `flutter doctor -v` if stale)
 

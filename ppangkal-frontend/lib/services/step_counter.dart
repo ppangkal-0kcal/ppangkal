@@ -1,7 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 /// Source of step-count data for the tour flow. Real pedometer packages
-/// (the actual implementation is planned next week) emit a **cumulative**
+/// ([PedometerStepCounter]) emit a **cumulative**
 /// count — since the listener attached, or since device boot, depending
 /// on platform — not a delta. [stepStream] mirrors that contract on
 /// purpose, so callers already write the "snapshot a baseline, subtract
@@ -18,7 +22,42 @@ import 'dart:async';
 abstract class StepCounter {
   Stream<int> get stepStream;
 
+  /// Requests the motion/activity permission if the platform needs one.
+  /// Returns false when step data won't be available.
+  Future<bool> ensurePermission();
+
   void dispose();
+}
+
+/// Picks the real sensor on Android/iOS and the timer-driven fake
+/// elsewhere (Chrome/desktop dev targets have no pedometer).
+StepCounter createStepCounter() {
+  final hasPedometer = !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+  return hasPedometer ? PedometerStepCounter() : FakeStepCounter();
+}
+
+/// Platform pedometer — Android `TYPE_STEP_COUNTER` (steps since boot) /
+/// iOS `CMPedometer`. Because the Android value is counted by the sensor
+/// hub itself, steps taken while the screen is off are still reflected the
+/// next time an event arrives, even if the Dart side was throttled.
+class PedometerStepCounter implements StepCounter {
+  @override
+  Stream<int> get stepStream => Pedometer.stepCountStream
+      .map((event) => event.steps)
+      // A device without a step sensor errors the stream; the controller
+      // then keeps GPS-only distance instead of crashing the tour.
+      .handleError((Object _) {});
+
+  @override
+  Future<bool> ensurePermission() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return true;
+    final status = await Permission.activityRecognition.request();
+    return status.isGranted;
+  }
+
+  @override
+  void dispose() {}
 }
 
 /// Development stand-in — increments a cumulative counter on a timer so
@@ -44,6 +83,9 @@ class FakeStepCounter implements StepCounter {
 
   @override
   Stream<int> get stepStream => _controller.stream;
+
+  @override
+  Future<bool> ensurePermission() async => true;
 
   @override
   void dispose() {

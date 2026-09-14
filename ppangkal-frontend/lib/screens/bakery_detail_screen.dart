@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/api_exception.dart';
+import '../core/formatters.dart';
 import '../models/bakery.dart';
 import '../models/bread_item.dart';
 import '../services/bakery_service.dart';
+import '../services/naver_map_launcher.dart';
 import '../theme/app_theme.dart';
+import '../widgets/bread_detail_sheet.dart';
 import '../widgets/error_view.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/loading_view.dart';
+import '../widgets/network_photo.dart';
 import '../widgets/tour_info_section.dart';
 
 /// Bakery detail (`GET /bakeries/:id` + `GET /bakeries/:id/items` —
@@ -96,31 +100,121 @@ class _BasicInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return GlassCard(
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(bakery.name, style: textTheme.headlineSmall),
-          const SizedBox(height: AppSpacing.xs),
-          Text(bakery.address, style: textTheme.bodyMedium),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              if (bakery.rating != null) ...[
-                const Icon(Icons.star, size: 16),
-                const SizedBox(width: AppSpacing.xs),
-                Text(bakery.rating!.toStringAsFixed(1), style: textTheme.bodySmall),
-                const SizedBox(width: AppSpacing.md),
-              ],
-              Icon(bakery.isOpenNow ? Icons.check_circle_outline : Icons.cancel_outlined, size: 16),
-              const SizedBox(width: AppSpacing.xs),
-              Text(bakery.isOpenNow ? '영업 중' : '영업 종료', style: textTheme.bodySmall),
-            ],
+          if (bakery.photoUrl != null)
+            AspectRatio(
+              aspectRatio: 16 / 10,
+              child: NetworkPhoto(
+                url: bakery.photoUrl,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                placeholderIcon: Icons.storefront_outlined,
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: _basicInfo(context, textTheme),
           ),
-          if (bakery.openingHours != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text('영업시간 ${bakery.openingHours}', style: textTheme.bodySmall),
-          ],
         ],
+      ),
+    );
+  }
+
+  Widget _basicInfo(BuildContext context, TextTheme textTheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(bakery.name, style: textTheme.headlineSmall),
+        const SizedBox(height: AppSpacing.xs),
+        Text(bakery.address, style: textTheme.bodyMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            if (bakery.rating != null) ...[
+              const Icon(Icons.star, size: 16),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                bakery.rating!.toStringAsFixed(1) +
+                    (bakery.reviewCount != null
+                        ? ' · 리뷰 ${formatThousands(bakery.reviewCount!)}'
+                        : ''),
+                style: textTheme.bodySmall,
+              ),
+              const SizedBox(width: AppSpacing.md),
+            ],
+            Icon(
+              bakery.isOpenNow
+                  ? Icons.check_circle_outline
+                  : Icons.cancel_outlined,
+              size: 16,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              bakery.isOpenNow ? '영업 중' : '영업 종료',
+              style: textTheme.bodySmall,
+            ),
+          ],
+        ),
+        if (bakery.openingHours != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text('영업시간 ${bakery.openingHours}', style: textTheme.bodySmall),
+        ],
+        const SizedBox(height: AppSpacing.md),
+        OutlinedButton.icon(
+          onPressed: () async {
+            final opened = await NaverMapLauncher.walkTo(
+              latitude: bakery.latitude,
+              longitude: bakery.longitude,
+              name: bakery.name,
+            );
+            if (!opened && context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('네이버 지도를 열 수 없습니다.')),
+              );
+            }
+          },
+          icon: const Icon(Icons.directions_walk),
+          label: const Text('네이버 지도로 길찾기'),
+        ),
+      ],
+    );
+  }
+}
+
+class _MenuThumb extends StatelessWidget {
+  final BreadItem item;
+
+  const _MenuThumb({required this.item});
+
+  static const double _width = 120;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return InkWell(
+      onTap: () => showBreadDetailSheet(context, item),
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: _width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            NetworkPhoto(url: item.imageUrl, width: _width, height: 100),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              item.name,
+              style: textTheme.bodyMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text('${formatThousands(item.price)}원', style: textTheme.bodySmall),
+            CalorieLine(item: item, style: textTheme.bodySmall),
+          ],
+        ),
       ),
     );
   }
@@ -135,21 +229,42 @@ class _MenuPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final estimatedCount = items.where((i) => i.isCalorieEstimated).length;
+
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('빵 메뉴 (${items.length}종)', style: textTheme.titleMedium),
           const SizedBox(height: AppSpacing.sm),
-          for (final item in items)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-              child: Text('${item.name} · ${item.price}원 · ${item.calories}kcal'),
+          if (items.isEmpty)
+            Text('아직 등록된 메뉴 정보가 없어요.', style: textTheme.bodySmall)
+          else
+            SizedBox(
+              height: 176,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: items.length,
+                separatorBuilder: (_, _) =>
+                    const SizedBox(width: AppSpacing.sm),
+                itemBuilder: (context, i) => _MenuThumb(item: items[i]),
+              ),
             ),
-          const SizedBox(height: AppSpacing.sm),
+          if (estimatedCount > 0) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              estimatedCount == items.length
+                  ? '이 빵집은 칼로리를 공개하지 않아 전부 유사 제품 기준 추정치예요.'
+                  : '"추정" 표시된 칼로리는 유사 제품 기준 추정치예요.',
+              style: textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.md),
           FilledButton(
-            onPressed: items.isEmpty ? null : () => context.push('/bakeries/$bakeryId/menu'),
-            child: const Text('빵 메뉴 선택하기'),
+            onPressed: items.isEmpty
+                ? null
+                : () => context.push('/bakeries/$bakeryId/menu'),
+            child: const Text('빵 고르고 투어 시작하기'),
           ),
         ],
       ),
