@@ -36,15 +36,33 @@ class WeeklyBarChart extends StatelessWidget {
         final overGoal = dailyGoalCalories > 0 && net > dailyGoalCalories;
         final weekday = DateTime.parse(day.date).weekday; // 1=Mon..7=Sun
 
+        final barColor = overGoal ? colors.over : colors.safe;
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            SizedBox(
+              height: textTheme.labelSmall?.fontSize != null ? textTheme.labelSmall!.fontSize! * 1.6 : 18,
+              child: day.consumedCalories > 0
+                  ? Text('${day.consumedCalories}', style: textTheme.labelSmall)
+                  : null,
+            ),
+            // Fixed-height track so the chart keeps its shape on light days
+            // (bars are scaled against the goal, so most days are short).
             Container(
               width: 24,
-              height: (_maxBarHeight * ratio).clamp(4, _maxBarHeight),
+              height: _maxBarHeight,
+              alignment: Alignment.bottomCenter,
               decoration: BoxDecoration(
-                color: overGoal ? colors.over : colors.safe,
+                color: barColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
+              ),
+              child: Container(
+                height: (_maxBarHeight * ratio).clamp(day.consumedCalories > 0 ? 6 : 0, _maxBarHeight),
+                decoration: BoxDecoration(
+                  color: barColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.xs),

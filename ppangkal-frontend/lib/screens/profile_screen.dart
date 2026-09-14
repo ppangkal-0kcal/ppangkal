@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../models/activity_level.dart';
@@ -67,6 +68,32 @@ class ProfileScreen extends StatelessWidget {
                         const SizedBox(height: AppSpacing.md),
                         Text('활동 수준: ${user.activityLevel}', style: textTheme.bodyMedium),
                       ],
+                      const Divider(height: AppSpacing.xl),
+                      // 비밀번호 없는 MVP 로그인이라 이 ID가 곧 로그인 수단 —
+                      // 잃어버리면 다시 들어올 방법이 없으므로 복사할 수 있게 노출.
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('로그인 ID', style: textTheme.labelMedium),
+                                SelectableText(user.id, style: textTheme.bodyMedium),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'ID 복사',
+                            icon: const Icon(Icons.copy_outlined),
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: user.id));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('로그인 ID를 복사했어요.')),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

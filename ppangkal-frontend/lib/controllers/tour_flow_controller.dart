@@ -98,6 +98,14 @@ class TourFlowController extends ChangeNotifier {
   /// Fallback only, when there's no GPS fix to measure distance with.
   static const double _fallbackStrideLengthM = 0.7;
 
+  int _dataRevision = 0;
+
+  /// Bumps whenever something the server aggregates changes (a stop, a
+  /// food log, a completed tour). Screens that show server-side totals —
+  /// 홈 balance, 통계 — `select` this and refetch when it moves, since the
+  /// tab shell keeps them alive instead of rebuilding them.
+  int get dataRevision => _dataRevision;
+
   Tour? get tour => _tour;
   List<TourStop> get stops => List.unmodifiable(_stops);
   List<FoodLog> get foodLogs => List.unmodifiable(_foodLogs);
@@ -167,12 +175,15 @@ class TourFlowController extends ChangeNotifier {
   }
 
   Future<void> _startSensors() async {
-    await _stepCounter.ensurePermission();
+    // Unanswered permission prompts must not block the tour from starting —
+    // it just runs without that sensor (see the class doc's fallbacks).
+    const promptTimeout = Duration(seconds: 15);
+    await _stepCounter.ensurePermission().timeout(promptTimeout, onTimeout: () => false);
     _stepSubscription ??= _stepCounter.stepStream.listen(_onRawSteps);
 
     final source = _positionSource;
     if (source == null) return;
-    _gpsPermitted = await source.ensurePermission();
+    _gpsPermitted = await source.ensurePermission().timeout(promptTimeout, onTimeout: () => false);
     if (_gpsPermitted) {
       await _positionSubscription?.cancel();
       _positionSubscription = source.watch().listen(
@@ -224,6 +235,7 @@ class TourFlowController extends ChangeNotifier {
     );
     _stops.add(stop);
     _beginLeg();
+    _dataRevision++;
     notifyListeners();
     return stop;
   }
@@ -244,6 +256,7 @@ class TourFlowController extends ChangeNotifier {
       quantity: quantity,
     );
     _foodLogs.add(log);
+    _dataRevision++;
     notifyListeners();
     return log;
   }
@@ -261,6 +274,7 @@ class TourFlowController extends ChangeNotifier {
     final completed = await _tourService.completeTour(token, tour.id);
     _tour = completed;
     await _stopPositionTracking();
+    _dataRevision++;
     notifyListeners();
     return completed;
   }

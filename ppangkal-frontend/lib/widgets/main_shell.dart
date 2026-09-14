@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../theme/app_theme.dart';
 
 /// Bottom-tab shell for the 4 primary destinations (홈/빵집/통계/마이페이지).
 /// Each tab is a [StatefulShellRoute] branch, so switching tabs preserves
 /// that tab's own navigation stack instead of resetting it.
 ///
-/// Also lays down the app-wide background gradient ([AppBackground]) behind
-/// every tab: each tab screen is its own `Scaffold`, which paints an opaque
-/// `scaffoldBackgroundColor` by default — without overriding that to
-/// transparent for this subtree, the gradient would be fully hidden and
-/// `GlassCard`'s `BackdropFilter` would have nothing to blur.
+/// The brand gradient is painted per page (`BrandBackground`, applied in
+/// the router), not here — see that widget for why.
 class MainShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
@@ -19,21 +15,8 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final background = theme.extension<AppBackground>() ?? AppBackground.brand;
-
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: DecoratedBox(decoration: BoxDecoration(gradient: background.gradient)),
-          ),
-          Theme(
-            data: theme.copyWith(scaffoldBackgroundColor: Colors.transparent),
-            child: navigationShell,
-          ),
-        ],
-      ),
+      body: navigationShell,
       // 상단 콘텐츠와 시각적으로 분리되도록 위쪽 모서리만 둥글게 처리
       // (2026-09 디자인 가이드: rounded top corners).
       bottomNavigationBar: ClipRRect(

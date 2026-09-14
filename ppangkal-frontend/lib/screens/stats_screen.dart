@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../controllers/tour_flow_controller.dart';
 import '../core/api_exception.dart';
 import '../models/daily_stats.dart';
 import '../models/weekly_stats.dart';
@@ -25,11 +26,17 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   late Future<(DailyStats, WeeklyStats)> _future;
+  int? _loadedRevision;
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
+  /// Refetch after a stop/food log/tour completion — this tab stays alive
+  /// in the shell's IndexedStack, so loading once in initState would show
+  /// stale data. `select` is build-only in provider, hence checked here.
+  void _reloadIfStale(BuildContext context) {
+    final revision = context.select<TourFlowController, int>((c) => c.dataRevision);
+    if (revision != _loadedRevision) {
+      _loadedRevision = revision;
+      _load();
+    }
   }
 
   void _load() {
@@ -44,6 +51,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _reloadIfStale(context);
     return Scaffold(
       appBar: AppBar(title: const Text('통계')),
       body: Padding(

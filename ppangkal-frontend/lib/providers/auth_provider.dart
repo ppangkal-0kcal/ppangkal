@@ -59,7 +59,15 @@ class AuthProvider extends ChangeNotifier {
         activityLevel: activityLevel,
       );
       token = result.token;
-      user = result.user;
+      // The signup response carries only id/name/goal — refetch the full
+      // profile so weight (bakery walk-calorie estimates) and the 마이페이지
+      // fields aren't blank until the next app launch. If that refetch
+      // fails the account still exists, so fall back to the partial user.
+      try {
+        user = await _service.fetchMe(result.token);
+      } on ApiException {
+        user = result.user;
+      }
       status = AuthStatus.authenticated;
       notifyListeners();
       return true;

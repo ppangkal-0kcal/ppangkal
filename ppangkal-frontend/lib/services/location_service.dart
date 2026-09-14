@@ -51,19 +51,25 @@ class GeolocatorPositionSource implements PositionSource {
   @override
   Future<GeoSample?> current() async {
     try {
-      if (!await ensurePermission()) return null;
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 10),
-        ),
-      );
-      return _toSample(position);
+      // The timeout covers the permission prompt too — a browser prompt the
+      // user never answers would otherwise leave the bakery list spinning.
+      return await _currentWithPermission().timeout(const Duration(seconds: 15));
     } catch (_) {
       // Timeout or platform error — the bakery list falls back to the
       // city-center coordinate instead of blocking on GPS.
       return null;
     }
+  }
+
+  Future<GeoSample?> _currentWithPermission() async {
+    if (!await ensurePermission()) return null;
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.medium,
+        timeLimit: Duration(seconds: 10),
+      ),
+    );
+    return _toSample(position);
   }
 
   static LocationSettings _trackingSettings() {
