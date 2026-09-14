@@ -31,6 +31,9 @@ class Bakery {
   final SuggestedWalk? suggestedWalk;
   final TourInfo? tourInfo;
 
+  /// On-sale menu count — list response only (`bread_item_count`).
+  final int? breadItemCount;
+
   const Bakery({
     required this.id,
     required this.name,
@@ -47,6 +50,7 @@ class Bakery {
     this.estimatedWalkCalories,
     this.suggestedWalk,
     this.tourInfo,
+    this.breadItemCount,
   });
 
   factory Bakery.fromJson(Map<String, dynamic> json) => Bakery(
@@ -68,5 +72,6 @@ class Bakery {
             : null,
         tourInfo:
             json['tour_info'] != null ? TourInfo.fromJson(json['tour_info'] as Map<String, dynamic>) : null,
+        breadItemCount: json['bread_item_count'] as int?,
       );
 }

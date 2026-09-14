@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../core/formatters.dart';
 import '../models/bakery.dart';
 import '../theme/app_theme.dart';
 import 'glass_card.dart';
+import 'network_photo.dart';
 
 /// One row in the bakery list (`GET /bakeries` — FRONTEND_API_GUIDE.md §2
 /// steps 2~3). Only renders fields the list response actually has —
@@ -27,29 +29,45 @@ class BakeryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: Text(bakery.name, style: textTheme.titleMedium)),
-                if (bakery.walkRecommended == true) const _WalkRecommendedBadge(),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(bakery.address, style: textTheme.bodySmall),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                if (bakery.distanceM != null) ...[
-                  const Icon(Icons.directions_walk, size: 16),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text('${bakery.distanceM!.round()}m', style: textTheme.bodySmall),
-                  const SizedBox(width: AppSpacing.md),
-                ],
-                if (bakery.rating != null) ...[
-                  const Icon(Icons.star, size: 16),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(bakery.rating!.toStringAsFixed(1), style: textTheme.bodySmall),
-                  if (bakery.reviewCount != null)
-                    Text(' (${bakery.reviewCount})', style: textTheme.bodySmall),
-                ],
+                NetworkPhoto(url: bakery.photoUrl, width: 72, height: 72, placeholderIcon: Icons.storefront_outlined),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: Text(bakery.name, style: textTheme.titleMedium)),
+                          if (bakery.walkRecommended == true) const _WalkRecommendedBadge(),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(bakery.address, style: textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: AppSpacing.sm),
+                      Wrap(
+                        spacing: AppSpacing.md,
+                        runSpacing: AppSpacing.xs,
+                        children: [
+                          if (bakery.distanceM != null)
+                            _Meta(icon: Icons.directions_walk, text: formatDistance(bakery.distanceM!)),
+                          if (bakery.rating != null)
+                            _Meta(
+                              icon: Icons.star,
+                              text: bakery.rating!.toStringAsFixed(1) +
+                                  (bakery.reviewCount != null ? ' (${formatThousands(bakery.reviewCount!)})' : ''),
+                            ),
+                          if (bakery.breadItemCount != null)
+                            _Meta(
+                              icon: Icons.bakery_dining_outlined,
+                              text: bakery.breadItemCount! > 0 ? '메뉴 ${bakery.breadItemCount}종' : '메뉴 준비 중',
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
             if (bakery.walkRecommended == false && walk != null) ...[
@@ -63,6 +81,25 @@ class BakeryCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Meta extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _Meta({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16),
+        const SizedBox(width: AppSpacing.xs),
+        Text(text, style: Theme.of(context).textTheme.bodySmall),
+      ],
     );
   }
 }

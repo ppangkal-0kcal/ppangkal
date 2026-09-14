@@ -44,6 +44,8 @@ dependencies:
   url_launcher: ^6.3.2
   image_picker: ^1.2.3
   gal: ^2.3.3
+  flutter_naver_map: ^1.4.4
+  cached_network_image: ^4.0.0
 
 dev_dependencies:
   flutter_test:

@@ -125,14 +125,13 @@ Future<User> updateMe(String token, Map<String, dynamic> fields) async {
 
 ## 7. 플랫폼 관련 주의사항
 
-- **Android 실기기(USB)**: 폰에서 `http://localhost:4000`은 폰 자신을 가리키므로, PC에서
-  `adb reverse tcp:4000 tcp:4000`을 실행해둬야 폰의 앱이 PC 백엔드에 붙는다(에뮬레이터라면
-  대신 `10.0.2.2`를 쓰면 됨 — `core/api_config.dart` 주석 참고). USB가 재연결되면 이 설정이
-  풀릴 수 있어 매번 확인 필요.
+- **Android 실기기**: 절차는 `DEVICE_TESTING.md`, 실행은 `tool/run_on_device.ps1`. USB는
+  `adb reverse tcp:4000 tcp:4000` 후 localhost, Wi-Fi는 PC LAN IP를 `API_BASE_URL`로 넣는다
+  (에뮬레이터는 `10.0.2.2`). USB 재연결 시 reverse 설정이 풀린다.
 - **웹(Chrome)**: 백엔드 `src/app.ts`에 `cors()` 미들웨어를 열어뒀다(로컬 개발용, 모든
   origin 허용 — JWT Bearer 인증이라 쿠키 기반 세션이 없어서 안전). 그대로 유지하면 됨.
-- `core/api_config.dart`의 `apiBaseUrl`이 `http://localhost:4000/api`로 하드코딩돼 있다.
-  실제 배포/원격 서버로 붙일 땐 이 값을 바꿔야 한다.
+- `core/api_config.dart`의 `apiBaseUrl`은 `--dart-define=API_BASE_URL`로 바꾼다 (기본값
+  `http://localhost:4000/api`). 배포 서버도 코드 수정 없이 빌드 옵션으로 붙인다.
 
 ---
 
@@ -175,6 +174,6 @@ backend 세션에서 제안할 것.
 
 ## 10. 아직 없는 것
 
-- 빵집 목록 지도 핀 — 지도 SDK 미정 (논의 필요)
+- 네이버 지도 Client ID — NCP 콘솔 발급 필요 (없으면 지도 모드는 대체 목록, `DEVICE_TESTING.md` §0)
 - 투어 히스토리 — 백엔드에 투어 목록 API 없음
 - 실기기에서 확인 필요: 화면 꺼짐 상태 추적 지속, 네이버 지도 앱/웹 폴백 URL, 갤러리 저장

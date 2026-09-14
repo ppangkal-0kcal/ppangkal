@@ -39,7 +39,11 @@ Full service-layer ↔ endpoint mapping is in `API_INTEGRATION.md` — read that
 screen, it's the actual up-to-date map of what's built vs. what a new screen still needs to call.
 
 Dependencies added beyond the Flutter defaults: `http`, `provider`, `flutter_secure_storage`,
-`go_router`, `geolocator`, `pedometer`, `permission_handler`, `url_launcher`, `image_picker`, `gal`.
+`go_router`, `geolocator`, `pedometer`, `permission_handler`, `url_launcher`, `image_picker`, `gal`,
+`flutter_naver_map`, `cached_network_image`. Build-time config (`API_BASE_URL`,
+`NAVER_MAP_CLIENT_ID`) comes from `--dart-define` / `dart_defines.json` (gitignored) — real-device
+steps are in `DEVICE_TESTING.md` and `tool/run_on_device.ps1`. Photos use `NetworkPhoto`
+(disk-cached on mobile; on web it falls back to `<img>` because the R2 bucket sends no CORS headers).
 `permission_handler_android` is pinned to 13.0.1 via `dependency_overrides` — 14.x needs
 compileSdk 37, which AGP 9.0.1 can't resolve (the SDK installs as `android-37.0`, AGP looks for
 `android-37`). Remove the override once AGP is upgraded. Flutter 3.44.8 stable, Dart 3.12.2
@@ -126,11 +130,14 @@ without derailing a diet/calorie goal.
 - GPS speed filter: only count movement ≤20km/h as walking (bike/bus speeds excluded); aggregate
   distance/duration/steps client-side and report the summary via `POST /api/tours/:tourId/stops`.
 - Naver Map handoff via `url_launcher` deep link, with `m.map.naver.com` web fallback if the app
-  isn't installed. **No embedded map SDK, no server-side routing** — this is a deliberate
-  architecture decision (`tech-stack.md` §5), not a gap.
+  isn't installed. **Turn-by-turn directions stay in the external app, no server-side routing**
+  (`tech-stack.md` §5).
 - Consumption photos: camera → device gallery only. Never uploaded; `food_logs` has no photo field.
-- Map pin rendering for the bakery list screen is **still undecided** — backend only returns raw
-  lat/lng. Don't pick a map SDK unilaterally; flag it for discussion first.
+- Bakery map pins: **decided 2026-09-14 — Naver Maps SDK (`flutter_naver_map`)**, pins only, no
+  routing. Needs an NCP "Dynamic Map" Client ID passed as `--dart-define=NAVER_MAP_CLIENT_ID`
+  (`lib/core/api_config.dart`); `lib/services/naver_map_setup.dart` tracks whether auth actually
+  succeeded and `BakeryMapView` falls back to a Naver-app handoff list on web/desktop, without a
+  key, or on auth failure. The SDK doesn't support web — keep that fallback working.
 
 ## Toolchain status (verify with `flutter doctor -v` if stale)
 

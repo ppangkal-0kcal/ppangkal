@@ -6,9 +6,12 @@ import 'controllers/tour_flow_controller.dart';
 import 'providers/auth_provider.dart';
 import 'router/app_router.dart';
 import 'services/location_service.dart';
+import 'services/naver_map_setup.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NaverMapSetup.init();
   runApp(const PpangkalApp());
 }
 
