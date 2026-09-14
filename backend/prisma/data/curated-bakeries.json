@@ -1,0 +1,2282 @@
+{
+  "bakeries": [
+    {
+      "id": "bak_ovenbrothers",
+      "name": "오븐 브라더스 목동본점",
+      "latitude": 36.3323506696544,
+      "longitude": 127.409241360074,
+      "address": "대전 중구 목동로 13 1층",
+      "rating": 4.54,
+      "review_count": 1223,
+      "photo": "bak_ovenbrothers/entrance.jpg",
+      "source_document": "빵집_데이터_정리__오븐_브라더스_.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_ovenbrothers_덩드레스 와일드 블루베리",
+          "name": "덩드레스 와일드 블루베리",
+          "category": "디저트",
+          "price": 5800,
+          "calories": 290,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item01.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_덩드레스 제주말차",
+          "name": "덩드레스 제주말차",
+          "category": "디저트",
+          "price": 5800,
+          "calories": 280,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item02.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_덩드레스 다크초코",
+          "name": "덩드레스 다크초코",
+          "category": "디저트",
+          "price": 5800,
+          "calories": 310,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item03.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_구겔호프",
+          "name": "구겔호프",
+          "category": "빵",
+          "price": 5800,
+          "calories": 450,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item04.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_아몬드 크림 크루아상",
+          "name": "아몬드 크림 크루아상",
+          "category": "빵",
+          "price": 5200,
+          "calories": 470,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item05.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_쇼송 오 뽐므 (사과파이)",
+          "name": "쇼송 오 뽐므 (사과파이)",
+          "category": "빵",
+          "price": 5800,
+          "calories": 400,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item06.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_밀크버터스콘",
+          "name": "밀크버터스콘",
+          "category": "빵",
+          "price": 4000,
+          "calories": 350,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item07.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_까눌레",
+          "name": "까눌레",
+          "category": "디저트",
+          "price": 3000,
+          "calories": 180,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item08.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_에그타르트",
+          "name": "에그타르트",
+          "category": "디저트",
+          "price": 4000,
+          "calories": 250,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item09.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_파리마브르케이크",
+          "name": "파리마브르케이크",
+          "category": "디저트",
+          "price": 4800,
+          "calories": 390,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item10.jpg"
+        },
+        {
+          "id": "itm_bak_ovenbrothers_리얼 초코 브라우니",
+          "name": "리얼 초코 브라우니",
+          "category": "디저트",
+          "price": 5400,
+          "calories": 430,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_ovenbrothers/item11.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_californiabakery",
+      "name": "캘리포니아베이커리카페",
+      "latitude": 36.3496408,
+      "longitude": 127.3873775,
+      "address": "대전 서구 둔산남로91번길 13 (둔산동, 호텔 디 에디션) 1~2층",
+      "rating": 4.1,
+      "review_count": 381,
+      "photo": "bak_californiabakery/entrance.jpg",
+      "source_document": "빵집_데이터_정리__캘리포니아베이커리카페_.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_californiabakery_명란 베이글",
+          "name": "명란 베이글",
+          "category": "빵",
+          "price": 5800,
+          "calories": 340,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item01.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_말차 초코 베이글",
+          "name": "말차 초코 베이글",
+          "category": "빵",
+          "price": 5500,
+          "calories": 360,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item02.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_소금 치아바타",
+          "name": "소금 치아바타",
+          "category": "빵",
+          "price": 5300,
+          "calories": 300,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item03.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_초코바게트",
+          "name": "초코바게트",
+          "category": "빵",
+          "price": 6500,
+          "calories": 480,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item04.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_겉바속촉 소금빵",
+          "name": "겉바속촉 소금빵",
+          "category": "빵",
+          "price": 3300,
+          "calories": 320,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item05.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_에그 소금빵",
+          "name": "에그 소금빵",
+          "category": "빵",
+          "price": 5500,
+          "calories": 380,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item06.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_찰떡 소보로 앙금빵",
+          "name": "찰떡 소보로 앙금빵",
+          "category": "빵",
+          "price": 3200,
+          "calories": 340,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item07.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_옥수수팡팡",
+          "name": "옥수수팡팡",
+          "category": "빵",
+          "price": 3200,
+          "calories": 300,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item08.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_두바이 쫀득 쿠키",
+          "name": "두바이 쫀득 쿠키",
+          "category": "디저트",
+          "price": 6500,
+          "calories": 420,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item09.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_허니허니 (카스테라)",
+          "name": "허니허니 (카스테라)",
+          "category": "디저트",
+          "price": 4800,
+          "calories": 330,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item10.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_쑥설기",
+          "name": "쑥설기",
+          "category": "디저트",
+          "price": 4500,
+          "calories": 260,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item11.jpg"
+        },
+        {
+          "id": "itm_bak_californiabakery_버터떡 (4입)",
+          "name": "버터떡 (4입)",
+          "category": "디저트",
+          "price": 7800,
+          "calories": 620,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_californiabakery/item12.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_harehare_dunsan",
+      "name": "하레하레 둔산점",
+      "latitude": 36.3514651,
+      "longitude": 127.3950449,
+      "address": "대전 서구 둔산로 155 (둔산동)",
+      "rating": 4.2,
+      "review_count": 653,
+      "photo": "bak_harehare_dunsan/entrance.jpg",
+      "source_document": "빵집_데이터_정리__하레하레_둔산점_.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_harehare_dunsan_순수망고롤 (조각)",
+          "name": "순수망고롤 (조각)",
+          "category": "디저트",
+          "price": 4900,
+          "calories": 320,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item01.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_왁뿌망고소금빵",
+          "name": "왁뿌망고소금빵",
+          "category": "빵",
+          "price": 7800,
+          "calories": 450,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item02.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_우유폭탄",
+          "name": "우유폭탄",
+          "category": "디저트",
+          "price": 3500,
+          "calories": 380,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item03.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_쪽파프리글",
+          "name": "쪽파프리글",
+          "category": "빵",
+          "price": 4600,
+          "calories": 420,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item04.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_뿌링소금빵",
+          "name": "뿌링소금빵",
+          "category": "빵",
+          "price": 4500,
+          "calories": 430,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item05.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_리얼감자빵",
+          "name": "리얼감자빵",
+          "category": "빵",
+          "price": 2900,
+          "calories": 260,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item06.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_메론크림빵",
+          "name": "메론크림빵",
+          "category": "빵",
+          "price": 3200,
+          "calories": 350,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item07.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_콘치즈빵",
+          "name": "콘치즈빵",
+          "category": "빵",
+          "price": 2800,
+          "calories": 320,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item08.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_마시멜로우속갸또",
+          "name": "마시멜로우속갸또",
+          "category": "디저트",
+          "price": 3800,
+          "calories": 300,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item09.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_못난이녹차인절미",
+          "name": "못난이녹차인절미",
+          "category": "디저트",
+          "price": 4300,
+          "calories": 400,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item10.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_단짠단짠 양파빵",
+          "name": "단짠단짠 양파빵",
+          "category": "빵",
+          "price": 5200,
+          "calories": 480,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item11.jpg"
+        },
+        {
+          "id": "itm_bak_harehare_dunsan_초코 늑대빵",
+          "name": "초코 늑대빵",
+          "category": "빵",
+          "price": 2800,
+          "calories": 300,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_harehare_dunsan/item12.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_greenbakery",
+      "name": "그린베이커리",
+      "latitude": 36.427744,
+      "longitude": 127.3896341,
+      "address": "대전광역시 유성구 테크노4로 80-7 1층 101호",
+      "rating": 4.5,
+      "review_count": 128,
+      "photo": "bak_greenbakery/entrance.jpg",
+      "source_document": "빵집_데이터_정리_그린베이커리 (1).docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_greenbakery_소금빵",
+          "name": "소금빵",
+          "category": "빵",
+          "price": 3200,
+          "calories": 300,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_greenbakery/item01.jpg"
+        },
+        {
+          "id": "itm_bak_greenbakery_에그타르트",
+          "name": "에그타르트",
+          "category": "디저트",
+          "price": 3500,
+          "calories": 200,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_greenbakery/item02.jpg"
+        },
+        {
+          "id": "itm_bak_greenbakery_오리지널 크루아상",
+          "name": "오리지널 크루아상",
+          "category": "빵",
+          "price": 3500,
+          "calories": 280,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_greenbakery/item03.jpg"
+        },
+        {
+          "id": "itm_bak_greenbakery_퀸 아망",
+          "name": "퀸 아망",
+          "category": "빵",
+          "price": 3800,
+          "calories": 380,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_greenbakery/item04.jpg"
+        },
+        {
+          "id": "itm_bak_greenbakery_인절미 크루아상",
+          "name": "인절미 크루아상",
+          "category": "빵",
+          "price": 5400,
+          "calories": 420,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_greenbakery/item05.jpg"
+        },
+        {
+          "id": "itm_bak_greenbakery_사워도우 바게트",
+          "name": "사워도우 바게트",
+          "category": "빵",
+          "price": 4300,
+          "calories": 600,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_greenbakery/item06.jpg"
+        },
+        {
+          "id": "itm_bak_greenbakery_초코 슈",
+          "name": "초코 슈",
+          "category": "디저트",
+          "price": 4800,
+          "calories": 380,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": null
+        },
+        {
+          "id": "itm_bak_greenbakery_바닐라 슈",
+          "name": "바닐라 슈",
+          "category": "디저트",
+          "price": 4000,
+          "calories": 320,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": null
+        },
+        {
+          "id": "itm_bak_greenbakery_말차 슈",
+          "name": "말차 슈",
+          "category": "디저트",
+          "price": 4500,
+          "calories": 350,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": null
+        },
+        {
+          "id": "itm_bak_greenbakery_티라미스 슈",
+          "name": "티라미스 슈",
+          "category": "디저트",
+          "price": 4800,
+          "calories": 370,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": null
+        }
+      ]
+    },
+    {
+      "id": "bak_tourapi_2899345",
+      "name": "꾸드뱅 베이커리 하우스",
+      "latitude": 36.3507369032586,
+      "longitude": 127.379816289382,
+      "address": "대전 서구 둔산남로9번길 71 1층",
+      "rating": 4.2,
+      "review_count": 488,
+      "photo": "bak_tourapi_2899345/entrance.jpg",
+      "source_document": "빵집_데이터_정리_꾸드뱅_베이커리_하우스.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_tourapi_2899345_퀸아망 샌드",
+          "name": "퀸아망 샌드",
+          "category": "빵",
+          "price": 5400,
+          "calories": 580,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_tourapi_2899345/item01.jpg"
+        },
+        {
+          "id": "itm_bak_tourapi_2899345_두바이 더티초코",
+          "name": "두바이 더티초코",
+          "category": "빵",
+          "price": 7300,
+          "calories": 580,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_tourapi_2899345/item02.jpg"
+        },
+        {
+          "id": "itm_bak_tourapi_2899345_마롱밤파이/찹쌀곶감파이",
+          "name": "마롱밤파이/찹쌀곶감파이",
+          "category": "디저트",
+          "price": 4500,
+          "calories": 400,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_tourapi_2899345/item03.jpg"
+        },
+        {
+          "id": "itm_bak_tourapi_2899345_마쉬룸 비프 샌드위치",
+          "name": "마쉬룸 비프 샌드위치",
+          "category": "빵",
+          "price": 5800,
+          "calories": 500,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_tourapi_2899345/item04.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_namusangja",
+      "name": "나무상자",
+      "latitude": 36.3511327431453,
+      "longitude": 127.370821731126,
+      "address": "대전 서구 계룡로394번길 14-18 1층",
+      "rating": 5.0,
+      "review_count": 20,
+      "photo": "bak_namusangja/entrance.jpg",
+      "source_document": "빵집_데이터_정리_나무상자.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_namusangja_건강 한끼 포카치아",
+          "name": "건강 한끼 포카치아",
+          "category": "빵",
+          "price": 5700,
+          "calories": 330,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_namusangja/item01.jpg"
+        },
+        {
+          "id": "itm_bak_namusangja_단호박 크림치즈빵",
+          "name": "단호박 크림치즈빵",
+          "category": "빵",
+          "price": 3800,
+          "calories": 340,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_namusangja/item02.jpg"
+        },
+        {
+          "id": "itm_bak_namusangja_바람 머금은 무화과깜파뉴",
+          "name": "바람 머금은 무화과깜파뉴",
+          "category": "빵",
+          "price": 6400,
+          "calories": 290,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_namusangja/item03.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_dearose",
+      "name": "데 아로즈",
+      "latitude": 36.3517410985805,
+      "longitude": 127.372308760495,
+      "address": "대전 서구 계룡로407번길 27 데 아로즈",
+      "rating": 4.9,
+      "review_count": 11,
+      "photo": "bak_dearose/entrance.jpg",
+      "source_document": "빵집_데이터_정리_데_아로즈.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_dearose_솔티드 카라멜 휘낭시에",
+          "name": "솔티드 카라멜 휘낭시에",
+          "category": "디저트",
+          "price": 3400,
+          "calories": 230,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_dearose/item01.jpg"
+        },
+        {
+          "id": "itm_bak_dearose_누텔라 헤이즐넛 휘낭시에",
+          "name": "누텔라 헤이즐넛 휘낭시에",
+          "category": "디저트",
+          "price": 3400,
+          "calories": 250,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_dearose/item02.jpg"
+        },
+        {
+          "id": "itm_bak_dearose_메이플 피칸",
+          "name": "메이플 피칸",
+          "category": "빵",
+          "price": 3400,
+          "calories": 250,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_dearose/item03.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_denhaag",
+      "name": "덴하그 (Denhaag)",
+      "latitude": 36.362077908065,
+      "longitude": 127.343149050423,
+      "address": "대전 유성구 대학로81번길 32-11 2층",
+      "rating": 4.7,
+      "review_count": null,
+      "photo": "bak_denhaag/entrance.jpg",
+      "source_document": "빵집_데이터_정리_덴하그.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_denhaag_퍼피의 집",
+          "name": "퍼피의 집",
+          "category": "디저트",
+          "price": 6800,
+          "calories": 420,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_denhaag/item01.jpg"
+        },
+        {
+          "id": "itm_bak_denhaag_블랙페피",
+          "name": "블랙페피",
+          "category": "디저트",
+          "price": 7000,
+          "calories": 480,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_denhaag/item02.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_lorone",
+      "name": "로로네베이커리",
+      "latitude": 36.3249042644197,
+      "longitude": 127.423260626735,
+      "address": "대전 중구 중교로 30 승촌빌딩 1층",
+      "rating": 4.68,
+      "review_count": 33,
+      "photo": "bak_lorone/entrance.jpg",
+      "source_document": "빵집_데이터_정리_로로네베이커리.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_lorone_바질토마토",
+          "name": "바질토마토",
+          "category": "빵",
+          "price": 6200,
+          "calories": 380,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item01.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_공주알밤식빵",
+          "name": "공주알밤식빵",
+          "category": "빵",
+          "price": 7000,
+          "calories": 400,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item02.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_팥빵",
+          "name": "팥빵",
+          "category": "빵",
+          "price": 2000,
+          "calories": 260,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item03.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_모카번",
+          "name": "모카번",
+          "category": "빵",
+          "price": 3200,
+          "calories": 380,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item04.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_소세지롤",
+          "name": "소세지롤",
+          "category": "디저트",
+          "price": 4200,
+          "calories": 400,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item05.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_치즈포테이토고로케",
+          "name": "치즈포테이토고로케",
+          "category": "빵",
+          "price": 4200,
+          "calories": 290,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item06.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_소금빵",
+          "name": "소금빵",
+          "category": "빵",
+          "price": 2700,
+          "calories": 300,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item07.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_크로와상",
+          "name": "크로와상",
+          "category": "빵",
+          "price": 3500,
+          "calories": 250,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item08.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_만겹크로와상",
+          "name": "만겹크로와상",
+          "category": "빵",
+          "price": 7000,
+          "calories": 340,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item09.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_퀸아망",
+          "name": "퀸아망",
+          "category": "빵",
+          "price": 4500,
+          "calories": 350,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item10.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_뺑스위스",
+          "name": "뺑스위스",
+          "category": "빵",
+          "price": 5000,
+          "calories": 350,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item11.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_오로지초코",
+          "name": "오로지초코",
+          "category": "빵",
+          "price": 5200,
+          "calories": 370,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item12.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_뺑애플",
+          "name": "뺑애플",
+          "category": "빵",
+          "price": 5000,
+          "calories": 340,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item13.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_슈크림크로와상",
+          "name": "슈크림크로와상",
+          "category": "디저트",
+          "price": 4300,
+          "calories": 340,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item14.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_쇼콜라 디플로마트",
+          "name": "쇼콜라 디플로마트",
+          "category": "빵",
+          "price": 5200,
+          "calories": 390,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item15.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_흑임자크림",
+          "name": "흑임자크림",
+          "category": "빵",
+          "price": 5200,
+          "calories": 390,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item16.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_체리퐁당",
+          "name": "체리퐁당",
+          "category": "빵",
+          "price": 5200,
+          "calories": 390,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item17.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_바닐라까눌레",
+          "name": "바닐라까눌레",
+          "category": "디저트",
+          "price": 2500,
+          "calories": 190,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item18.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_페레로 매직큐브",
+          "name": "페레로 매직큐브",
+          "category": "빵",
+          "price": 5500,
+          "calories": 380,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item19.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_피스타치오크림",
+          "name": "피스타치오크림",
+          "category": "빵",
+          "price": 6200,
+          "calories": 390,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item20.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_갸또쇼콜라",
+          "name": "갸또쇼콜라",
+          "category": "빵",
+          "price": 6800,
+          "calories": 300,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item21.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_갈레트 브루통 – 솔티드 발로나",
+          "name": "갈레트 브루통 – 솔티드 발로나",
+          "category": "빵",
+          "price": 2000,
+          "calories": 300,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item22.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_갈레트 브루통 - 플레인",
+          "name": "갈레트 브루통 - 플레인",
+          "category": "빵",
+          "price": 2000,
+          "calories": 300,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item23.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_화이트롤",
+          "name": "화이트롤",
+          "category": "디저트",
+          "price": 6900,
+          "calories": 220,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item24.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_오렌지 휘낭시에",
+          "name": "오렌지 휘낭시에",
+          "category": "디저트",
+          "price": 2100,
+          "calories": 190,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item25.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_쇼콜라 휘낭시에",
+          "name": "쇼콜라 휘낭시에",
+          "category": "디저트",
+          "price": 2300,
+          "calories": 200,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item26.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_무화과 휘낭시에",
+          "name": "무화과 휘낭시에",
+          "category": "디저트",
+          "price": 2100,
+          "calories": 200,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item27.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_황치즈 휘낭시에",
+          "name": "황치즈 휘낭시에",
+          "category": "디저트",
+          "price": 2100,
+          "calories": 200,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item28.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_휘낭시에",
+          "name": "휘낭시에",
+          "category": "디저트",
+          "price": 2200,
+          "calories": 190,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item29.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_맘모스",
+          "name": "맘모스",
+          "category": "빵",
+          "price": 5000,
+          "calories": 650,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item30.jpg"
+        },
+        {
+          "id": "itm_bak_lorone_빨미까레",
+          "name": "빨미까레",
+          "category": "빵",
+          "price": 4800,
+          "calories": 230,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_lorone/item31.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_mongsim",
+      "name": "몽심 본점",
+      "latitude": 36.3518238,
+      "longitude": 127.4249594,
+      "address": "대전광역시 대덕구 한남로38번길 28 1층(지번: 대덕구 오정동 175-45)",
+      "rating": 4.4,
+      "review_count": 36,
+      "photo": "bak_mongsim/entrance.jpg",
+      "source_document": "빵집_데이터_정리_몽심본점 (1).docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_mongsim_발로나초콜릿 휘낭시에",
+          "name": "발로나초콜릿 휘낭시에",
+          "category": "디저트",
+          "price": 4000,
+          "calories": 260,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_mongsim/item01.jpg"
+        },
+        {
+          "id": "itm_bak_mongsim_클래식버터 휘낭시에",
+          "name": "클래식버터 휘낭시에",
+          "category": "디저트",
+          "price": 3500,
+          "calories": 240,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_mongsim/item02.jpg"
+        },
+        {
+          "id": "itm_bak_mongsim_황치즈 휘낭시에",
+          "name": "황치즈 휘낭시에",
+          "category": "디저트",
+          "price": 4500,
+          "calories": 270,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_mongsim/item03.jpg"
+        },
+        {
+          "id": "itm_bak_mongsim_누네띠네 휘낭시에",
+          "name": "누네띠네 휘낭시에",
+          "category": "디저트",
+          "price": 3300,
+          "calories": 250,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_mongsim/item04.jpg"
+        },
+        {
+          "id": "itm_bak_mongsim_하우스초콜릿 마들렌",
+          "name": "하우스초콜릿 마들렌",
+          "category": "디저트",
+          "price": 3000,
+          "calories": 220,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_mongsim/item05.jpg"
+        },
+        {
+          "id": "itm_bak_mongsim_흑임자 마들렌",
+          "name": "흑임자 마들렌",
+          "category": "디저트",
+          "price": 2500,
+          "calories": 210,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영",
+          "image": "bak_mongsim/item06.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_sungsimdang",
+      "name": "성심당 본점",
+      "latitude": 36.3277442039027,
+      "longitude": 127.427245809564,
+      "address": "대전 중구 대종로480번길 15",
+      "rating": 4.52,
+      "review_count": 18392,
+      "photo": "bak_sungsimdang/entrance.jpg",
+      "source_document": "빵집_데이터_정리_성심당본점.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_sungsimdang_초코찰빵",
+          "name": "초코찰빵",
+          "category": "빵",
+          "price": 2300,
+          "calories": 150,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item01.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_티베리브레드",
+          "name": "티베리브레드",
+          "category": "빵",
+          "price": 3500,
+          "calories": 330,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item02.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_로쏘블러쉬",
+          "name": "로쏘블러쉬",
+          "category": "빵",
+          "price": 4800,
+          "calories": 380,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item03.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_플레인크로와상",
+          "name": "플레인크로와상",
+          "category": "빵",
+          "price": 2800,
+          "calories": 230,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item04.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_아몬드 크로와상",
+          "name": "아몬드 크로와상",
+          "category": "빵",
+          "price": 3500,
+          "calories": 320,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item05.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_이탈리안 살시차",
+          "name": "이탈리안 살시차",
+          "category": "빵",
+          "price": 4500,
+          "calories": 440,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item06.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_썬셋폴",
+          "name": "썬셋폴",
+          "category": "빵",
+          "price": 4500,
+          "calories": 420,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item07.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_토네이도 쏘옥 단짠",
+          "name": "토네이도 쏘옥 단짠",
+          "category": "빵",
+          "price": 3500,
+          "calories": 420,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item08.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_공주알밤식빵",
+          "name": "공주알밤식빵",
+          "category": "빵",
+          "price": 4000,
+          "calories": 1100,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item09.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_회오리 소세지",
+          "name": "회오리 소세지",
+          "category": "빵",
+          "price": 3800,
+          "calories": 450,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item10.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_볼케이노",
+          "name": "볼케이노",
+          "category": "빵",
+          "price": 3800,
+          "calories": 395,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item11.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_치즈 바질 바게트",
+          "name": "치즈 바질 바게트",
+          "category": "빵",
+          "price": 4500,
+          "calories": 420,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item12.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_초코팡오레",
+          "name": "초코팡오레",
+          "category": "빵",
+          "price": 2800,
+          "calories": 390,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item13.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_팡오레",
+          "name": "팡오레",
+          "category": "빵",
+          "price": 2000,
+          "calories": 318,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item14.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_반할번",
+          "name": "반할번",
+          "category": "빵",
+          "price": 2500,
+          "calories": 270,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item15.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_월넛브레드",
+          "name": "월넛브레드",
+          "category": "빵",
+          "price": 4000,
+          "calories": 366,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item16.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_오징어먹물방망이",
+          "name": "오징어먹물방망이",
+          "category": "빵",
+          "price": 3300,
+          "calories": 295,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item17.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_카카오순정",
+          "name": "카카오순정",
+          "category": "빵",
+          "price": 3000,
+          "calories": 327,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item18.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_초코폭탄",
+          "name": "초코폭탄",
+          "category": "빵",
+          "price": 4500,
+          "calories": 400,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item19.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_모닝빵",
+          "name": "모닝빵",
+          "category": "빵",
+          "price": 3000,
+          "calories": 110,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item20.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_어니언 브레드",
+          "name": "어니언 브레드",
+          "category": "빵",
+          "price": 4500,
+          "calories": 320,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item21.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_블랙까망베르",
+          "name": "블랙까망베르",
+          "category": "빵",
+          "price": 3800,
+          "calories": 350,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item22.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_미스터홍",
+          "name": "미스터홍",
+          "category": "빵",
+          "price": 2800,
+          "calories": 343,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item23.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_감자 치아바타",
+          "name": "감자 치아바타",
+          "category": "빵",
+          "price": 3500,
+          "calories": 330,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item24.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_노아레즌",
+          "name": "노아레즌",
+          "category": "빵",
+          "price": 7000,
+          "calories": 380,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item25.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_볼콘50",
+          "name": "볼콘50",
+          "category": "빵",
+          "price": 6000,
+          "calories": 600,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item26.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_올리브 치아바타",
+          "name": "올리브 치아바타",
+          "category": "빵",
+          "price": 3500,
+          "calories": 400,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item27.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_치아바타",
+          "name": "치아바타",
+          "category": "빵",
+          "price": 3500,
+          "calories": 260,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item28.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_맷돌로 갈은 통밀빵",
+          "name": "맷돌로 갈은 통밀빵",
+          "category": "빵",
+          "price": 4500,
+          "calories": 240,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item29.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_통밀메밀쿠론",
+          "name": "통밀메밀쿠론",
+          "category": "빵",
+          "price": 7000,
+          "calories": 300,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item30.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_보약브롯",
+          "name": "보약브롯",
+          "category": "빵",
+          "price": 4500,
+          "calories": 750,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item31.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_후르츠브롯",
+          "name": "후르츠브롯",
+          "category": "빵",
+          "price": 5000,
+          "calories": 900,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item32.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_소금빵",
+          "name": "소금빵",
+          "category": "빵",
+          "price": 1500,
+          "calories": 260,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item33.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_무화과그늘아래",
+          "name": "무화과그늘아래",
+          "category": "빵",
+          "price": 3000,
+          "calories": 260,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item34.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_소금크로와상",
+          "name": "소금크로와상",
+          "category": "빵",
+          "price": 1800,
+          "calories": 200,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item35.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_호밀사워브레드",
+          "name": "호밀사워브레드",
+          "category": "빵",
+          "price": 7000,
+          "calories": 1000,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item36.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_S브레드",
+          "name": "S브레드",
+          "category": "빵",
+          "price": 3000,
+          "calories": 214,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item37.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_레드와인빵",
+          "name": "레드와인빵",
+          "category": "빵",
+          "price": 4500,
+          "calories": 550,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item38.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_62호밀브롯",
+          "name": "62호밀브롯",
+          "category": "빵",
+          "price": 7000,
+          "calories": 1000,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item41.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_호밀 샤워브레드",
+          "name": "호밀 샤워브레드",
+          "category": "빵",
+          "price": 7000,
+          "calories": 1000,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item42.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_퀸아망",
+          "name": "퀸아망",
+          "category": "빵",
+          "price": 3300,
+          "calories": 380,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item43.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_빵오쇼콜라",
+          "name": "빵오쇼콜라",
+          "category": "빵",
+          "price": 3000,
+          "calories": 280,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item44.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_후랑보아즈쇼콜라",
+          "name": "후랑보아즈쇼콜라",
+          "category": "빵",
+          "price": 3500,
+          "calories": 320,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item45.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_해바라기",
+          "name": "해바라기",
+          "category": "빵",
+          "price": 2000,
+          "calories": 210,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item46.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_스테이크빵",
+          "name": "스테이크빵",
+          "category": "빵",
+          "price": 2300,
+          "calories": 290,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item47.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_벌집속에 꿀",
+          "name": "벌집속에 꿀",
+          "category": "빵",
+          "price": 3000,
+          "calories": 310,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item48.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_콘프렌즈",
+          "name": "콘프렌즈",
+          "category": "빵",
+          "price": 2500,
+          "calories": 219,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item49.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_망고패션",
+          "name": "망고패션",
+          "category": "빵",
+          "price": 2500,
+          "calories": 260,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item50.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_빅매치",
+          "name": "빅매치",
+          "category": "빵",
+          "price": 2300,
+          "calories": 345,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item51.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_마라米고로게",
+          "name": "마라米고로게",
+          "category": "빵",
+          "price": 3000,
+          "calories": 212,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item52.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_찹쌀주먹밥",
+          "name": "찹쌀주먹밥",
+          "category": "빵",
+          "price": 2300,
+          "calories": 230,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item53.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_참치고로케",
+          "name": "참치고로케",
+          "category": "빵",
+          "price": 2500,
+          "calories": 220,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item54.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_야채고로케",
+          "name": "야채고로케",
+          "category": "빵",
+          "price": 2300,
+          "calories": 220,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item55.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_우유고로케",
+          "name": "우유고로케",
+          "category": "빵",
+          "price": 2300,
+          "calories": 248,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item56.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_김치찹쌀주먹밥",
+          "name": "김치찹쌀주먹밥",
+          "category": "빵",
+          "price": 2300,
+          "calories": 250,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item57.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_키다리트위스트",
+          "name": "키다리트위스트",
+          "category": "빵",
+          "price": 3000,
+          "calories": 320,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item58.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_판타롱 부추빵",
+          "name": "판타롱 부추빵",
+          "category": "빵",
+          "price": 2000,
+          "calories": 250,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item59.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_튀소구마",
+          "name": "튀소구마",
+          "category": "빵",
+          "price": 1700,
+          "calories": 343,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item60.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_튀김소보로",
+          "name": "튀김소보로",
+          "category": "빵",
+          "price": 1700,
+          "calories": 343,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item61.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_단팥빵",
+          "name": "단팥빵",
+          "category": "빵",
+          "price": 1700,
+          "calories": 252,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item62.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_소보로",
+          "name": "소보로",
+          "category": "빵",
+          "price": 1300,
+          "calories": 190,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item63.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_슈크림빵",
+          "name": "슈크림빵",
+          "category": "디저트",
+          "price": 2000,
+          "calories": 221,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item64.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_아몬드 크림빵",
+          "name": "아몬드 크림빵",
+          "category": "빵",
+          "price": 2000,
+          "calories": 260,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item65.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_치즈퐁듀",
+          "name": "치즈퐁듀",
+          "category": "빵",
+          "price": 1500,
+          "calories": 358,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item66.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_빵도넛",
+          "name": "빵도넛",
+          "category": "빵",
+          "price": 1700,
+          "calories": 280,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item68.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_보름달",
+          "name": "보름달",
+          "category": "빵",
+          "price": 2800,
+          "calories": 270,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_sungsimdang/item69.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_보문산 메아리",
+          "name": "보문산 메아리",
+          "category": "빵",
+          "price": 6000,
+          "calories": 257,
+          "source_grade": "B",
+          "source_note": "사진: AI 생성",
+          "image": "bak_sungsimdang/item70.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_작은 메아리",
+          "name": "작은 메아리",
+          "category": "빵",
+          "price": 3000,
+          "calories": 300,
+          "source_grade": "B",
+          "source_note": "사진: AI 생성",
+          "image": "bak_sungsimdang/item71.jpg"
+        },
+        {
+          "id": "itm_bak_sungsimdang_시나몬 메아리",
+          "name": "시나몬 메아리",
+          "category": "빵",
+          "price": 4800,
+          "calories": 328,
+          "source_grade": "B",
+          "source_note": "사진: AI 생성",
+          "image": "bak_sungsimdang/item72.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_slowbread",
+      "name": "슬로우브레드 관평점",
+      "latitude": 36.4241154,
+      "longitude": 127.3894333,
+      "address": "대전광역시 유성구 관평2로 30 1층",
+      "rating": 3.9,
+      "review_count": 38,
+      "photo": "bak_slowbread/entrance.jpg",
+      "source_document": "빵집_데이터_정리_슬로우브레드 (1).docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_slowbread_소금빵",
+          "name": "소금빵",
+          "category": "빵",
+          "price": 1800,
+          "calories": 250,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item01.jpg"
+        },
+        {
+          "id": "itm_bak_slowbread_애플파이",
+          "name": "애플파이",
+          "category": "디저트",
+          "price": 3700,
+          "calories": 380,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item02.jpg"
+        },
+        {
+          "id": "itm_bak_slowbread_흰둥이",
+          "name": "흰둥이",
+          "category": "빵",
+          "price": 2000,
+          "calories": 180,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item03.jpg"
+        },
+        {
+          "id": "itm_bak_slowbread_명란소금빵",
+          "name": "명란소금빵",
+          "category": "빵",
+          "price": 2900,
+          "calories": 300,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item04.jpg"
+        },
+        {
+          "id": "itm_bak_slowbread_카이막",
+          "name": "카이막",
+          "category": "빵",
+          "price": 3000,
+          "calories": 450,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item05.jpg"
+        },
+        {
+          "id": "itm_bak_slowbread_몽블랑",
+          "name": "몽블랑",
+          "category": "빵",
+          "price": 5300,
+          "calories": 450,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item06.jpg"
+        },
+        {
+          "id": "itm_bak_slowbread_무화과 깜빠뉴",
+          "name": "무화과 깜빠뉴",
+          "category": "빵",
+          "price": 4700,
+          "calories": 500,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item07.jpg"
+        },
+        {
+          "id": "itm_bak_slowbread_우유크림도넛",
+          "name": "우유크림도넛",
+          "category": "디저트",
+          "price": 3800,
+          "calories": 350,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item08.jpg"
+        },
+        {
+          "id": "itm_bak_slowbread_가루쌀 쑥 깜빠뉴",
+          "name": "가루쌀 쑥 깜빠뉴",
+          "category": "빵",
+          "price": 3700,
+          "calories": 450,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item09.jpg"
+        },
+        {
+          "id": "itm_bak_slowbread_소세지빵",
+          "name": "소세지빵",
+          "category": "빵",
+          "price": 2500,
+          "calories": 320,
+          "source_grade": "C",
+          "source_note": "매장 미공개 — 유사 제품 기준 추정치 · 사진: 직접 촬영 · AI 보정",
+          "image": "bak_slowbread/item10.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_openoven",
+      "name": "오픈오븐",
+      "latitude": 36.3527090095037,
+      "longitude": 127.373794078295,
+      "address": "대전 서구 갈마역로25번길 7 102호",
+      "rating": 4.8,
+      "review_count": 39,
+      "photo": "bak_openoven/entrance.jpg",
+      "source_document": "빵집_데이터_정리_오픈오븐.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_openoven_인절미 스틱",
+          "name": "인절미 스틱",
+          "category": "빵",
+          "price": 4000,
+          "calories": 320,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_openoven/item01.jpg"
+        },
+        {
+          "id": "itm_bak_openoven_녹차빵",
+          "name": "녹차빵",
+          "category": "빵",
+          "price": 6000,
+          "calories": 420,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_openoven/item02.jpg"
+        },
+        {
+          "id": "itm_bak_openoven_고구마 크로아상",
+          "name": "고구마 크로아상",
+          "category": "빵",
+          "price": 4000,
+          "calories": 390,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_openoven/item03.jpg"
+        },
+        {
+          "id": "itm_bak_openoven_초코범벅",
+          "name": "초코범벅",
+          "category": "빵",
+          "price": 6000,
+          "calories": 570,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_openoven/item04.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_coldbutter",
+      "name": "콜드버터베이크샵 본점",
+      "latitude": 36.3257896,
+      "longitude": 127.4233942,
+      "address": "대전 중구 중앙로112번길 37 1층 일부 1호",
+      "rating": 3.8,
+      "review_count": 63,
+      "photo": "bak_coldbutter/entrance.jpg",
+      "source_document": "빵집_데이터_정리_콜드버터베이크샵.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_coldbutter_전남친 블루베리 모찌빵",
+          "name": "전남친 블루베리 모찌빵",
+          "category": "빵",
+          "price": 4500,
+          "calories": 260,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item01.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_고구마 치즈 케이크 모찌빵",
+          "name": "고구마 치즈 케이크 모찌빵",
+          "category": "디저트",
+          "price": 4500,
+          "calories": 290,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item02.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_사랑에 빠진 딸기 모찌빵",
+          "name": "사랑에 빠진 딸기 모찌빵",
+          "category": "빵",
+          "price": 4200,
+          "calories": 260,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item03.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_두바이 초코 모찌빵",
+          "name": "두바이 초코 모찌빵",
+          "category": "빵",
+          "price": 8500,
+          "calories": 480,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item04.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_두바이 콜낭시에",
+          "name": "두바이 콜낭시에",
+          "category": "빵",
+          "price": 5800,
+          "calories": 290,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item05.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_황치즈",
+          "name": "황치즈",
+          "category": "빵",
+          "price": 3200,
+          "calories": 200,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item06.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_말차로쉐",
+          "name": "말차로쉐",
+          "category": "빵",
+          "price": 3900,
+          "calories": 195,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item07.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_빠스구마",
+          "name": "빠스구마",
+          "category": "빵",
+          "price": 3200,
+          "calories": 190,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item08.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_옥수크림 소금빵",
+          "name": "옥수크림 소금빵",
+          "category": "빵",
+          "price": 4800,
+          "calories": 320,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item09.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_흑후추 소금빵",
+          "name": "흑후추 소금빵",
+          "category": "빵",
+          "price": 4600,
+          "calories": 300,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item10.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_황치즈크림 소금빵",
+          "name": "황치즈크림 소금빵",
+          "category": "빵",
+          "price": 4800,
+          "calories": 340,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item11.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_우유크림 소금빵",
+          "name": "우유크림 소금빵",
+          "category": "빵",
+          "price": 4800,
+          "calories": 340,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item12.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_로이스 생초코",
+          "name": "로이스 생초코",
+          "category": "빵",
+          "price": 3500,
+          "calories": 210,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item13.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_츄러스 소금빵",
+          "name": "츄러스 소금빵",
+          "category": "빵",
+          "price": 3800,
+          "calories": 300,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item14.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_마늘 퐁당 소금빵",
+          "name": "마늘 퐁당 소금빵",
+          "category": "빵",
+          "price": 4600,
+          "calories": 310,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item15.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_카라멜 넛츠",
+          "name": "카라멜 넛츠",
+          "category": "빵",
+          "price": 3200,
+          "calories": 200,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item16.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_고메 플레인",
+          "name": "고메 플레인",
+          "category": "빵",
+          "price": 2800,
+          "calories": 165,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item17.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_콘마요 소금빵",
+          "name": "콘마요 소금빵",
+          "category": "빵",
+          "price": 5900,
+          "calories": 330,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item18.jpg"
+        },
+        {
+          "id": "itm_bak_coldbutter_명란마요 소금빵",
+          "name": "명란마요 소금빵",
+          "category": "빵",
+          "price": 4200,
+          "calories": 310,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_coldbutter/item19.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_pieroom",
+      "name": "파이룸",
+      "latitude": 36.3589,
+      "longitude": 127.3448,
+      "address": "대전 유성구 대학로 39-10 103호 파이룸",
+      "rating": 4.7,
+      "review_count": 289,
+      "photo": "bak_pieroom/entrance.jpg",
+      "source_document": "빵집_데이터_정리_파이룸.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_pieroom_아몬드크루아상",
+          "name": "아몬드크루아상",
+          "category": "빵",
+          "price": 4500,
+          "calories": 480,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_pieroom/item01.jpg"
+        },
+        {
+          "id": "itm_bak_pieroom_햄치즈 크루아상",
+          "name": "햄치즈 크루아상",
+          "category": "빵",
+          "price": 4500,
+          "calories": 440,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_pieroom/item02.jpg"
+        },
+        {
+          "id": "itm_bak_pieroom_에그파이",
+          "name": "에그파이",
+          "category": "디저트",
+          "price": 4800,
+          "calories": 400,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_pieroom/item03.jpg"
+        },
+        {
+          "id": "itm_bak_pieroom_방울토마토 마리네이드빵",
+          "name": "방울토마토 마리네이드빵",
+          "category": "빵",
+          "price": 3800,
+          "calories": 445,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_pieroom/item04.jpg"
+        },
+        {
+          "id": "itm_bak_pieroom_애플파이",
+          "name": "애플파이",
+          "category": "빵",
+          "price": 3800,
+          "calories": 510,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_pieroom/item05.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bak_harupang",
+      "name": "하루팡",
+      "latitude": 36.3594186322007,
+      "longitude": 127.344526963499,
+      "address": "대전 유성구 봉명동 611-1",
+      "rating": 4.2,
+      "review_count": 90,
+      "photo": "bak_harupang/entrance.jpg",
+      "source_document": "빵집_데이터_정리_하루팡.docx",
+      "bread_items": [
+        {
+          "id": "itm_bak_harupang_야끼소바빵",
+          "name": "야끼소바빵",
+          "category": "빵",
+          "price": 3800,
+          "calories": 470,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_harupang/item01.jpg"
+        },
+        {
+          "id": "itm_bak_harupang_더블 쇼콜라바게트",
+          "name": "더블 쇼콜라바게트",
+          "category": "빵",
+          "price": 5900,
+          "calories": 530,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_harupang/item02.jpg"
+        },
+        {
+          "id": "itm_bak_harupang_메론빵",
+          "name": "메론빵",
+          "category": "빵",
+          "price": 2400,
+          "calories": 350,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_harupang/item03.jpg"
+        },
+        {
+          "id": "itm_bak_harupang_앙꼬버터",
+          "name": "앙꼬버터",
+          "category": "빵",
+          "price": 3900,
+          "calories": 360,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_harupang/item04.jpg"
+        },
+        {
+          "id": "itm_bak_harupang_카레빵",
+          "name": "카레빵",
+          "category": "빵",
+          "price": 3200,
+          "calories": 405,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_harupang/item05.jpg"
+        },
+        {
+          "id": "itm_bak_harupang_치쿠와빵",
+          "name": "치쿠와빵",
+          "category": "빵",
+          "price": 3200,
+          "calories": 445,
+          "source_grade": "B",
+          "source_note": "사진: 직접 촬영",
+          "image": "bak_harupang/item06.jpg"
+        }
+      ]
+    }
+  ]
+}

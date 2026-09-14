@@ -5,18 +5,50 @@ repository.
 
 ## Repository status
 
-No longer boilerplate (as of 2026-07-28) — the counter-app default is gone. Currently implemented:
-auth flow (`login_screen.dart`/`signup_screen.dart`/`home_screen.dart`, backed by
-`AuthProvider`/`AuthService`, real screens), plus four **"디자인 없음" data-verification screens**
-(`bakery_list_screen.dart`, `bakery_detail_screen.dart`, `tour_flow_screen.dart`,
-`stats_screen.dart`) that exercise the rest of the API surface with plain `Text` dumps — these are
-reference code for a design pass, not final UI; don't polish them, replace them. Full
-service-layer ↔ endpoint mapping is in `API_INTEGRATION.md` — read that before adding a new
+As of 2026-09-14 the full 8-step tour flow, 통계, and 마이페이지 are built with the brand design,
+and the client-only device features (GPS speed filter, pedometer, Naver Map handoff, gallery-only
+photos) are implemented — see `API_INTEGRATION.md` §5 (screens) and §9 (device features).
+`SCREEN_STATUS.md` is a 2026-07-29 snapshot kept for history, not the current state.
+
+- **Routing**: centralized in `lib/router/app_router.dart` (`go_router`) — no more
+  screen-by-screen `Navigator.push`/`MaterialPageRoute`, no `AuthGate` widget. Auth gating is a
+  `redirect` keyed off `AuthProvider` via `refreshListenable`; login/signup screens just flip
+  `AuthProvider.status` and the router follows, they don't navigate themselves.
+- **Bottom-tab shell**: `StatefulShellRoute.indexedStack` (`lib/widgets/main_shell.dart`), 4 tabs —
+  홈/빵집/통계/마이페이지. Each tab keeps its own navigation stack across tab switches, so tab
+  screens stay alive: 홈/통계 refetch by `select`ing `TourFlowController.dataRevision`, which bumps
+  on every stop/food log/tour completion. The tour screens are top-level routes outside the shell.
+- **Background**: every route builder wraps its screen in `_page(...)` → `BrandBackground`
+  (opaque gradient per page + transparent Scaffold + 600px max content width). Don't apply the
+  gradient once around the whole app — a pushed page's transparent Scaffold would show the page
+  beneath it. New routes must use `_page` too.
+- **Theme**: `lib/theme/app_theme.dart` — brand seed color `#E8C39E` (구운 빵 껍질), one line
+  re-tones the app. `ThemeExtension`s: `CalorieStatusColors` (안전/주의/초과 신호등 3색),
+  `GlassStyle` (glassmorphism constants), `AppBackground` (gradient). `AppSpacing` holds the
+  4/8/16/24/32 spacing scale — screens shouldn't write raw `EdgeInsets` numbers.
+- **Common widgets** (`lib/widgets/`): `GlassCard` (the only place that should touch
+  `BackdropFilter`+`GlassStyle` directly — nests safely, skips re-blurring if already inside
+  another `GlassCard`), `LoadingView`, `ErrorView` (renders `ApiException.message` + optional
+  retry), `EmptyView` (icon + message). New screens should reach for these instead of building
+  loading/error/empty states inline.
+- **Debug tools**: `tour_flow_screen.dart` (raw API-sequence dump) is the only remaining
+  verification screen, reachable through `lib/screens/debug_screen.dart` and gated behind
+  `kDebugMode` twice (home's entry button + the `/debug` redirect). Don't polish it.
+
+Full service-layer ↔ endpoint mapping is in `API_INTEGRATION.md` — read that before adding a new
 screen, it's the actual up-to-date map of what's built vs. what a new screen still needs to call.
 
-Dependencies added beyond the Flutter defaults: `http`, `provider`, `flutter_secure_storage`.
-Flutter 3.44.8 stable, Dart 3.12.2 (verify with `flutter --version` if this drifts). Common
-commands:
+Dependencies added beyond the Flutter defaults: `http`, `provider`, `flutter_secure_storage`,
+`go_router`, `geolocator`, `pedometer`, `permission_handler`, `url_launcher`, `image_picker`, `gal`,
+`flutter_naver_map`, `cached_network_image`. Build-time config (`API_BASE_URL`,
+`NAVER_MAP_CLIENT_ID`) comes from `--dart-define` / `dart_defines.json` (gitignored) — real-device
+steps are in `DEVICE_TESTING.md` and `tool/run_on_device.ps1`. Photos use `NetworkPhoto`
+(disk-cached on mobile; on web it falls back to `<img>` because the R2 bucket sends no CORS headers).
+`permission_handler_android` is pinned to 13.0.1 via `dependency_overrides` — 14.x needs
+compileSdk 37, which AGP 9.0.1 can't resolve (the SDK installs as `android-37.0`, AGP looks for
+`android-37`). Remove the override once AGP is upgraded. Flutter 3.44.8 stable, Dart 3.12.2
+(verify with `flutter --version` if this drifts).
+Common commands:
 
 - `flutter pub get` — install dependencies.
 - `flutter run` — run on a connected device/emulator (see **Toolchain status** below for what's
@@ -75,19 +107,37 @@ without derailing a diet/calorie goal.
 - `null` is a normal value for optional fields (`suggested_walk`, `tour_info`) — don't treat it as
   an error case.
 
+## 모델 규칙
+
+- API 응답은 반드시 모델 클래스로 감싼다. raw Map을 위젯에 넘기지 않는다.
+- 수동 fromJson 방식을 유지한다 (json_serializable 미사용).
+- 예시: `lib/models/bakery.dart`
+
+## 스타일 규칙
+
+- 색상은 `Theme.of(context)` 또는 `ThemeExtension`으로만 접근한다. 하드코딩 금지.
+- 간격은 `AppSpacing` 상수를 사용한다.
+- 카드형 UI는 `GlassCard` 위젯을 사용한다.
+- 로딩/에러/빈 상태는 `LoadingView`/`ErrorView`/`EmptyView`를 사용한다.
+
 ## What this app must implement itself (no backend API — see `FRONTEND_API_GUIDE.md` §4)
 
-- Background sensor tracking that survives screen-off (`flutter_background_service` + Android
-  Foreground Service notification).
+- Background sensor tracking that survives screen-off — **implemented with `geolocator`'s Android
+  location foreground service** (ongoing notification + wake lock), not `flutter_background_service`
+  as the spec names; rationale in `API_INTEGRATION.md` §9. The backend guide still needs updating
+  to match (propose in a backend session).
 - Step counting (platform pedometer).
 - GPS speed filter: only count movement ≤20km/h as walking (bike/bus speeds excluded); aggregate
   distance/duration/steps client-side and report the summary via `POST /api/tours/:tourId/stops`.
 - Naver Map handoff via `url_launcher` deep link, with `m.map.naver.com` web fallback if the app
-  isn't installed. **No embedded map SDK, no server-side routing** — this is a deliberate
-  architecture decision (`tech-stack.md` §5), not a gap.
+  isn't installed. **Turn-by-turn directions stay in the external app, no server-side routing**
+  (`tech-stack.md` §5).
 - Consumption photos: camera → device gallery only. Never uploaded; `food_logs` has no photo field.
-- Map pin rendering for the bakery list screen is **still undecided** — backend only returns raw
-  lat/lng. Don't pick a map SDK unilaterally; flag it for discussion first.
+- Bakery map pins: **decided 2026-09-14 — Naver Maps SDK (`flutter_naver_map`)**, pins only, no
+  routing. Needs an NCP "Dynamic Map" Client ID passed as `--dart-define=NAVER_MAP_CLIENT_ID`
+  (`lib/core/api_config.dart`); `lib/services/naver_map_setup.dart` tracks whether auth actually
+  succeeded and `BakeryMapView` falls back to a Naver-app handoff list on web/desktop, without a
+  key, or on auth failure. The SDK doesn't support web — keep that fallback working.
 
 ## Toolchain status (verify with `flutter doctor -v` if stale)
 
@@ -164,3 +214,8 @@ without derailing a diet/calorie goal.
 ### 6. 세션 마무리 습관 — `/recap`
 
 ### 7. 리뷰는 "위젯 하나"가 아니라 "흐름 전체"로 — `/review`
+
+## 알려진 성능 고려사항
+- GlassCard는 BackdropFilter를 사용하므로 개당 렌더 비용이 있음.
+  현재 데이터 규모(빵집 2곳, 메뉴 9종)에서는 문제없으나,
+  긴 목록에 적용 시 스크롤 성능 확인 필요.

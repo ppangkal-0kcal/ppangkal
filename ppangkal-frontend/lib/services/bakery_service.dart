@@ -2,7 +2,8 @@ import '../core/api_client.dart';
 import '../models/bakery.dart';
 import '../models/bread_item.dart';
 
-/// GET /api/bakeries (FRONTEND_API_GUIDE.md §2) — no auth required.
+/// GET /api/bakeries* (FRONTEND_API_GUIDE.md §2 steps 2~4) — none of these
+/// three require auth.
 class BakeryService {
   final ApiClient _client;
 
@@ -26,10 +27,9 @@ class BakeryService {
     return list.map((e) => Bakery.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  /// Raw passthrough — `tour_info` is null unless the bakery is TourAPI-registered
-  /// (FRONTEND_API_GUIDE.md §2 step 2~3), so this is left as a Map, not a model.
-  Future<Map<String, dynamic>> fetchDetail(String bakeryId) {
-    return _client.get('/bakeries/$bakeryId');
+  Future<Bakery> fetchDetail(String bakeryId) async {
+    final json = await _client.get('/bakeries/$bakeryId');
+    return Bakery.fromJson(json);
   }
 
   Future<List<BreadItem>> fetchItems(String bakeryId) async {

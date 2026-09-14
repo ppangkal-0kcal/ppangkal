@@ -1,45 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'controllers/tour_flow_controller.dart';
 import 'providers/auth_provider.dart';
-import 'screens/home_screen.dart';
-import 'screens/login_screen.dart';
+import 'router/app_router.dart';
+import 'services/location_service.dart';
+import 'services/naver_map_setup.dart';
+import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NaverMapSetup.init();
   runApp(const PpangkalApp());
 }
 
-class PpangkalApp extends StatelessWidget {
+class PpangkalApp extends StatefulWidget {
   const PpangkalApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthProvider()..tryAutoLogin(),
-      child: MaterialApp(
-        title: '빵칼',
-        theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange)),
-        home: const AuthGate(),
-      ),
-    );
-  }
+  State<PpangkalApp> createState() => _PpangkalAppState();
 }
 
-/// Routes to Login or Home based on [AuthProvider.status], showing a
-/// splash spinner while `tryAutoLogin` resolves a stored token.
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
+class _PpangkalAppState extends State<PpangkalApp> {
+  final _authProvider = AuthProvider()..tryAutoLogin();
+
+  // Single app-wide instance — an active tour has to survive the user
+  // bouncing between the bakery tab and the tour screens (see
+  // lib/controllers/tour_flow_controller.dart's class doc).
+  final PositionSource _positionSource = GeolocatorPositionSource();
+  late final _tourFlowController = TourFlowController(positionSource: _positionSource);
+
+  late final GoRouter _router = buildAppRouter(_authProvider);
+
+  @override
+  void dispose() {
+    _authProvider.dispose();
+    _tourFlowController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final status = context.watch<AuthProvider>().status;
-
-    return switch (status) {
-      AuthStatus.unknown => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-      AuthStatus.authenticated => const HomeScreen(),
-      AuthStatus.authenticating || AuthStatus.unauthenticated => const LoginScreen(),
-    };
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: _authProvider),
+        ChangeNotifierProvider.value(value: _tourFlowController),
+        Provider<PositionSource>.value(value: _positionSource),
+      ],
+      child: MaterialApp.router(
+        title: '빵칼',
+        theme: buildAppTheme(),
+        routerConfig: _router,
+      ),
+    );
   }
 }

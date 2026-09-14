@@ -50,6 +50,14 @@ class AuthService {
     return User.fromJson(json);
   }
 
+  /// PATCH /users/me — 체중/키/나이/활동량/목표 칼로리 부분 수정. 응답은
+  /// 수정된 필드만 담고 있어 (name/gender 없음) [User]로 바로 파싱할 수
+  /// 없으므로, 성공 후 [fetchMe]로 전체 프로필을 다시 받아온다.
+  Future<User> updateMe(String token, Map<String, dynamic> fields) async {
+    await _client.patch('/users/me', token: token, body: fields);
+    return fetchMe(token);
+  }
+
   Future<String?> readStoredToken() => _storage.read(key: _tokenKey);
 
   Future<void> logout() => _storage.delete(key: _tokenKey);
