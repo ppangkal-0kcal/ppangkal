@@ -2,20 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/formatters.dart';
+import '../core/walk_calories.dart';
 import '../models/bread_item.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import 'network_photo.dart';
-
-/// Minutes of walking that burn [kcal] for a [weightKg] person — the same
-/// fixed-MET formula the backend uses (`calorieService.ts`:
-/// `3.5 MET × kg × h × 1.05`), so this preview matches what a real tour
-/// stop would credit.
-int walkMinutesToBurn(int kcal, double weightKg) {
-  const walkMet = 3.5;
-  const correction = 1.05;
-  return (kcal / (walkMet * weightKg * correction) * 60).round();
-}
 
 /// Full info for one bread: large photo, price, calories (flagged when
 /// estimated), macros when known, and the "0-kcal" hook — how long a walk
@@ -72,7 +63,7 @@ class _BreadDetailSheet extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
-                      '걸어서 약 ${walkMinutesToBurn(item.calories, weight)}분이면 0kcal로 맞출 수 있어요',
+                      '걸어서 약 ${WalkCalories.minutesToBurn(item.calories, weight)}분이면 0kcal로 맞출 수 있어요',
                       style: textTheme.bodyMedium,
                     ),
                   ),

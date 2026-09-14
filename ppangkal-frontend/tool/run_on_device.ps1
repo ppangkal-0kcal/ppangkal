@@ -1,4 +1,4 @@
-<#
+﻿<#
   실기기(Android) 테스트 실행 도우미 — DEVICE_TESTING.md 참고.
 
   사용:
@@ -59,4 +59,6 @@ try {
 
 $flutterArgs = @('run', "--dart-define=API_BASE_URL=$apiBaseUrl", "--dart-define=NAVER_MAP_CLIENT_ID=$($defines.NAVER_MAP_CLIENT_ID)")
 if ($Release) { $flutterArgs += '--release' }
+# flutter는 경고를 stderr로 쓴다 — Stop 상태면 PowerShell 5.1이 실행을 끊는다
+$ErrorActionPreference = 'Continue'
 flutter @flutterArgs

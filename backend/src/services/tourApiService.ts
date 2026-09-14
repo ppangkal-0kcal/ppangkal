@@ -126,16 +126,28 @@ export async function fetchNearbySpots(params: {
 // 그대로 넘기면 TourAPI가 서버 사이드에서 걸러주므로 제목 키워드 매칭보다 정확하다.
 const PARK_CATEGORY = { cat1: 'A02', cat2: 'A0202', cat3: 'A02020700' };
 
+// 빵집 좌표 기준 공원은 거의 바뀌지 않는데, 빵집 목록 한 번에 빵집 수만큼 TourAPI를 부르면
+// 일일 호출 한도에 금방 닿는다 — 좌표+반경별로 결과(없음 포함)를 메모리에 12시간 캐시한다.
+// 실패는 캐시하지 않는다 (일시 장애가 12시간 동안 "공원 없음"으로 굳지 않도록).
+const PARK_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+const parkCache = new Map<string, { value: NearbySpot | null; expiresAt: number }>();
+
 export async function findNearbyPark(params: {
   latitude: number;
   longitude: number;
   radiusM: number;
 }): Promise<NearbySpot | null> {
-  const spots = await fetchNearbySpots({ ...params, ...PARK_CATEGORY });
-  if (spots.length === 0) return null;
+  const key = `${params.latitude.toFixed(5)},${params.longitude.toFixed(5)},${params.radiusM}`;
+  const cached = parkCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.value;
 
+  const spots = await fetchNearbySpots({ ...params, ...PARK_CATEGORY });
   // arrange: 'E'로 이미 거리순 정렬되지만, 가장 가까운 항목을 명시적으로 보장한다.
-  return spots.reduce((closest, spot) => (spot.distanceM < closest.distanceM ? spot : closest));
+  const value =
+    spots.length === 0 ? null : spots.reduce((closest, spot) => (spot.distanceM < closest.distanceM ? spot : closest));
+
+  parkCache.set(key, { value, expiresAt: Date.now() + PARK_CACHE_TTL_MS });
+  return value;
 }
 
 export interface SuggestedWalk {
@@ -146,6 +158,26 @@ export interface SuggestedWalk {
 }
 
 const PARK_SUGGEST_RADIUS_M = 1000;
+
+/** 체중과 무관한 공원 정보 — 사용자 위치/체중 없이 빵집 목록에 붙여 앱이 칼로리를 직접 계산한다. */
+export interface NearbyParkInfo {
+  content_id: string;
+  title: string;
+  round_trip_distance_m: number;
+}
+
+export async function findParkNearBakery(params: {
+  latitude: number;
+  longitude: number;
+}): Promise<NearbyParkInfo | null> {
+  try {
+    const park = await findNearbyPark({ ...params, radiusM: PARK_SUGGEST_RADIUS_M });
+    if (!park) return null;
+    return { content_id: park.contentId, title: park.title, round_trip_distance_m: Math.round(park.distanceM * 2) };
+  } catch {
+    return null;
+  }
+}
 
 // 빵집 좌표 기준 근처 공원을 찾아 왕복 산책 제안을 만든다 — idea.md §3: 도보 유도 대상이 아닌
 // 빵집(리스트 단계) 또는 도보 실측 거리가 짧았던 방문(투어 도착 단계) 둘 다에서 쓰는 공용 로직.

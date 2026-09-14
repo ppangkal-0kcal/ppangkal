@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 import { calculateCaloriesBurned, estimateWalkMinutes, WALK_RECOMMEND_THRESHOLD_M } from '../services/calorieService';
-import { buildParkWalkSuggestion, fetchRestaurantEnrichment } from '../services/tourApiService';
+import { buildParkWalkSuggestion, fetchRestaurantEnrichment, findParkNearBakery } from '../services/tourApiService';
 import { ApiError } from '../utils/ApiError';
 import { asyncHandler } from '../utils/asyncHandler';
 import { haversineDistanceM, isBakeryOpenNow } from '../utils/geo';
@@ -13,15 +13,14 @@ export const bakeriesRouter = Router();
  * /bakeries:
  *   get:
  *     tags: [Bakeries]
- *     summary: 주변 빵집 목록 (거리/평점/추천순 정렬)
+ *     summary: 빵집 목록 — lat/lng 생략 시 위치 없는 전체 목록(권장), 제공 시 거리 계산·정렬(구버전 호환)
  *     parameters:
  *       - in: query
  *         name: lat
- *         required: true
  *         schema: { type: number }
+ *         description: 생략하면 사용자 위치를 받지 않는 모드 — 전체 빵집 + nearby_park(근처 공원, 체중 무관)를 반환하고 거리 관련 필드는 없음
  *       - in: query
  *         name: lng
- *         required: true
  *         schema: { type: number }
  *       - in: query
  *         name: radius_km
@@ -43,6 +42,34 @@ export const bakeriesRouter = Router();
 bakeriesRouter.get(
   '/',
   asyncHandler(async (req, res) => {
+    // 위치 없는 모드 (앱 1.0.0+ 기본): 사용자 좌표를 서버로 보내지 않는다 — 전체 빵집과 체중 무관한
+    // 근처 공원 정보(nearby_park)만 주고, 거리·도보 추천·칼로리·정렬은 앱이 기기 안에서 계산한다.
+    // lat/lng를 보내는 기존 방식은 이미 설치된 앱과 모니터링 호환을 위해 그대로 둔다.
+    if (req.query.lat === undefined && req.query.lng === undefined) {
+      const bakeries = await prisma.bakery.findMany({
+        include: { _count: { select: { breadItems: { where: { isAvailable: true } } } } },
+        orderBy: { name: 'asc' },
+      });
+      const bakeriesResponse = await Promise.all(
+        bakeries.map(async (bakery) => ({
+          id: bakery.id,
+          name: bakery.name,
+          latitude: bakery.latitude,
+          longitude: bakery.longitude,
+          address: bakery.address,
+          rating: bakery.rating,
+          review_count: bakery.reviewCount,
+          opening_hours: bakery.openingHours,
+          photo_url: bakery.photoUrl,
+          bread_item_count: bakery._count.breadItems,
+          is_open_now: isBakeryOpenNow(bakery.openingHours),
+          nearby_park: await findParkNearBakery({ latitude: bakery.latitude, longitude: bakery.longitude }),
+        })),
+      );
+      res.json({ bakeries: bakeriesResponse });
+      return;
+    }
+
     const lat = Number(req.query.lat);
     const lng = Number(req.query.lng);
     const radiusKm = Number(req.query.radius_km ?? 3);

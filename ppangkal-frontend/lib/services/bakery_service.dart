@@ -9,20 +9,11 @@ class BakeryService {
 
   BakeryService({ApiClient? client}) : _client = client ?? ApiClient();
 
-  Future<List<Bakery>> fetchNearby({
-    required double lat,
-    required double lng,
-    double radiusKm = 3,
-    String sort = 'recommended',
-    double? userWeight,
-  }) async {
-    final json = await _client.get('/bakeries', query: {
-      'lat': lat.toString(),
-      'lng': lng.toString(),
-      'radius_km': radiusKm.toString(),
-      'sort': sort,
-      if (userWeight != null) 'user_weight': userWeight.toString(),
-    });
+  /// Every bakery, requested **without** the user's position or weight —
+  /// callers compute distance, walkability, calories and sort order on-device
+  /// via [Bakery.withUserPosition], so location never leaves the phone.
+  Future<List<Bakery>> fetchAll() async {
+    final json = await _client.get('/bakeries');
     final list = json['bakeries'] as List<dynamic>;
     return list.map((e) => Bakery.fromJson(e as Map<String, dynamic>)).toList();
   }
