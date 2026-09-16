@@ -21,8 +21,9 @@ void main() {
   test('walk formulas match backend calorieService', () {
     // 400kcal / (3.5 × 60kg × 1.05) h = 1.814h ≈ 109분
     expect(WalkCalories.minutesToBurn(400, 60), 109);
-    // estimateWalkMinutes(1000m) = round(1000 / 66.67) = 15 → 3.5 × 60 × 0.25 × 1.05 = 55.1 → 55
-    expect(WalkCalories.estimateWalkMinutes(1000), 15);
+    // estimateWalkMinutes(1000m) = round(1000 × 1.3(도로망 보정) / 66.67) = round(19.5) = 20
+    expect(WalkCalories.estimateWalkMinutes(1000), 20);
+    // caloriesBurned은 도로망 보정과 무관한 별개 공식 — 분(minutes)을 직접 받는다.
     expect(WalkCalories.caloriesBurned(60, 15), 55);
   });
 
@@ -45,7 +46,8 @@ void main() {
       expect(bakery.walkRecommended, isFalse);
       expect(bakery.estimatedWalkCalories, isNotNull);
       expect(bakery.suggestedWalk?.title, '우리들공원');
-      expect(bakery.suggestedWalk?.estimatedCaloriesBurned, 55);
+      // estimateWalkMinutes(1000m, 도로망 보정 1.3배 포함) = 20 → caloriesBurned(60, 20) = 74
+      expect(bakery.suggestedWalk?.estimatedCaloriesBurned, 74);
     });
 
     test('near bakery: walkable, no park suggestion; no weight means no calories', () {

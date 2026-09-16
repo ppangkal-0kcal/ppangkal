@@ -10,8 +10,14 @@ export const AVG_WALK_SPEED_M_PER_MIN = 4000 / 60;
 // 이 거리 이내면 도보 이동을 적극 권장하고, 초과하면 도착 후 산책 제안으로 전환한다.
 export const WALK_RECOMMEND_THRESHOLD_M = 1200;
 
+// 직선거리 → 실제 도보 경로 보정 배율 (위 1.2~1.4배 범위의 중간값). estimateWalkMinutes에만
+// 곱한다 — 응답에 실리는 distance_m은 직선거리 그대로 두고, 그 거리로 계산하는 도보 시간·
+// 칼로리만 보정한다. WALK_RECOMMEND_THRESHOLD_M은 이미 이 보정을 감안해 정한 값이라
+// 다시 곱하지 않는다 — 곱하면 도보권 판정 기준이 달라진다.
+export const ROAD_DISTANCE_FACTOR = 1.3;
+
 export function estimateWalkMinutes(distanceM: number): number {
-  return Math.round(distanceM / AVG_WALK_SPEED_M_PER_MIN);
+  return Math.round((distanceM * ROAD_DISTANCE_FACTOR) / AVG_WALK_SPEED_M_PER_MIN);
 }
 
 // legacy/ppangkal.md §2.1: 활동량 계수

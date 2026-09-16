@@ -198,10 +198,10 @@ bakeriesRouter.get(
   }),
 );
 
+// findSpotsNearBakery가 이미 15(축제/공연)를 뺀 목록만 넘겨주므로 여기엔 없다.
 const SPOT_TYPE_LABELS: Record<string, string> = {
   '12': '관광지',
   '14': '문화시설',
-  '15': '축제·공연',
   '28': '레포츠',
   '38': '쇼핑',
 };

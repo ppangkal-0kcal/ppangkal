@@ -21,6 +21,13 @@ import 'network_photo.dart';
 /// `GET /bakeries/:id/nearby-spots`). Only built once a bakery is picked;
 /// refetches when the picked bakery changes. Tapping a spot opens its TourAPI
 /// detail (`GET /tour/spots/:id`) with a Naver Map walking handoff.
+///
+/// The 소모 칼로리 badge reads "1시간 관광"이지만 실제로는 빵집→관광지 이동(거리 기반)
+/// + [WalkCalories.sightseeingMinutes](1시간 관광) 합산이다 — 이동만으로는 체감상 너무
+/// 작고, 1시간만 쓰면 실제로 거기까지 걸어가는 몫이 빠진다. 라벨에 "이동+"을 넣지 않기로
+/// 했으므로(가독성 우선) 빵집마다 거리가 달라 같은 "1시간 관광" 라벨 아래 숫자가 조금씩
+/// 다르다 — 의도된 것이지 버그가 아니다. 도보 이동 캡션(`걸어서 약 X분`)과는 표시가
+/// 분리돼 있지만 칼로리 자체는 그 이동 시간을 포함한다 — 각 위젯의 계산부 주석 참고.
 class NearbySpotsSection extends StatefulWidget {
   final Bakery bakery;
 
@@ -112,8 +119,11 @@ class _SpotRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final minutes = WalkCalories.estimateWalkMinutes(spot.distanceM.toDouble());
-    final kcal = weightKg == null ? null : WalkCalories.caloriesBurned(weightKg!, minutes);
+    final walkMinutes = WalkCalories.estimateWalkMinutes(spot.distanceM.toDouble());
+    // 빵집에서 여기까지 걷는 몫 + 도착해서 1시간 둘러보는 몫을 합친다.
+    final sightseeingKcal = weightKg == null
+        ? null
+        : WalkCalories.caloriesBurned(weightKg!, walkMinutes + WalkCalories.sightseeingMinutes);
 
     return GlassCard(
       padding: const EdgeInsets.all(AppSpacing.sm),
@@ -130,14 +140,15 @@ class _SpotRow extends StatelessWidget {
                 children: [
                   Text(spot.title, style: textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: AppSpacing.xs),
-                  Text('빵집에서 ${_formatDistance(spot.distanceM)} · 걸어서 약 $minutes분', style: textTheme.bodySmall),
+                  Text('빵집에서 ${_formatDistance(spot.distanceM)} · 걸어서 약 $walkMinutes분', style: textTheme.bodySmall),
                   const SizedBox(height: AppSpacing.xs),
                   Wrap(
                     spacing: AppSpacing.xs,
                     runSpacing: AppSpacing.xs,
                     children: [
                       if (spot.contentType != null) SpotTag(label: spot.contentType!),
-                      if (kcal != null) SpotTag(label: '$kcal kcal 소모', tone: TagTone.calorie, icon: Icons.local_fire_department),
+                      if (sightseeingKcal != null)
+                        SpotTag(label: '1시간 관광 $sightseeingKcal kcal', tone: TagTone.calorie, icon: Icons.local_fire_department),
                     ],
                   ),
                 ],
@@ -242,7 +253,10 @@ class _SpotDetailSheet extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final walkMinutes = WalkCalories.estimateWalkMinutes(spot.distanceM.toDouble());
     final weightKg = context.select<AuthProvider, double?>((a) => a.user?.weight);
-    final walkKcal = weightKg == null ? null : WalkCalories.caloriesBurned(weightKg, walkMinutes);
+    // 위 _SpotRow와 같은 계산 — 이동 + 1시간 관광.
+    final sightseeingKcal = weightKg == null
+        ? null
+        : WalkCalories.caloriesBurned(weightKg, walkMinutes + WalkCalories.sightseeingMinutes);
 
     return FutureBuilder<SpotDetail>(
       future: future,
@@ -278,8 +292,12 @@ class _SpotDetailSheet extends StatelessWidget {
                   tone: TagTone.neutral,
                   icon: Icons.directions_walk,
                 ),
-                if (walkKcal != null)
-                  SpotTag(label: '$walkKcal kcal 소모', tone: TagTone.calorie, icon: Icons.local_fire_department),
+                if (sightseeingKcal != null)
+                  SpotTag(
+                    label: '1시간 관광 시 약 $sightseeingKcal kcal',
+                    tone: TagTone.calorie,
+                    icon: Icons.local_fire_department,
+                  ),
               ],
             ),
             if (spot.address != null) ...[

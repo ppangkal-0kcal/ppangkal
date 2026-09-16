@@ -131,9 +131,13 @@ export async function fetchNearbySpots(params: {
   }));
 }
 
-// 빵집 주변 "갈만한 곳" — 숙박(32)·음식점(39, 카페 포함)·여행코스(25)는 빵투어 중 들르는 장소가 아니라 뺀다.
-// 남는 타입: 관광지(12), 문화시설(14), 축제/공연(15), 레포츠(28), 쇼핑(38).
-const EXCLUDED_SPOT_TYPES = new Set(['25', '32', '39']);
+// 빵집 주변 "갈만한 곳" — 숙박(32)·음식점(39, 카페 포함)·여행코스(25)는 빵투어 중 들르는 장소가
+// 아니라 뺀다. 축제/공연(15)도 뺀다 — locationBasedList2는 eventstartdate/eventenddate를
+// 안 줘서 지금 진행 중인지 판별할 방법이 없고, 끝난 행사가 그대로 노출되는 문제가 있었다
+// (날짜로 거르려면 searchFestival2/detailIntro2를 추가로 불러야 하는데, 12시간 캐시와 맞물리면
+// 캐시가 살아있는 동안 축제가 끝나도 낡은 정보가 남는 문제가 여전하다 — 그 비용을 들이느니 뺀다).
+// 남는 타입: 관광지(12), 문화시설(14), 레포츠(28), 쇼핑(38).
+const EXCLUDED_SPOT_TYPES = new Set(['15', '25', '32', '39']);
 const BAKERY_SPOT_RADIUS_M = 2000;
 const BAKERY_SPOT_LIMIT = 10;
 const BAKERY_SPOT_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
