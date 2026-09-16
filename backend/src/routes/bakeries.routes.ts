@@ -1,7 +1,12 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 import { calculateCaloriesBurned, estimateWalkMinutes, WALK_RECOMMEND_THRESHOLD_M } from '../services/calorieService';
-import { buildParkWalkSuggestion, fetchRestaurantEnrichment, findParkNearBakery } from '../services/tourApiService';
+import {
+  buildParkWalkSuggestion,
+  fetchRestaurantEnrichment,
+  findParkNearBakery,
+  findSpotsNearBakery,
+} from '../services/tourApiService';
 import { ApiError } from '../utils/ApiError';
 import { asyncHandler } from '../utils/asyncHandler';
 import { haversineDistanceM, isBakeryOpenNow } from '../utils/geo';
@@ -189,6 +194,63 @@ bakeriesRouter.get(
       photo_url: bakery.photoUrl,
       is_open_now: isBakeryOpenNow(bakery.openingHours),
       tour_info: tourInfo,
+    });
+  }),
+);
+
+const SPOT_TYPE_LABELS: Record<string, string> = {
+  '12': '관광지',
+  '14': '문화시설',
+  '15': '축제·공연',
+  '28': '레포츠',
+  '38': '쇼핑',
+};
+
+/**
+ * @openapi
+ * /bakeries/{bakeryId}/nearby-spots:
+ *   get:
+ *     tags: [Bakeries]
+ *     summary: 빵집 주변 갈만한 곳 (TourAPI locationBasedList2, 빵집 좌표 기준 2km, 최대 10곳, 12시간 캐시)
+ *     description: 사용자 좌표를 받지 않는다. 도보 시간·소모 칼로리는 앱이 distance_m과 체중으로 기기에서 계산한다.
+ *     parameters:
+ *       - in: path
+ *         name: bakeryId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: "{ spots: [{ content_id, title, content_type, address, image_url, distance_m, latitude, longitude }] } — 거리순"
+ *       404:
+ *         description: 빵집 없음
+ *       502:
+ *         description: TourAPI 호출 실패 (TOUR_API_UNAVAILABLE)
+ */
+// GET /api/bakeries/:bakeryId/nearby-spots — 홈 화면 "고른 빵집 주변 관광지"
+bakeriesRouter.get(
+  '/:bakeryId/nearby-spots',
+  asyncHandler(async (req, res) => {
+    const bakery = await prisma.bakery.findUnique({ where: { id: req.params.bakeryId } });
+    if (!bakery) throw ApiError.notFound('빵집을 찾을 수 없습니다.');
+
+    let spots;
+    try {
+      spots = await findSpotsNearBakery({ latitude: bakery.latitude, longitude: bakery.longitude });
+    } catch {
+      throw new ApiError(502, 'TOUR_API_UNAVAILABLE', '주변 관광지 정보를 불러오지 못했습니다.');
+    }
+
+    res.json({
+      spots: spots.map((spot) => ({
+        content_id: spot.contentId,
+        title: spot.title,
+        content_type: (spot.contentTypeId && SPOT_TYPE_LABELS[spot.contentTypeId]) ?? null,
+        address: spot.address,
+        image_url: spot.imageUrl,
+        distance_m: Math.round(spot.distanceM),
+        latitude: spot.mapy,
+        longitude: spot.mapx,
+      })),
     });
   }),
 );

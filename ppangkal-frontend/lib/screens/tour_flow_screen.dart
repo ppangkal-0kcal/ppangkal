@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/tour_flow_controller.dart';
+import '../models/bread_selection.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -66,8 +67,12 @@ class _TourFlowScreenState extends State<TourFlowScreen> {
       _append('\nPOST /food-logs 호출...');
       final foodLog = await controller.logFood(
         token: token,
-        breadItemId: 'itm_bak_sungsimdang_소보로빵',
-        quantity: 1,
+        selection: const BreadSelection(
+          breadItemId: 'itm_bak_sungsimdang_소보로빵',
+          name: '소보로빵',
+          unitCalories: 0, // 서버가 bread_items의 칼로리를 쓰므로 여기 값은 사용되지 않는다
+          quantity: 1,
+        ),
       );
       _append('-> id=${foodLog.id} calories=${foodLog.calories} quantity=${foodLog.quantity}');
 

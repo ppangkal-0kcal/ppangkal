@@ -39,6 +39,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> signup({
+    required String email,
+    required String password,
     required String name,
     required String gender,
     required int age,
@@ -51,6 +53,8 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final result = await _service.signup(
+        email: email,
+        password: password,
         name: name,
         gender: gender,
         age: age,
@@ -79,12 +83,32 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> login(String userId) async {
+  Future<bool> login({required String email, required String password}) =>
+      _loginWith(() => _service.login(email: email, password: password));
+
+  /// For 1.0.0 accounts that haven't linked an email yet.
+  Future<bool> loginWithUserId(String userId) => _loginWith(() => _service.loginWithUserId(userId));
+
+  Future<bool> linkCredentials({required String email, required String password}) async {
+    if (token == null) return false;
+    errorMessage = null;
+    try {
+      user = await _service.linkCredentials(token!, email: email, password: password);
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> _loginWith(Future<String> Function() request) async {
     status = AuthStatus.authenticating;
     errorMessage = null;
     notifyListeners();
     try {
-      final loggedInToken = await _service.login(userId: userId);
+      final loggedInToken = await request();
       user = await _service.fetchMe(loggedInToken);
       token = loggedInToken;
       status = AuthStatus.authenticated;

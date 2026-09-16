@@ -53,25 +53,28 @@ final token = context.read<AuthProvider>().token; // String? — null이면 비�
 | 서비스 파일 | 메서드 | HTTP | 엔드포인트 | 인증 | 비고 |
 | --- | --- | --- | --- | --- | --- |
 | `services/auth_service.dart` | `signup(...)` | POST | `/auth/signup` | ✗ | 성공 시 토큰을 `flutter_secure_storage`에 저장까지 함 |
-| | `login(userId: ...)` | POST | `/auth/login` | ✗ | 응답에 유저 정보 없음 — 로그인 후 `fetchMe` 필요 |
+| | `login(email:, password:)` | POST | `/auth/login` | ✗ | 응답에 유저 정보 없음 — 로그인 후 `fetchMe` 필요 |
+| | `loginWithUserId(userId)` | POST | `/auth/login` | ✗ | 1.0.0에서 ID로만 가입한 계정용 (로그인 화면 "이전 버전 ID로 로그인") |
+| | `linkCredentials(token, email:, password:)` | PUT | `/users/me/credentials` | ✓ | ID 전용 계정에 이메일 로그인 연결 (마이페이지) |
 | | `fetchMe(token)` | GET | `/users/me` | ✓ | 회원가입 직후에도 호출 — signup 응답엔 id/name/목표만 있음 |
 | | `updateMe(token, fields)` | PATCH | `/users/me` | ✓ | 응답이 부분 필드라 성공 후 `fetchMe`로 전체 프로필 재조회 |
 | | `readStoredToken()` / `logout()` | — | (로컬) | — | secure storage 읽기/삭제, API 호출 아님 |
 | `services/bakery_service.dart` | `fetchNearby(...)` | GET | `/bakeries` | ✗ | `userWeight` 넘기면 `estimated_walk_calories`/`suggested_walk` 채워짐 |
 | | `fetchDetail(bakeryId)` | GET | `/bakeries/:id` | ✗ | `tour_info`는 raw Map, TourAPI 미등록이면 `null` |
 | | `fetchItems(bakeryId)` | GET | `/bakeries/:id/items` | ✗ | |
+| | `fetchNearbySpots(bakeryId)` | GET | `/bakeries/:id/nearby-spots` | ✗ | **빵집 좌표** 기준 TourAPI 관광지 (사용자 좌표 안 보냄). 도보 분/칼로리는 기기 계산 |
 | `services/tour_service.dart` | `startTour(token)` | POST | `/tours` | ✓ | 8단계 흐름 1단계 |
 | | `addStop(...)` | POST | `/tours/:tourId/stops` | ✓ | 8단계 흐름 6~7단계, 클라이언트 실측값(distance_m/duration_minutes/steps) 필요 |
 | | `completeTour(token, tourId)` | PATCH | `/tours/:tourId/complete` | ✓ | 8단계 흐름 8단계, `balance_kcal` 확정 |
 | | `getTour(token, tourId)` | GET | `/tours/:tourId` | ✓ | 리포트 카드용 `stops[]` 포함 |
-| `services/food_log_service.dart` | `create(...)` | POST | `/food-logs` | ✓ | 실제 섭취 확정 시점에만 호출 (예상치는 저장 안 함) |
+| | `fetchHistory(token, {limit})` | GET | `/tours` | ✓ | 완료된 투어만 최신순 — 통계 탭의 지난 리포트 목록 |
+| `services/food_log_service.dart` | `create(token:, selection:, tourStopId:)` | POST | `/food-logs` | ✓ | 실제 섭취 확정 시점에만 호출. `BreadSelection.isCustom`이면 `custom_name`/`custom_calories`로 보냄 |
 | | `list(token, {from, to})` | GET | `/food-logs` | ✓ | |
 | `services/calories_service.dart` | `getBalance(token)` | GET | `/calories/balance` | ✓ | 0-kcal 밸런스 바 실시간 값 |
 | | `calculatePreview(...)` | POST | `/calories/calculate` | ✗ | 미리보기 단건 계산 |
-| `services/stats_service.dart` | `daily(token, {date})` | GET | `/stats/daily` | ✓ | |
+| `services/stats_service.dart` | `daily(token, {date})` | GET | `/stats/daily` | ✓ | `visits[]` — 그날 방문 빵집별 먹은 빵 |
 | | `weekly(token, {to})` | GET | `/stats/weekly` | ✓ | |
-| `services/sightseeing_service.dart` | `nearby(...)` | GET | `/tour/nearby` | ✓ | **`/tour`(단수, TourAPI 프록시)** — `/tours`(투어 세션)와 다른 리소스 |
-| | `spotDetail(token, contentId)` | GET | `/tour/spots/:contentId` | ✓ | |
+| `services/sightseeing_service.dart` | `spotDetail(token, contentId)` | GET | `/tour/spots/:contentId` | ✓ | **`/tour`(단수, TourAPI 프록시)** — `/tours`(투어 세션)와 다른 리소스. 사용자 좌표를 보내던 `nearby`는 삭제 |
 
 ---
 
@@ -79,9 +82,11 @@ final token = context.read<AuthProvider>().token; // String? — null이면 비�
 
 화면에서 쓰는 응답은 전부 `models/`의 모델 클래스(수동 `fromJson`)로 감싼다: `User`,
 `Bakery`, `BreadItem`, `TourInfo`, `SuggestedWalk`, `Tour`, `TourStop`, `FoodLog`,
-`CalorieBalance`, `DailyStats`, `WeeklyStats`, `BreadSelection`(클라이언트 전용 선택 상태),
-`ActivityLevel`(문자열 상수 3개). 아직 화면이 없는 `tour/nearby`, `tour/spots/:id`만 raw Map으로
-남아 있다 — 화면을 붙일 때 같은 패턴으로 모델을 추가할 것.
+`CalorieBalance`, `DailyStats`(+`DailyVisit`), `WeeklyStats`, `NearbySpot`, `SpotDetail`,
+`BreadSelection`·`TourLeg`(클라이언트 전용 선택 상태), `ActivityLevel`(문자열 상수 3개).
+
+`TourLeg`는 `TourFlowController.currentLeg` — 투어 중 고른 빵집·빵과 그 구간의 진행(도착/섭취 확정)을
+들고 있어 홈 카드·홈 주변 관광지·통계의 "확정 전" 항목이 이 값을 본다. 투어 종료 시 비워진다.
 
 ---
 
@@ -90,15 +95,14 @@ final token = context.read<AuthProvider>().token; // String? — null이면 비�
 | 화면 | 파일 | 호출 |
 | --- | --- | --- |
 | 로그인/회원가입 | `login_screen.dart`, `signup_screen.dart` (`widgets/auth_layout.dart`) | `/auth/*`, `/users/me` |
-| 홈 (칼로리 잔액 + 투어 진입) | `home_screen.dart` | `/calories/balance` |
+| 홈 (칼로리 잔액 + 투어 요약 + 고른 빵집 주변 관광지) | `home_screen.dart`, `widgets/nearby_spots_section.dart` | `/calories/balance`, `/bakeries/:id/nearby-spots`, `/tour/spots/:id` (빵집을 고르기 전엔 관광지 섹션 없음) |
 | 빵집 목록 | `bakery_list_screen.dart` | `/bakeries` (**좌표 없이** 전체 목록 → 거리·도보 추천·칼로리·정렬은 `Bakery.withUserPosition`으로 기기 안에서 계산. 위치 실패 시 대전 중심 좌표) |
 | 빵집 상세 | `bakery_detail_screen.dart` | `/bakeries/:id`, `/bakeries/:id/items`, 네이버 지도 딥링크 |
-| 빵 메뉴 선택 | `bread_menu_screen.dart` | 없음 (예상 칼로리는 클라이언트 계산) |
-| 투어 진행 | `tour_progress_screen.dart` | `/tours`, `/tours/:id/stops` |
-| 섭취 확정 | `food_confirm_screen.dart` | `/food-logs`, 갤러리 저장 |
-| 투어 리포트 | `tour_report_screen.dart` | `/tours/:id/complete`, `/tours/:id` |
+| 빵 메뉴 선택 | `bread_menu_screen.dart` | `/bakeries/:id`, `/bakeries/:id/items` (예상 칼로리는 클라이언트 계산). "빵 직접 추가"로 메뉴에 없는 빵을 이름+칼로리로 담을 수 있고, 버튼을 누르면 `TourFlowController.startLeg`가 투어를 시작한 뒤 홈으로 보낸다 |
+| 투어 진행 (이동→도착→섭취 확정→다음 빵집) | `widgets/active_tour_card.dart` + `widgets/food_confirm_sheet.dart` (홈 탭 안) | `/tours`, `/tours/:id/stops`, `/food-logs`, 갤러리 저장 |
+| 투어 리포트 | `tour_report_screen.dart` (`/tour/report` 종료 직후, `/tour/report/:tourId` 통계에서) | `/tours/:id/complete`, `/tours/:id` |
 | 통계 | `stats_screen.dart` | `/stats/daily`, `/stats/weekly` |
-| 마이페이지 | `profile_screen.dart` | `PATCH /users/me` |
+| 마이페이지 | `profile_screen.dart` | `PATCH /users/me`, `PUT /users/me/credentials` |
 
 투어 API 호출 순서와 ID 전달(`tour_id`, `tour_stop_id`)은 화면이 아니라
 `controllers/tour_flow_controller.dart`가 전담한다. 화면을 갈아엎어도 이 컨트롤러는 그대로 둘 것.

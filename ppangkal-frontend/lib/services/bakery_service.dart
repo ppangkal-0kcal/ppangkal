@@ -1,6 +1,7 @@
 import '../core/api_client.dart';
 import '../models/bakery.dart';
 import '../models/bread_item.dart';
+import '../models/nearby_spot.dart';
 
 /// GET /api/bakeries* (FRONTEND_API_GUIDE.md §2 steps 2~4) — none of these
 /// three require auth.
@@ -27,5 +28,12 @@ class BakeryService {
     final json = await _client.get('/bakeries/$bakeryId/items');
     final list = json['bread_items'] as List<dynamic>;
     return list.map((e) => BreadItem.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// TourAPI spots around the bakery itself — no user position in the request.
+  Future<List<NearbySpot>> fetchNearbySpots(String bakeryId) async {
+    final json = await _client.get('/bakeries/$bakeryId/nearby-spots');
+    final list = json['spots'] as List<dynamic>;
+    return list.map((e) => NearbySpot.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

@@ -45,6 +45,17 @@ class ApiClient {
     );
   }
 
+  Future<Map<String, dynamic>> put(
+    String path, {
+    Map<String, dynamic>? body,
+    String? token,
+  }) {
+    final uri = Uri.parse('$apiBaseUrl$path');
+    return _send(
+      () => _http.put(uri, headers: _headers(token), body: jsonEncode(body ?? {})),
+    );
+  }
+
   Map<String, String> _headers(String? token) => {
         'Content-Type': 'application/json; charset=utf-8',
         if (token != null) 'Authorization': 'Bearer $token',

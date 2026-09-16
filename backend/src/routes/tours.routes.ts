@@ -185,6 +185,52 @@ toursRouter.patch(
 
 /**
  * @openapi
+ * /tours:
+ *   get:
+ *     tags: [Tours]
+ *     summary: 완료된 투어 목록 (통계 탭의 지난 리포트 — 최신순)
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20, maximum: 100 }
+ *     responses:
+ *       200:
+ *         description: "{ tours: [{ id, started_at, completed_at, total_steps, total_distance_m, total_calories_burned, total_calories_consumed, balance_kcal, bakery_count, bakery_names[] }] } — stops 상세는 GET /tours/:id"
+ */
+// GET /api/tours — 진행 중인 투어는 빼고(completed_at IS NULL) 끝난 것만 돌려준다.
+toursRouter.get(
+  '/',
+  asyncHandler(async (req, res) => {
+    const limit = Math.min(Number(req.query.limit) || 20, 100);
+
+    const tours = await prisma.tour.findMany({
+      where: { userId: req.userId, completedAt: { not: null } },
+      orderBy: { completedAt: 'desc' },
+      take: limit,
+      // 목록 카드에는 빵집 이름만 필요하다 — 걸음/거리 같은 stop 단위 수치는 상세에서 받는다.
+      include: { stops: { select: { bakery: { select: { name: true } } }, orderBy: { visitedAt: 'asc' } } },
+    });
+
+    res.json({
+      tours: tours.map((tour) => ({
+        id: tour.id,
+        started_at: tour.startedAt,
+        completed_at: tour.completedAt,
+        total_steps: tour.totalSteps,
+        total_distance_m: tour.totalDistanceM,
+        total_calories_burned: tour.totalCaloriesBurned,
+        total_calories_consumed: tour.totalCaloriesConsumed,
+        balance_kcal: tour.balanceKcal,
+        bakery_count: tour.stops.length,
+        bakery_names: tour.stops.map((stop) => stop.bakery.name),
+      })),
+    });
+  }),
+);
+
+/**
+ * @openapi
  * /tours/{tourId}:
  *   get:
  *     tags: [Tours]

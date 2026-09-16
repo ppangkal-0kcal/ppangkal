@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../core/validators.dart';
 import '../models/activity_level.dart';
 import '../models/user.dart';
 import '../providers/auth_provider.dart';
@@ -56,8 +57,7 @@ class ProfileScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.lg),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      StatRow(
                         children: [
                           StatColumn(label: '키', value: user.height != null ? '${user.height!.toStringAsFixed(0)}cm' : '-'),
                           StatColumn(label: '체중', value: user.weight != null ? '${user.weight!.toStringAsFixed(0)}kg' : '-'),
@@ -69,8 +69,17 @@ class ProfileScreen extends StatelessWidget {
                         Text('활동 수준: ${user.activityLevel}', style: textTheme.bodyMedium),
                       ],
                       const Divider(height: AppSpacing.xl),
-                      // 비밀번호 없는 MVP 로그인이라 이 ID가 곧 로그인 수단 —
-                      // 잃어버리면 다시 들어올 방법이 없으므로 복사할 수 있게 노출.
+                      if (user.email != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('로그인 이메일', style: textTheme.labelMedium),
+                            Text(user.email!, style: textTheme.bodyMedium),
+                          ],
+                        )
+                      // 1.0.0에서 ID로만 가입한 계정 — 이 ID가 유일한 로그인 수단이라 복사할 수
+                      // 있게 두고, 이메일 로그인으로 옮겨갈 수 있는 버튼을 함께 보여준다.
+                      else ...[
                       Row(
                         children: [
                           Expanded(
@@ -94,6 +103,13 @@ class ProfileScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                      const SizedBox(height: AppSpacing.sm),
+                      FilledButton.tonalIcon(
+                        onPressed: () => _showLinkSheet(context),
+                        icon: const Icon(Icons.mail_outline),
+                        label: const Text('이메일 로그인 설정하기'),
+                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -113,6 +129,113 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (sheetContext) => _EditProfileSheet(authProvider: context.read<AuthProvider>(), user: user),
+    );
+  }
+
+  void _showLinkSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => _LinkCredentialsSheet(authProvider: context.read<AuthProvider>()),
+    );
+  }
+}
+
+/// `PUT /users/me/credentials` — moves an ID-only (1.0.0) account to
+/// email+password login.
+class _LinkCredentialsSheet extends StatefulWidget {
+  final AuthProvider authProvider;
+
+  const _LinkCredentialsSheet({required this.authProvider});
+
+  @override
+  State<_LinkCredentialsSheet> createState() => _LinkCredentialsSheetState();
+}
+
+class _LinkCredentialsSheetState extends State<_LinkCredentialsSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _saving = true);
+    final ok = await widget.authProvider.linkCredentials(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    if (!mounted) return;
+    setState(() => _saving = false);
+    final messenger = ScaffoldMessenger.of(context);
+    if (ok) {
+      Navigator.of(context).pop();
+      messenger.showSnackBar(const SnackBar(content: Text('이제 이메일로 로그인할 수 있어요.')));
+    } else {
+      messenger.showSnackBar(
+        SnackBar(content: Text(widget.authProvider.errorMessage ?? '설정에 실패했습니다.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSpacing.md,
+        right: AppSpacing.md,
+        top: AppSpacing.lg,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('이메일 로그인 설정', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: AppSpacing.xs),
+            Text('설정 후에는 ID 대신 이메일과 비밀번호로 로그인해요.', style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: AppSpacing.md),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(labelText: '이메일'),
+              validator: Validators.email,
+            ),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: '비밀번호', helperText: '8자 이상'),
+              validator: Validators.password,
+            ),
+            TextFormField(
+              controller: _confirmController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: '비밀번호 확인'),
+              validator: (v) => v != _passwordController.text ? '비밀번호가 일치하지 않습니다' : null,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: _saving ? null : _submit,
+              child: _saving
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Text('설정하기'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

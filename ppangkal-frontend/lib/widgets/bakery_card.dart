@@ -104,18 +104,37 @@ class _Meta extends StatelessWidget {
   }
 }
 
+/// 걸어갈 만한 거리라는 건 이 앱에서 "칼로리를 채울 수 있다"는 뜻이라,
+/// [CalorieStatusColors]의 안전(초록)을 그대로 쓴다 — 회색 배지일 때는
+/// 다른 메타 정보와 구분이 안 됐다.
 class _WalkRecommendedBadge extends StatelessWidget {
   const _WalkRecommendedBadge();
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).extension<CalorieStatusColors>()?.safe ?? CalorieStatusColors.brand.safe;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
-      child: Text('걸어가기 좋아요', style: Theme.of(context).textTheme.labelSmall),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.directions_walk, size: 14, color: color),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            '걸어가기 좋아요',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
+      ),
     );
   }
 }

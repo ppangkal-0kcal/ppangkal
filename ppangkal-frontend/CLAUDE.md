@@ -14,6 +14,10 @@ photos) are implemented — see `API_INTEGRATION.md` §5 (screens) and §9 (devi
   screen-by-screen `Navigator.push`/`MaterialPageRoute`, no `AuthGate` widget. Auth gating is a
   `redirect` keyed off `AuthProvider` via `refreshListenable`; login/signup screens just flip
   `AuthProvider.status` and the router follows, they don't navigate themselves.
+- **투어는 홈 탭에서 진행한다 (2026-09-16)**: 별도 `tour_progress_screen`/`food_confirm_screen`은
+  삭제했다. 이동→도착 기록→먹은 빵 확정(바텀시트)→다음 빵집/종료가 전부
+  `widgets/active_tour_card.dart`의 카드 상태로 이뤄지고, 상태는 `TourFlowController.currentLeg`가
+  들고 있어 탭을 옮겨도 이어진다. 남은 투어 라우트는 `/tour/report`뿐.
 - **Bottom-tab shell**: `StatefulShellRoute.indexedStack` (`lib/widgets/main_shell.dart`), 4 tabs —
   홈/빵집/통계/마이페이지. Each tab keeps its own navigation stack across tab switches, so tab
   screens stay alive: 홈/통계 refetch by `select`ing `TourFlowController.dataRevision`, which bumps
@@ -113,7 +117,14 @@ without derailing a diet/calorie goal.
   예상 칼로리·산책 제안·정렬은 `Bakery.withUserPosition`(공식: `lib/core/walk_calories.dart`, 서버
   `calorieService.ts`와 동일)으로 기기 안에서 계산한다. `test/bread_info_test.dart`가 요청에 쿼리가 없음을 고정한다.
 - 투어 GPS 좌표도 기기 안에서만 쓰고 서버에는 거리·시간·걸음 합산값만 보낸다.
-- `SightseeingService.nearby`는 좌표를 쿼리로 보내는 구현이라 **화면에 연결하기 전에** 같은 방식으로 바꿀 것 (현재 미사용).
+- 홈의 주변 관광지는 `GET /bakeries/:id/nearby-spots`(**빵집 좌표** 기준)로 받는다. 사용자 좌표를 보내던
+  `SightseeingService.nearby`(`/tour/nearby`)는 삭제했다 — 되살리지 말 것.
+
+## 로그인 (2026-09-16, 앱 1.1.0)
+
+- 이메일+비밀번호 가입/로그인. 1.0.0에서 ID로만 가입한 계정은 로그인 화면의 "이전 버전 ID로 로그인"으로 들어와
+  마이페이지에서 이메일을 연결한다 (`PUT /users/me/credentials`). 스토어의 1.0.0 앱이 계속 동작하도록 서버는
+  `{ user_id }` 로그인과 email 없는 가입을 계속 받는다.
 - 출시 절차·서명 키·수집 항목 표는 `RELEASE.md`.
 
 ## 모델 규칙

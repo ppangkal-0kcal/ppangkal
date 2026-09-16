@@ -4,7 +4,11 @@
 /// have to be tied to a tour) and the backend passes that through as-is.
 class FoodLog {
   final String id;
-  final String breadItemId;
+
+  /// `null` when the user typed the bread in themselves — [customName] holds
+  /// its name then.
+  final String? breadItemId;
+  final String? customName;
   final String? tourStopId;
   final int calories;
   final int quantity;
@@ -12,7 +16,8 @@ class FoodLog {
 
   const FoodLog({
     required this.id,
-    required this.breadItemId,
+    this.breadItemId,
+    this.customName,
     this.tourStopId,
     required this.calories,
     required this.quantity,
@@ -21,7 +26,8 @@ class FoodLog {
 
   factory FoodLog.fromJson(Map<String, dynamic> json) => FoodLog(
         id: json['id'] as String,
-        breadItemId: json['bread_item_id'] as String,
+        breadItemId: json['bread_item_id'] as String?,
+        customName: json['custom_name'] as String?,
         tourStopId: json['tour_stop_id'] as String?,
         calories: json['calories'] as int,
         quantity: json['quantity'] as int,

@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../models/bakery.dart';
+import '../models/bread_selection.dart';
 import '../models/calorie_balance.dart';
 import '../models/food_log.dart';
 import '../models/tour.dart';
+import '../models/tour_leg.dart';
 import '../models/tour_stop.dart';
 import '../services/calories_service.dart';
 import '../services/food_log_service.dart';
@@ -78,6 +81,7 @@ class TourFlowController extends ChangeNotifier {
   Tour? _tour;
   final List<TourStop> _stops = [];
   final List<FoodLog> _foodLogs = [];
+  TourLeg? _currentLeg;
 
   StreamSubscription<int>? _stepSubscription;
   StreamSubscription<GeoSample>? _positionSubscription;
@@ -109,6 +113,34 @@ class TourFlowController extends ChangeNotifier {
   Tour? get tour => _tour;
   List<TourStop> get stops => List.unmodifiable(_stops);
   List<FoodLog> get foodLogs => List.unmodifiable(_foodLogs);
+
+  /// Bakery + bread picked for the leg in progress — `null` until a tour
+  /// starts with a pick, and cleared again when the tour completes. 홈 uses
+  /// it for the tour summary and to decide whether to show nearby spots.
+  TourLeg? get currentLeg => _currentLeg;
+
+  /// Records the bakery/bread pick for the active tour's current leg. Picking
+  /// the same bakery again before its food is confirmed (e.g. resuming from
+  /// 홈) keeps the leg's arrival state; anything else starts a fresh leg.
+  /// Starts a tour if none is running, then records the pick — the single
+  /// entry point used by 빵 메뉴 선택's "투어 시작" button.
+  Future<void> startLeg({
+    required String token,
+    required Bakery bakery,
+    required List<BreadSelection> selections,
+  }) async {
+    if (!isStarted) await startTour(token);
+    planLeg(bakery, selections);
+  }
+
+  void planLeg(Bakery bakery, List<BreadSelection> selections) {
+    if (!isStarted) return;
+    final leg = _currentLeg;
+    _currentLeg = leg != null && leg.bakery.id == bakery.id && !leg.foodConfirmed
+        ? leg.copyWith(selections: selections)
+        : TourLeg(bakery: bakery, selections: selections);
+    notifyListeners();
+  }
 
   /// True only while a tour is actively in progress. [_tour] itself stays
   /// non-null after [complete]/[fetchReport] too (the report screen reads
@@ -166,6 +198,7 @@ class TourFlowController extends ChangeNotifier {
     _tour = tour;
     _stops.clear();
     _foodLogs.clear();
+    _currentLeg = null;
     _countedSteps = 0;
     _walkFilter = WalkFilter();
     await _startSensors();
@@ -234,31 +267,44 @@ class TourFlowController extends ChangeNotifier {
       steps: steps,
     );
     _stops.add(stop);
+    final leg = _currentLeg;
+    if (leg != null && leg.bakery.id == bakeryId) {
+      _currentLeg = leg.copyWith(arrivedStop: stop);
+    }
     _beginLeg();
     _dataRevision++;
     notifyListeners();
     return stop;
   }
 
-  /// Logs food eaten at the most recently recorded stop.
-  Future<FoodLog> logFood({
-    required String token,
-    required String breadItemId,
-    int quantity = 1,
-  }) async {
+  /// Logs food eaten at the most recently recorded stop. [selection] may be
+  /// a menu item or a bread the user typed in — see [BreadSelection].
+  Future<FoodLog> logFood({required String token, required BreadSelection selection}) async {
     if (_stops.isEmpty) {
       throw StateError('arriveAtBakery()를 먼저 호출해야 합니다.');
     }
     final log = await _foodLogService.create(
       token: token,
-      breadItemId: breadItemId,
+      selection: selection,
       tourStopId: _stops.last.id,
-      quantity: quantity,
     );
     _foodLogs.add(log);
     _dataRevision++;
     notifyListeners();
     return log;
+  }
+
+  /// Logs every selection at the latest stop, then marks the current leg's
+  /// food as confirmed so re-entering the screen can't log it twice.
+  Future<void> confirmFood({required String token, required List<BreadSelection> selections}) async {
+    for (final selection in selections) {
+      await logFood(token: token, selection: selection);
+    }
+    final leg = _currentLeg;
+    if (leg != null) {
+      _currentLeg = leg.copyWith(foodConfirmed: true);
+      notifyListeners();
+    }
   }
 
   /// Today's running balance — independent of which tour is active (the
@@ -273,6 +319,7 @@ class TourFlowController extends ChangeNotifier {
     final tour = _requireTour();
     final completed = await _tourService.completeTour(token, tour.id);
     _tour = completed;
+    _currentLeg = null;
     await _stopPositionTracking();
     _dataRevision++;
     notifyListeners();

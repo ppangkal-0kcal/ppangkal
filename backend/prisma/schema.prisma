@@ -18,6 +18,10 @@ model User {
   activityLevel     String   @map("activity_level")
   dailyGoalCalories Int      @map("daily_goal_calories")
   createdAt         DateTime @default(now()) @map("created_at")
+  // 이메일+비밀번호 로그인 (앱 1.1.0+). 1.0.0 때 ID로만 가입한 사용자는 둘 다 NULL이고 기존 user_id
+  // 로그인을 계속 쓴다. 이메일은 소문자로 정규화해 저장하고, 비밀번호는 scrypt 해시만 저장한다.
+  email             String?  @unique
+  passwordHash      String?  @map("password_hash")
 
   tours    Tour[]
   foodLogs FoodLog[]
@@ -147,14 +151,17 @@ model TourStop {
 model FoodLog {
   id         String   @id @default(cuid())
   userId     String   @map("user_id")
-  breadItemId String  @map("bread_item_id")
+  // 큐레이션된 메뉴를 먹었으면 bread_item_id, DB에 없는 빵을 사용자가 직접 입력했으면 custom_name.
+  // 둘 중 하나는 반드시 있다 (앱/라우트에서 강제 — DB CHECK는 걸지 않았다).
+  breadItemId String? @map("bread_item_id")
+  customName  String? @map("custom_name")
   tourStopId String?  @map("tour_stop_id")
   calories   Int
   quantity   Int      @default(1)
   loggedAt   DateTime @default(now()) @map("logged_at")
 
   user      User      @relation(fields: [userId], references: [id])
-  breadItem BreadItem @relation(fields: [breadItemId], references: [id])
+  breadItem BreadItem? @relation(fields: [breadItemId], references: [id])
   tourStop  TourStop? @relation(fields: [tourStopId], references: [id])
 
   @@map("food_logs")

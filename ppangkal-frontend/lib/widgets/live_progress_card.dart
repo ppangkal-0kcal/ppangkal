@@ -30,8 +30,7 @@ class LiveProgressCard extends StatelessWidget {
     return GlassCard(
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          StatRow(
             children: [
               StatColumn(label: '이번 구간 걸음', value: '${controller.currentLegSteps}'),
               StatColumn(label: '이번 구간 거리', value: '${controller.currentLegDistanceM}m'),

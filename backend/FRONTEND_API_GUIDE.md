@@ -21,8 +21,9 @@
 
 | 단계 | 호출 |
 | --- | --- |
-| 회원가입 | `POST /api/auth/signup` — `{ name, gender, age, height, weight, activity_level }` → `{ user: { id, name, daily_goal_calories }, token }` |
-| 로그인 (MVP: user_id 기반 간편 로그인) | `POST /api/auth/login` — `{ user_id }` → `{ token }` |
+| 회원가입 | `POST /api/auth/signup` — `{ email, password(8자+), name, gender, age, height, weight, activity_level }` → `{ user: { id, name, daily_goal_calories }, token }`. 중복 이메일은 409 `EMAIL_TAKEN`. (1.0.0 앱 호환으로 email/password 없이도 받지만 새 앱은 항상 보낸다) |
+| 로그인 | `POST /api/auth/login` — `{ email, password }` → `{ token }`. 불일치는 401 `INVALID_CREDENTIALS`. 1.0.0 ID 전용 계정은 `{ user_id }`도 계속 허용 |
+| ID 계정 → 이메일 연결 | `PUT /api/users/me/credentials` (인증) — `{ email, password }` → `{ email }`. 이미 이메일이 있으면 400 `EMAIL_ALREADY_SET` |
 | 내 프로필 조회 | `GET /api/users/me` (인증) → `{ id, name, gender, age, height, weight, activity_level, daily_goal_calories }` |
 | 내 프로필 수정 | `PATCH /api/users/me` (인증) — `weight`/`height`/`age`/`activity_level`/`daily_goal_calories` 중 바꿀 필드만 |
 
@@ -69,16 +70,18 @@
 ### 7단계 — 도착 & 실제 먹은 빵 정산
 1. 빵집 도착 시 `POST /api/tours/{tourId}/stops` — `{ bakery_id, distance_m, duration_minutes, steps }` (이 구간에서 실측한 값)
    → `{ id(=tour_stop_id), calories_burned, suggested_walk }` 받음. `suggested_walk`가 있으면 "도착 후 산책" 카드를 보여주면 됨 (없으면 `null`, 정상).
-2. 실제 먹은 빵 확정: `POST /api/food-logs` — `{ bread_item_id, tour_stop_id, quantity }` (`tour_stop_id`는 위에서 받은 값)
+2. 실제 먹은 빵 확정: `POST /api/food-logs` — `{ bread_item_id, tour_stop_id, quantity }` (`tour_stop_id`는 위에서 받은 값).
+   메뉴에 없는 빵은 `bread_item_id` 대신 `{ custom_name, custom_calories(1개당, 0~5000) }`로 보낸다 — 이 값은 그 사용자의 food_log에만 저장되고 `bread_items`에는 아무것도 추가되지 않는다. 응답의 `bread_item_id`는 이때 `null`, `custom_name`에 이름이 담긴다.
    → 여러 개 먹었으면 빵 종류별로 여러 번 호출.
 3. 0-kcal 밸런스 바 갱신용 실시간 값: `GET /api/calories/balance` (인증) → `remaining_calories`, `status`(green/yellow/red)
 
 ### 8단계 — 투어 종료 & 결과 저장
 - `PATCH /api/tours/{tourId}/complete` (인증) → `{ total_steps, total_distance_m, total_calories_burned, total_calories_consumed, balance_kcal }` — 이 값으로 종료 요약 카드를 그린다.
 - 방문 빵집별 상세까지 포함한 전체 리포트가 필요하면: `GET /api/tours/{tourId}` → `stops[]`(빵집별 거리/시간/걸음수/칼로리) 포함.
+- 지난 투어 리포트를 다시 볼 때는 `GET /api/tours`로 목록(완료된 것만, 최신순)을 받고 고른 투어를 `GET /api/tours/{tourId}`로 조회한다 — 목록 응답에는 `bakery_count`/`bakery_names[]`만 있고 stop 단위 수치는 없다.
 
 ### 그 외 — 통계 화면
-- `GET /api/stats/daily?date=YYYY-MM-DD` → 하루 섭취/소모 칼로리, 방문 빵집 수
+- `GET /api/stats/daily?date=YYYY-MM-DD` → 하루 섭취/소모 칼로리, 방문 빵집 수, `visits[]`(그날 방문한 빵집별 `bakery_name`/`visited_at`/`calories_burned`/`breads[{ name, quantity, calories }]`, 진행 중 투어 포함)
 - `GET /api/stats/weekly?to=YYYY-MM-DD` → 최근 7일 그래프용 데이터 + 목표 달성률
 
 ---
@@ -88,14 +91,17 @@
 | Method | Path | 인증 | 설명 |
 | --- | --- | --- | --- |
 | POST | `/auth/signup` | ✗ | 회원가입 |
-| POST | `/auth/login` | ✗ | 로그인 (user_id 기반) |
+| POST | `/auth/login` | ✗ | 로그인 (email+password, 구버전 user_id) |
+| PUT | `/users/me/credentials` | ✓ | ID 전용 계정에 이메일 로그인 연결 |
 | GET | `/users/me` | ✓ | 내 프로필 |
 | PATCH | `/users/me` | ✓ | 프로필 수정 |
 | GET | `/bakeries` | ✗ | 주변 빵집 목록 |
 | GET | `/bakeries/{bakeryId}` | ✗ | 빵집 상세 (TourAPI 보강 포함) |
 | GET | `/bakeries/{bakeryId}/items` | ✗ | 빵 메뉴 목록 |
+| GET | `/bakeries/{bakeryId}/nearby-spots` | ✗ | 빵집 좌표 기준 2km 주변 관광지 최대 10곳 (TourAPI, 12시간 캐시, 숙박·음식점 제외). 실패 시 502 `TOUR_API_UNAVAILABLE` |
 | POST | `/tours` | ✓ | 투어 시작 |
 | POST | `/tours/{tourId}/stops` | ✓ | 빵집 도착 기록 |
+| GET | `/tours` | ✓ | 완료된 투어 목록 (최신순, `limit` 기본 20) — 통계 탭 지난 리포트 |
 | GET | `/tours/{tourId}` | ✓ | 투어 상세 (리포트 카드) |
 | PATCH | `/tours/{tourId}/complete` | ✓ | 투어 종료 |
 | POST | `/calories/calculate` | ✗ | 도보 소모 칼로리 단건 계산 (미리보기용) |
@@ -104,7 +110,7 @@
 | GET | `/food-logs?from=&to=` | ✓ | 섭취 기록 조회 |
 | GET | `/stats/daily?date=` | ✓ | 일별 통계 |
 | GET | `/stats/weekly?to=` | ✓ | 주간 통계 |
-| GET | `/tour/nearby?lat=&lng=&radius_km=` | ✓ | 주변 관광지 목록 (TourAPI) |
+| GET | `/tour/nearby?lat=&lng=&radius_km=` | ✓ | 주변 관광지 목록 (TourAPI) — 사용자 좌표를 받으므로 앱은 쓰지 않음, 대신 `/bakeries/{id}/nearby-spots` |
 | GET | `/tour/spots/{contentId}` | ✓ | 관광지 상세 (TourAPI) |
 
 `/tour`(단수, TourAPI 관광정보 프록시)와 `/tours`(복수, 빵투어 세션)는 이름이 비슷하지만 완전히 다른 리소스이니 헷갈리지 말 것.

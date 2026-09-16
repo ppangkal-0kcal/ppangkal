@@ -32,7 +32,7 @@ function endOfDay(date: Date): Date {
  *         schema: { type: string, format: date }
  *     responses:
  *       200:
- *         description: date, consumed_calories, burned_calories, goal_calories, bakeries_visited
+ *         description: "date, consumed_calories, burned_calories, goal_calories, bakeries_visited, visits[] — 그날 방문한 빵집(진행 중 투어 포함)별 { tour_stop_id, bakery_id, bakery_name, visited_at, calories_burned, breads: [{ bread_item_id(직접 입력이면 null), name, is_custom, quantity, calories }] }"
  *       404:
  *         description: 사용자 없음
  */
@@ -47,11 +47,17 @@ statsRouter.get(
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
     if (!user) throw ApiError.notFound('사용자를 찾을 수 없습니다.');
 
-    const [foodLogs, tours] = await Promise.all([
+    const [foodLogs, tours, stops] = await Promise.all([
       prisma.foodLog.findMany({ where: { userId: req.userId, loggedAt: { gte: from, lte: to } } }),
       prisma.tour.findMany({
         where: { userId: req.userId, completedAt: { gte: from, lte: to } },
         include: { stops: true },
+      }),
+      // 진행 중인 투어의 방문도 포함한다 — 통계 탭에서 "오늘 고른 빵집과 빵"을 바로 보여주기 위함.
+      prisma.tourStop.findMany({
+        where: { tour: { userId: req.userId }, visitedAt: { gte: from, lte: to } },
+        include: { bakery: true, foodLogs: { include: { breadItem: true } } },
+        orderBy: { visitedAt: 'asc' },
       }),
     ]);
 
@@ -65,6 +71,20 @@ statsRouter.get(
       burned_calories: burnedCalories,
       goal_calories: user.dailyGoalCalories,
       bakeries_visited: bakeriesVisited,
+      visits: stops.map((stop) => ({
+        tour_stop_id: stop.id,
+        bakery_id: stop.bakeryId,
+        bakery_name: stop.bakery.name,
+        visited_at: stop.visitedAt.toISOString(),
+        calories_burned: stop.caloriesBurned,
+        breads: stop.foodLogs.map((log) => ({
+          bread_item_id: log.breadItemId,
+          name: log.breadItem?.name ?? log.customName ?? '직접 입력한 빵',
+          is_custom: log.breadItemId === null,
+          quantity: log.quantity,
+          calories: log.calories * log.quantity,
+        })),
+      })),
     });
   }),
 );

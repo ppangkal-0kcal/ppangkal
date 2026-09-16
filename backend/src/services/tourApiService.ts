@@ -18,6 +18,9 @@ interface LocationBasedListItem {
   mapx: string;
   mapy: string;
   dist: string;
+  contenttypeid?: string;
+  addr1?: string;
+  firstimage?: string;
 }
 
 interface DetailCommonItem {
@@ -55,6 +58,9 @@ export interface NearbySpot {
   distanceM: number;
   mapx: number;
   mapy: number;
+  contentTypeId: string | null;
+  address: string | null;
+  imageUrl: string | null;
 }
 
 export interface SpotDetail {
@@ -92,6 +98,7 @@ export async function fetchNearbySpots(params: {
   cat1?: string;
   cat2?: string;
   cat3?: string;
+  numOfRows?: number;
 }): Promise<NearbySpot[]> {
   const url = buildUrl('locationBasedList2', {
     mapX: params.longitude,
@@ -102,7 +109,7 @@ export async function fetchNearbySpots(params: {
     ...(params.cat1 ? { cat1: params.cat1 } : {}),
     ...(params.cat2 ? { cat2: params.cat2 } : {}),
     ...(params.cat3 ? { cat3: params.cat3 } : {}),
-    numOfRows: 20,
+    numOfRows: params.numOfRows ?? 20,
   });
 
   const res = await fetch(url);
@@ -118,7 +125,37 @@ export async function fetchNearbySpots(params: {
     distanceM: Number(item.dist),
     mapx: Number(item.mapx),
     mapy: Number(item.mapy),
+    contentTypeId: item.contenttypeid || null,
+    address: item.addr1 || null,
+    imageUrl: item.firstimage || null,
   }));
+}
+
+// 빵집 주변 "갈만한 곳" — 숙박(32)·음식점(39, 카페 포함)·여행코스(25)는 빵투어 중 들르는 장소가 아니라 뺀다.
+// 남는 타입: 관광지(12), 문화시설(14), 축제/공연(15), 레포츠(28), 쇼핑(38).
+const EXCLUDED_SPOT_TYPES = new Set(['25', '32', '39']);
+const BAKERY_SPOT_RADIUS_M = 2000;
+const BAKERY_SPOT_LIMIT = 10;
+const BAKERY_SPOT_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+const bakerySpotCache = new Map<string, { value: NearbySpot[]; expiresAt: number }>();
+
+/**
+ * 빵집 좌표 기준 주변 관광지 — 사용자 좌표는 쓰지 않는다. 공원 캐시와 같은 이유로 12시간 메모리 캐시
+ * (빵집 좌표는 고정이라 요청마다 TourAPI를 부를 필요가 없다). 실패는 캐시하지 않고 그대로 던진다.
+ */
+export async function findSpotsNearBakery(params: { latitude: number; longitude: number }): Promise<NearbySpot[]> {
+  const key = `${params.latitude.toFixed(5)},${params.longitude.toFixed(5)}`;
+  const cached = bakerySpotCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.value;
+
+  const spots = await fetchNearbySpots({ ...params, radiusM: BAKERY_SPOT_RADIUS_M, numOfRows: 50 });
+  const value = spots
+    .filter((spot) => !spot.contentTypeId || !EXCLUDED_SPOT_TYPES.has(spot.contentTypeId))
+    .sort((a, b) => a.distanceM - b.distanceM)
+    .slice(0, BAKERY_SPOT_LIMIT);
+
+  bakerySpotCache.set(key, { value, expiresAt: Date.now() + BAKERY_SPOT_CACHE_TTL_MS });
+  return value;
 }
 
 // '공원' 분류코드 — TourAPI categoryCode2로 실제 조회해 확인함: 자연(A01) 하위가 아니라

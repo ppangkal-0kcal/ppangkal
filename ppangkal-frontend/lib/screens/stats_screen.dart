@@ -4,19 +4,24 @@ import 'package:provider/provider.dart';
 import '../controllers/tour_flow_controller.dart';
 import '../core/api_exception.dart';
 import '../models/daily_stats.dart';
+import '../models/tour_leg.dart';
+import '../models/tour_summary.dart';
 import '../models/weekly_stats.dart';
 import '../providers/auth_provider.dart';
 import '../services/stats_service.dart';
+import '../services/tour_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/error_view.dart';
+import '../widgets/expandable_tile.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/loading_view.dart';
 import '../widgets/stat_column.dart';
+import '../widgets/tour_history_card.dart';
 import '../widgets/weekly_bar_chart.dart';
 
-/// 통계 tab — today's breakdown (`GET /stats/daily`) plus a 7-day bar chart
-/// (`GET /stats/weekly`). See `API_INTEGRATION.md` §3 for the service
-/// mapping this replaces the "디자인 없음" raw-dump verification screen.
+/// 통계 tab — today's breakdown (`GET /stats/daily`), a 7-day bar chart
+/// (`GET /stats/weekly`), and the finished-tour reports (`GET /tours`).
+/// See `API_INTEGRATION.md` §3 for the service mapping.
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
 
@@ -25,7 +30,7 @@ class StatsScreen extends StatefulWidget {
 }
 
 class _StatsScreenState extends State<StatsScreen> {
-  late Future<(DailyStats, WeeklyStats)> _future;
+  late Future<(DailyStats, WeeklyStats, List<TourSummary>)> _future;
   int? _loadedRevision;
 
   /// Refetch after a stop/food log/tour completion — this tab stays alive
@@ -44,9 +49,9 @@ class _StatsScreenState extends State<StatsScreen> {
     _future = _fetch(token);
   }
 
-  Future<(DailyStats, WeeklyStats)> _fetch(String token) async {
+  Future<(DailyStats, WeeklyStats, List<TourSummary>)> _fetch(String token) async {
     final service = StatsService();
-    return (service.daily(token), service.weekly(token)).wait;
+    return (service.daily(token), service.weekly(token), TourService().fetchHistory(token)).wait;
   }
 
   @override
@@ -63,14 +68,14 @@ class _StatsScreenState extends State<StatsScreen> {
 }
 
 class _StatsSection extends StatelessWidget {
-  final Future<(DailyStats, WeeklyStats)> future;
+  final Future<(DailyStats, WeeklyStats, List<TourSummary>)> future;
   final VoidCallback onRetry;
 
   const _StatsSection({required this.future, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<(DailyStats, WeeklyStats)>(
+    return FutureBuilder<(DailyStats, WeeklyStats, List<TourSummary>)>(
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
@@ -86,7 +91,7 @@ class _StatsSection extends StatelessWidget {
           );
         }
 
-        final (daily, weekly) = snapshot.data!;
+        final (daily, weekly, tours) = snapshot.data!;
         final textTheme = Theme.of(context).textTheme;
 
         return ListView(
@@ -114,8 +119,7 @@ class _StatsSection extends StatelessWidget {
                 children: [
                   Text('오늘', style: textTheme.titleMedium),
                   const SizedBox(height: AppSpacing.md),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  StatRow(
                     children: [
                       StatColumn(label: '목표', value: '${daily.goalCalories}'),
                       StatColumn(label: '섭취', value: '${daily.consumedCalories}'),
@@ -126,9 +130,112 @@ class _StatsSection extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: AppSpacing.md),
+            _TodayBreadCard(visits: daily.visits),
+            const SizedBox(height: AppSpacing.md),
+            TourHistoryCard(tours: tours),
           ],
         );
       },
+    );
+  }
+}
+
+/// 오늘 고른 빵집과 빵 — confirmed visits from `/stats/daily` plus the current
+/// leg's pick if its bread isn't confirmed yet (client-only until then).
+class _TodayBreadCard extends StatelessWidget {
+  final List<DailyVisit> visits;
+
+  const _TodayBreadCard({required this.visits});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final leg = context.select<TourFlowController, TourLeg?>((c) => c.isStarted ? c.currentLeg : null);
+    final pendingLeg = leg != null && !leg.foodConfirmed ? leg : null;
+
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('오늘 고른 빵집과 빵', style: textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.sm),
+          if (visits.isEmpty && pendingLeg == null)
+            Text('아직 기록이 없어요. 빵투어를 떠나 보세요!', style: textTheme.bodySmall),
+          for (final visit in visits)
+            _VisitBlock(
+              bakeryName: visit.bakeryName,
+              caption: '${_hhmm(visit.visitedAt)} 도착 · ${visit.caloriesBurned}kcal 소모',
+              lines: [for (final b in visit.breads) (name: b.name, quantity: b.quantity, kcal: b.calories)],
+              emptyText: '먹은 빵 기록 없음',
+            ),
+          if (pendingLeg != null)
+            _VisitBlock(
+              bakeryName: pendingLeg.bakery.name,
+              caption: pendingLeg.arrivedStop == null ? '이동 중 · 아직 먹기 전' : '도착 · 먹은 빵 확정 전',
+              lines: [
+                for (final s in pendingLeg.selections)
+                  (name: s.name, quantity: s.quantity, kcal: s.estimatedCalories),
+              ],
+              emptyText: '고른 빵 없음',
+              initiallyExpanded: true,
+            ),
+        ],
+      ),
+    );
+  }
+
+  static String _hhmm(DateTime utc) {
+    final t = utc.toLocal();
+    return '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+/// 빵집 한 곳의 방문 기록. 접으면 "어디서 몇 kcal"만, 펼치면 먹은 빵 목록까지 —
+/// 하루에 여러 곳을 돌면 카드가 계속 길어져서 기본은 접힌 상태로 둔다.
+class _VisitBlock extends StatelessWidget {
+  final String bakeryName;
+  final String caption;
+  final List<({String name, int quantity, int kcal})> lines;
+  final String emptyText;
+
+  /// 아직 확정 전인 현재 구간은 지금 뭘 골랐는지가 바로 보여야 해서 펼쳐서 시작한다.
+  final bool initiallyExpanded;
+
+  const _VisitBlock({
+    required this.bakeryName,
+    required this.caption,
+    required this.lines,
+    required this.emptyText,
+    this.initiallyExpanded = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final total = lines.fold<int>(0, (sum, l) => sum + l.kcal);
+
+    return ExpandableTile(
+      title: bakeryName,
+      subtitle: lines.isEmpty ? caption : '$caption · 빵 ${lines.length}종',
+      initiallyExpanded: initiallyExpanded,
+      trailing: lines.isEmpty ? null : Text('${total}kcal', style: textTheme.titleSmall),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (lines.isEmpty) Text(emptyText, style: textTheme.bodySmall),
+          for (final line in lines)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Row(
+                children: [
+                  Expanded(child: Text('${line.name} × ${line.quantity}', style: textTheme.bodyMedium)),
+                  Text('${line.kcal}kcal', style: textTheme.bodySmall),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

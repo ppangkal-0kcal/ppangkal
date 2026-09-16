@@ -20,8 +20,9 @@ const double _fallbackLat = 36.3504;
 const double _fallbackLng = 127.3845;
 
 /// Bakery list (`GET /bakeries` — FRONTEND_API_GUIDE.md §2 steps 2~3).
-/// Sorting is server-side only (`sort=distance|rating|recommended`) —
-/// switching [_sort] re-fetches, it never reorders the list locally.
+/// The whole list is fetched once, location-free; sorting, the radius filter
+/// and the name/address search all run on-device over that one response, so
+/// typing never hits the network (and never sends what the user searched for).
 class BakeryListScreen extends StatefulWidget {
   const BakeryListScreen({super.key});
 
@@ -43,6 +44,8 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
 
   String _sort = 'distance';
   bool _showMap = false;
+  final _searchController = TextEditingController();
+  String _query = '';
   late Future<List<Bakery>> _future;
   (double, double) _center = (_fallbackLat, _fallbackLng);
 
@@ -55,6 +58,22 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// 이름·주소 부분 일치. 서버에 검색 엔드포인트가 없고 목록이 이미 전부 메모리에
+  /// 있어서 기기에서 거른다 — 정렬·반경 필터와 같은 자리다.
+  List<Bakery> _search(List<Bakery> bakeries) {
+    final query = _query.trim().toLowerCase();
+    if (query.isEmpty) return bakeries;
+    return bakeries
+        .where((b) => b.name.toLowerCase().contains(query) || b.address.toLowerCase().contains(query))
+        .toList();
   }
 
   void _load() {
@@ -127,6 +146,27 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            TextField(
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onChanged: (value) => setState(() => _query = value),
+              decoration: InputDecoration(
+                hintText: '빵집 이름이나 주소로 검색',
+                prefixIcon: const Icon(Icons.search),
+                isDense: true,
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: '검색어 지우기',
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _query = '');
+                        },
+                      ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
             if (!_showMap)
               SegmentedButton<String>(
                 showSelectedIcon: false,
@@ -172,10 +212,12 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
                       onRetry: () => setState(_retry),
                     );
                   }
-                  final bakeries = snapshot.data!;
+                  final bakeries = _search(snapshot.data!);
                   if (bakeries.isEmpty) {
-                    return const EmptyView(
-                      message: '주변에 등록된 빵집이 없습니다.',
+                    return EmptyView(
+                      message: _query.trim().isEmpty
+                          ? '주변에 등록된 빵집이 없습니다.'
+                          : '‘${_query.trim()}’ 검색 결과가 없습니다.',
                       icon: Icons.bakery_dining_outlined,
                     );
                   }

@@ -18,7 +18,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('사용자 ID'), findsOneWidget);
+    expect(find.text('이메일'), findsOneWidget);
+    expect(find.text('비밀번호'), findsOneWidget);
   });
 
   testWidgets('Router shows a spinner while auth status is unknown', (tester) async {

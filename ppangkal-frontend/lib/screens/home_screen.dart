@@ -5,19 +5,21 @@ import 'package:provider/provider.dart';
 
 import '../controllers/tour_flow_controller.dart';
 import '../core/api_exception.dart';
+import '../models/bakery.dart';
 import '../models/calorie_balance.dart';
 import '../providers/auth_provider.dart';
 import '../services/calories_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/active_tour_card.dart';
 import '../widgets/calorie_balance_card.dart';
 import '../widgets/error_view.dart';
-import '../widgets/glass_card.dart';
 import '../widgets/loading_view.dart';
+import '../widgets/nearby_spots_section.dart';
 
-/// Home tab. Shows today's calorie balance from `GET /calories/balance`
-/// (FRONTEND_API_GUIDE.md §2 step 7) — only fields that endpoint actually
-/// returns; see `lib/widgets/calorie_balance_card.dart` for the status
-/// mapping — plus the entry point into (or back into) a bakery tour.
+/// Home tab. Today's calorie balance from `GET /calories/balance`
+/// (FRONTEND_API_GUIDE.md §2 step 7), the active tour itself
+/// ([ActiveTourCard] — 이동/도착/섭취 확정/다음 빵집이 전부 여기서 끝난다),
+/// and the picked bakery's nearby TourAPI spots.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -47,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     _reloadIfStale(context);
     final user = context.watch<AuthProvider>().user;
+    final pickedBakery = context.select<TourFlowController, Bakery?>((c) => c.currentLeg?.bakery);
 
     return Scaffold(
       appBar: AppBar(
@@ -84,7 +87,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   _BalanceSection(future: _future, onRetry: () => setState(_load)),
                   const SizedBox(height: AppSpacing.md),
-                  const _TourEntryCard(),
+                  const ActiveTourCard(),
+                  // 빵집을 고르기 전에는 주변 관광지를 보여주지 않는다.
+                  if (pickedBakery != null) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    NearbySpotsSection(bakery: pickedBakery),
+                  ],
                 ],
               ),
             ),
@@ -121,53 +129,6 @@ class _BalanceSection extends StatelessWidget {
         }
         return CalorieBalanceCard(balance: snapshot.data!);
       },
-    );
-  }
-}
-
-/// Starts a new tour, or resumes the one in progress — tours begin from a
-/// bakery pick (list → detail → menu → 투어 진행), so both lead to the
-/// 빵집 tab.
-class _TourEntryCard extends StatelessWidget {
-  const _TourEntryCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = context.watch<TourFlowController>();
-    final textTheme = Theme.of(context).textTheme;
-    final active = controller.isStarted;
-
-    return GlassCard(
-      child: Row(
-        children: [
-          Icon(
-            active ? Icons.directions_walk : Icons.bakery_dining_outlined,
-            size: 36,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(active ? '빵투어 진행 중' : '빵투어 떠나기', style: textTheme.titleMedium),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  active
-                      ? '${controller.stops.length}곳 방문 · 밸런스 ${controller.runningBalanceKcal}kcal'
-                      : '주변 빵집을 고르고 걸어서 칼로리를 채워요.',
-                  style: textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          FilledButton(
-            onPressed: () => context.go('/bakeries'),
-            child: Text(active ? '이어가기' : '시작'),
-          ),
-        ],
-      ),
     );
   }
 }

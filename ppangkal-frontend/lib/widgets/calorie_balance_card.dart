@@ -30,8 +30,7 @@ class CalorieBalanceCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           CalorieGauge(balance: balance),
           const SizedBox(height: AppSpacing.lg),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          StatRow(
             children: [
               StatColumn(label: '목표', value: '${balance.dailyGoalCalories}'),
               StatColumn(label: '섭취', value: '${balance.consumedCalories}'),

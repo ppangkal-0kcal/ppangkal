@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/validators.dart';
 import '../models/activity_level.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
@@ -17,6 +18,9 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _passwordConfirmController = TextEditingController();
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
   final _heightController = TextEditingController();
@@ -27,6 +31,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _passwordConfirmController.dispose();
     _nameController.dispose();
     _ageController.dispose();
     _heightController.dispose();
@@ -39,6 +46,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
     final auth = context.read<AuthProvider>();
     final ok = await auth.signup(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
       name: _nameController.text.trim(),
       gender: _gender,
       age: int.parse(_ageController.text),
@@ -69,6 +78,27 @@ class _SignupScreenState extends State<SignupScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+              decoration: const InputDecoration(labelText: '이메일', helperText: '로그인할 때 사용해요'),
+              validator: Validators.email,
+            ),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              autofillHints: const [AutofillHints.newPassword],
+              decoration: const InputDecoration(labelText: '비밀번호', helperText: '8자 이상'),
+              validator: Validators.password,
+            ),
+            TextFormField(
+              controller: _passwordConfirmController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: '비밀번호 확인'),
+              validator: (v) => v != _passwordController.text ? '비밀번호가 일치하지 않습니다' : null,
+            ),
+            const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: '이름'),

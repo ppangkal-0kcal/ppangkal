@@ -17,6 +17,8 @@ class AuthService {
         _storage = storage ?? const FlutterSecureStorage();
 
   Future<({User user, String token})> signup({
+    required String email,
+    required String password,
     required String name,
     required String gender,
     required int age,
@@ -25,6 +27,8 @@ class AuthService {
     required String activityLevel,
   }) async {
     final json = await _client.post('/auth/signup', body: {
+      'email': email,
+      'password': password,
       'name': name,
       'gender': gender,
       'age': age,
@@ -38,11 +42,24 @@ class AuthService {
     return (user: user, token: token);
   }
 
-  Future<String> login({required String userId}) async {
-    final json = await _client.post('/auth/login', body: {'user_id': userId});
+  Future<String> login({required String email, required String password}) =>
+      _login({'email': email, 'password': password});
+
+  /// ID-only login kept for accounts created by app 1.0.0 that haven't
+  /// linked an email yet.
+  Future<String> loginWithUserId(String userId) => _login({'user_id': userId});
+
+  Future<String> _login(Map<String, dynamic> body) async {
+    final json = await _client.post('/auth/login', body: body);
     final token = json['token'] as String;
     await _storage.write(key: _tokenKey, value: token);
     return token;
+  }
+
+  /// PUT /users/me/credentials — links email+password to an ID-only account.
+  Future<User> linkCredentials(String token, {required String email, required String password}) async {
+    await _client.put('/users/me/credentials', token: token, body: {'email': email, 'password': password});
+    return fetchMe(token);
   }
 
   Future<User> fetchMe(String token) async {

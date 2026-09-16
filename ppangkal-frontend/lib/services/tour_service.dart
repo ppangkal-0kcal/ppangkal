@@ -1,6 +1,7 @@
 import '../core/api_client.dart';
 import '../models/tour.dart';
 import '../models/tour_stop.dart';
+import '../models/tour_summary.dart';
 
 /// POST/GET/PATCH /api/tours* (FRONTEND_API_GUIDE.md §2 steps 1, 7~8) — all
 /// auth required.
@@ -43,5 +44,12 @@ class TourService {
   Future<Tour> getTour(String token, String tourId) async {
     final json = await _client.get('/tours/$tourId', token: token);
     return Tour.fromJson(json);
+  }
+
+  /// 완료된 투어만, 최신순 (통계 탭의 지난 리포트 목록).
+  Future<List<TourSummary>> fetchHistory(String token, {int limit = 20}) async {
+    final json = await _client.get('/tours', token: token, query: {'limit': '$limit'});
+    final list = json['tours'] as List<dynamic>;
+    return list.map((e) => TourSummary.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

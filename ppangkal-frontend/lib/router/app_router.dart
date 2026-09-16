@@ -2,20 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import '../models/bread_selection.dart';
 import '../providers/auth_provider.dart';
 import '../screens/bakery_detail_screen.dart';
 import '../screens/bakery_list_screen.dart';
 import '../screens/bread_menu_screen.dart';
 import '../screens/debug_screen.dart';
-import '../screens/food_confirm_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/stats_screen.dart';
-import '../screens/tour_progress_screen.dart';
 import '../screens/tour_report_screen.dart';
 import '../widgets/brand_background.dart';
 import '../widgets/main_shell.dart';
@@ -103,25 +100,15 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
           ),
         ],
       ),
-      // Active-tour flow — deliberately plain top-level routes, not nested
-      // under the tab shell: a tour spans multiple round trips through the
-      // 빵집 tab, and TourFlowController is a single app-root instance (see
-      // lib/main.dart), not scoped to any one branch of the shell.
-      GoRoute(
-        path: '/tour/progress/:bakeryId',
-        builder: (context, state) => _page(TourProgressScreen(
-          bakeryId: state.pathParameters['bakeryId']!,
-          selections: state.extra as List<BreadSelection>? ?? const [],
-        )),
-      ),
-      GoRoute(
-        path: '/tour/confirm/:tourStopId',
-        builder: (context, state) => _page(FoodConfirmScreen(
-          tourStopId: state.pathParameters['tourStopId']!,
-          selections: state.extra as List<BreadSelection>? ?? const [],
-        )),
-      ),
+      // 투어 진행(이동 → 도착 → 섭취 확정 → 다음 빵집)은 별도 화면이 아니라 홈 탭의
+      // `ActiveTourCard`에서 이뤄진다 — 남은 top-level 라우트는 종료 후 리포트뿐이다.
+      // 종료 직후의 리포트는 컨트롤러가 들고 있는 투어를, `/:tourId`는 통계에서
+      // 고른 지난 투어를 `GET /tours/:id`로 다시 받아 보여준다.
       GoRoute(path: '/tour/report', builder: (context, state) => _page(const TourReportScreen())),
+      GoRoute(
+        path: '/tour/report/:tourId',
+        builder: (context, state) => _page(TourReportScreen(tourId: state.pathParameters['tourId'])),
+      ),
     ],
   );
 }
