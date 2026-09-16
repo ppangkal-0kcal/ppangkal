@@ -6,7 +6,7 @@
 | --- | --- |
 | 출시 서명 키 | `tool/create_release_key.ps1`로 생성. 키스토어는 저장소 밖 `%USERPROFILE%\.ppangkal-release\`, 설정은 `android/key.properties` (git 제외) |
 | 앱 이름 | `빵칼` (Android `android:label`, iOS `CFBundleDisplayName`) |
-| 앱 아이콘 | 브랜드 마크(갈색 원 + 빵) — `tool/generate_app_icon.py`. 디자이너 아이콘이 나오면 교체 |
+| 앱 아이콘 | 디자이너 아이콘(리포지토리 루트 `빵칼_아이콘.png`) — `tool/generate_app_icon.py`로 Android/iOS 아이콘 생성 |
 | 패키지명 | `com.ppangkal.ppangkal` — **등록 후 절대 변경 금지** |
 | 위치 정보 | 빵집 거리 계산을 기기 안에서 수행 — 사용자 좌표를 서버로 보내지 않음 |
 | 업로드용 빌드 | `tool/build_store_release.ps1` — 출시 키 서명·배포 주소를 검사하고 AAB/APK 생성 |

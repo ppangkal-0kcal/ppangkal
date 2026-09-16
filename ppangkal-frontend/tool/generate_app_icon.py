@@ -1,81 +1,104 @@
 """
-빵칼 앱 아이콘 생성 — 로그인 화면 브랜드 마크(갈색 원 + 빵 아이콘)와 같은 디자인.
-디자이너 아이콘이 나오면 이 스크립트 대신 그 이미지로 교체하면 된다.
+빵칼 앱 아이콘 생성 — 디자이너 아이콘(리포지토리 루트 `빵칼_아이콘.png`, 512x512 불투명)에서
+Android/iOS 런처 아이콘을 만든다.
 
 실행 (ppangkal-frontend 폴더에서):
   pip install pillow
   python tool/generate_app_icon.py
+
+  다른 원본을 쓰려면: APP_ICON_SOURCE=경로 python tool/generate_app_icon.py
 
 생성물:
   - Android 기존 아이콘   android/app/src/main/res/mipmap-*/ic_launcher.png (원형 배지)
   - Android 적응형 아이콘 mipmap-anydpi-v26/ic_launcher.xml + ic_launcher_foreground.png + 배경색
   - iOS                   ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-*.png (불투명 정사각형)
 
-글리프: Flutter SDK의 Material Icons 폰트(Apache License 2.0) `bakery_dining` (U+E0C9).
+원본은 단색 배경 위에 그림이 올라간 형태라, 배경색은 모서리 픽셀에서 읽고 그림 영역은
+배경색과 다른 픽셀의 경계로 잘라낸다 — 적응형 아이콘 전경은 그렇게 잘라낸 그림만 쓴다
+(런처 마스크가 캔버스 가장자리를 잘라내므로 원본을 그대로 넣으면 그림이 잘린다).
 """
 import os
 import re
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageDraw
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FONT = os.environ.get('MATERIAL_ICONS_FONT', r'C:\flutter\bin\cache\artifacts\material_fonts\materialicons-regular.otf')
-GLYPH = '\ue0c9'
+SOURCE = os.environ.get('APP_ICON_SOURCE', os.path.join(os.path.dirname(ROOT), '빵칼_아이콘.png'))
 
-BROWN = (122, 83, 35, 255)  # 앱 primary 계열 (#7A5323)
-CREAM = (255, 246, 234, 255)  # AppBackground 상단 색 (#FFF6EA)
-SUPERSAMPLE = 4
+# 배경색과 이만큼도 차이 없는 픽셀은 배경으로 본다 (JPEG 잔여 노이즈·그라데이션 흡수).
+CONTENT_TOLERANCE = 20
+SUPERSAMPLE = 2
+
+# 그림이 차지하는 비율. 적응형 전경은 108dp 캔버스 기준이라 66dp 안전영역(0.61) 안쪽에 둔다.
+# 기존 아이콘은 원형 배지라 내접 정사각형(0.707)보다 작아야 그림이 원 밖으로 삐져나오지 않는다.
+LEGACY_CONTENT_RATIO = 0.68
+FOREGROUND_CONTENT_RATIO = 0.58
 
 
-def draw_glyph(canvas: Image.Image, box_size: int, glyph_ratio: float, color):
-    """글리프의 실제 잉크 영역을 캔버스 중앙에, 긴 변이 box_size × glyph_ratio가 되게 그린다.
+def load_source() -> tuple[Image.Image, tuple[int, int, int]]:
+    """원본 이미지와 배경색을 돌려준다."""
+    if not os.path.exists(SOURCE):
+        raise SystemExit(f'원본 아이콘을 찾을 수 없습니다: {SOURCE}\nAPP_ICON_SOURCE 환경변수로 경로를 지정하세요.')
+    img = Image.open(SOURCE).convert('RGBA')
+    if img.width != img.height:
+        raise SystemExit(f'정사각형 이미지가 필요합니다 (현재 {img.width}x{img.height}).')
+    background = img.convert('RGB').getpixel((1, 1))
+    return img, background
 
-    아이콘 폰트의 글자 박스는 그림보다 훨씬 커서(위아래 여백 포함) textbbox로 맞추면
-    위로 치우치고 작아진다 — 크게 그린 뒤 실제 픽셀 경계로 잘라 붙인다.
-    """
-    probe_size = 1024
-    probe = Image.new('L', (probe_size * 2, probe_size * 2), 0)
-    ImageDraw.Draw(probe).text((probe_size // 2, probe_size // 2), GLYPH,
-                               font=ImageFont.truetype(FONT, probe_size), fill=255)
-    mask = probe.crop(probe.getbbox())
 
-    target = box_size * glyph_ratio
-    scale = target / max(mask.size)
-    mask = mask.resize((max(1, round(mask.width * scale)), max(1, round(mask.height * scale))), Image.LANCZOS)
+def crop_content(img: Image.Image, background: tuple[int, int, int]) -> Image.Image:
+    """배경색만 있는 여백을 잘라낸 그림. 배경을 투명으로 바꾸지는 않는다 —
+    그림 안에도 배경색과 같은 색이 있을 수 있어 색상 기반 제거는 구멍을 낸다."""
+    diff = ImageChops.difference(img.convert('RGB'), Image.new('RGB', img.size, background)).convert('L')
+    box = diff.point(lambda v: 255 if v > CONTENT_TOLERANCE else 0).getbbox()
+    return img.crop(box) if box else img
 
+
+def paste_centered(canvas: Image.Image, content: Image.Image, ratio: float) -> None:
+    """content의 긴 변이 캔버스 × ratio가 되도록 줄여 가운데에 붙인다."""
     size = canvas.size[0]
-    fill = Image.new('RGBA', mask.size, color)
-    canvas.paste(fill, ((size - mask.width) // 2, (size - mask.height) // 2), mask)
+    scale = (size * ratio) / max(content.size)
+    resized = content.resize(
+        (max(1, round(content.width * scale)), max(1, round(content.height * scale))),
+        Image.LANCZOS,
+    )
+    canvas.paste(resized, ((size - resized.width) // 2, (size - resized.height) // 2), resized)
 
 
-def render(px: int, kind: str) -> Image.Image:
+def render(px: int, kind: str, content: Image.Image, background: tuple[int, int, int], source: Image.Image) -> Image.Image:
     big = px * SUPERSAMPLE
-    if kind == 'legacy':  # 투명 배경 위 원형 배지 (구형 런처)
+    if kind == 'legacy':  # 투명 배경 위 원형 배지 (적응형을 모르는 구형 런처)
         img = Image.new('RGBA', (big, big), (0, 0, 0, 0))
-        ImageDraw.Draw(img).ellipse((0, 0, big - 1, big - 1), fill=BROWN)
-        draw_glyph(img, big, 0.58, CREAM)
-    elif kind == 'foreground':  # 적응형 전경: 108dp 캔버스, 글리프는 안전영역(66dp) 안
+        ImageDraw.Draw(img).ellipse((0, 0, big - 1, big - 1), fill=(*background, 255))
+        paste_centered(img, content, LEGACY_CONTENT_RATIO)
+    elif kind == 'foreground':  # 적응형 전경: 108dp 캔버스, 그림은 안전영역 안. 배경은 별도 색 레이어.
         img = Image.new('RGBA', (big, big), (0, 0, 0, 0))
-        draw_glyph(img, big, 0.46, CREAM)
-    elif kind == 'ios':  # iOS는 투명도 불가 — 정사각형 꽉 채움, 모서리는 OS가 깎는다
-        img = Image.new('RGBA', (big, big), BROWN)
-        draw_glyph(img, big, 0.62, CREAM)
-        img = img.convert('RGB')
+        paste_centered(img, content, FOREGROUND_CONTENT_RATIO)
+    elif kind == 'ios':  # iOS는 투명도 불가 — 원본 여백 그대로 쓰고 모서리는 OS가 깎는다
+        img = source.resize((big, big), Image.LANCZOS).convert('RGB')
     else:
         raise ValueError(kind)
     return img.resize((px, px), Image.LANCZOS)
 
 
 def main():
+    source, background = load_source()
+    content = crop_content(source, background)
+    hex_background = '#%02X%02X%02X' % background
+
     res = os.path.join(ROOT, 'android', 'app', 'src', 'main', 'res')
     densities = {'mdpi': 1, 'hdpi': 1.5, 'xhdpi': 2, 'xxhdpi': 3, 'xxxhdpi': 4}
     for name, scale in densities.items():
         folder = os.path.join(res, f'mipmap-{name}')
         os.makedirs(folder, exist_ok=True)
-        render(int(48 * scale), 'legacy').save(os.path.join(folder, 'ic_launcher.png'), optimize=True)
-        render(int(108 * scale), 'foreground').save(os.path.join(folder, 'ic_launcher_foreground.png'), optimize=True)
+        render(int(48 * scale), 'legacy', content, background, source).save(
+            os.path.join(folder, 'ic_launcher.png'), optimize=True)
+        render(int(108 * scale), 'foreground', content, background, source).save(
+            os.path.join(folder, 'ic_launcher_foreground.png'), optimize=True)
 
     anydpi = os.path.join(res, 'mipmap-anydpi-v26')
     os.makedirs(anydpi, exist_ok=True)
+    # <monochrome>은 넣지 않는다 — 테마 아이콘은 단색 실루엣이라야 하는데 이 그림은
+    # 실루엣으로 만들면 식빵 덩어리 하나로 뭉개진다.
     with open(os.path.join(anydpi, 'ic_launcher.xml'), 'w', encoding='utf-8') as f:
         f.write(
             '<?xml version="1.0" encoding="utf-8"?>\n'
@@ -83,7 +106,6 @@ def main():
             '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
             '    <background android:drawable="@color/ic_launcher_background"/>\n'
             '    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>\n'
-            '    <monochrome android:drawable="@mipmap/ic_launcher_foreground"/>\n'
             '</adaptive-icon>\n'
         )
     values = os.path.join(res, 'values')
@@ -91,7 +113,7 @@ def main():
         f.write(
             '<?xml version="1.0" encoding="utf-8"?>\n'
             '<resources>\n'
-            '    <color name="ic_launcher_background">#7A5323</color>\n'
+            f'    <color name="ic_launcher_background">{hex_background}</color>\n'
             '</resources>\n'
         )
 
@@ -101,9 +123,9 @@ def main():
         if not m:
             continue
         px = round(float(m.group(1)) * int(m.group(2)))
-        render(px, 'ios').save(os.path.join(appiconset, filename), optimize=True)
+        render(px, 'ios', content, background, source).save(os.path.join(appiconset, filename), optimize=True)
 
-    print('아이콘 생성 완료: Android(기존+적응형), iOS')
+    print(f'아이콘 생성 완료 (원본: {SOURCE}, 배경색 {hex_background}): Android(기존+적응형), iOS')
 
 
 if __name__ == '__main__':
