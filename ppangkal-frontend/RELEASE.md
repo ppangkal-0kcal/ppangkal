@@ -9,6 +9,7 @@
 | 앱 아이콘 | 디자이너 아이콘(리포지토리 루트 `빵칼_아이콘.png`) — `tool/generate_app_icon.py`로 Android/iOS 아이콘 생성 |
 | 패키지명 | `com.ppangkal.ppangkal` — **등록 후 절대 변경 금지** |
 | 위치 정보 | 빵집 거리 계산을 기기 안에서 수행 — 사용자 좌표를 서버로 보내지 않음 |
+| 접근권한 고지 | 최초 실행 시 `/permissions` 안내 화면(로그인 이전). 셋 다 선택적 권한 — 정보통신망법 제22조의2. 권한을 바꾸면 `lib/models/app_permission.dart`도 같이 고칠 것 |
 | 업로드용 빌드 | `tool/build_store_release.ps1` — 출시 키 서명·배포 주소를 검사하고 AAB/APK 생성 |
 
 ## 1. 출시 키 (한 번만)

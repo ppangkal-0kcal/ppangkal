@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/validators.dart';
@@ -114,6 +115,14 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
+                // 접근권한 고지는 최초 실행 때 한 번 뜨지만, 가이드라인이 언제든
+                // 다시 확인할 수 있도록 요구해서 여기에도 둔다.
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/permissions'),
+                  icon: const Icon(Icons.shield_outlined),
+                  label: const Text('앱 접근권한 안내'),
+                ),
+                const SizedBox(height: AppSpacing.sm),
                 OutlinedButton.icon(
                   onPressed: () => context.read<AuthProvider>().logout(),
                   icon: const Icon(Icons.logout),
