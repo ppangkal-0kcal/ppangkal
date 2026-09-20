@@ -260,11 +260,14 @@ class _MenuPreviewCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.md),
-          FilledButton(
-            onPressed: items.isEmpty
-                ? null
-                : () => context.push('/bakeries/$bakeryId/menu'),
-            child: const Text('빵 고르고 투어 시작하기'),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: items.isEmpty
+                  ? null
+                  : () => context.push('/bakeries/$bakeryId/menu'),
+              child: const Text('빵 고르고 투어 시작하기'),
+            ),
           ),
         ],
       ),

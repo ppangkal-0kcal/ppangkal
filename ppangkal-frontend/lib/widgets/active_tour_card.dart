@@ -127,15 +127,10 @@ class _ActiveTourCardState extends State<ActiveTourCard> {
   List<Widget> _doneSteps(TourFlowController controller, String token, TourLeg leg) => [
         StatRow(
           children: [
-            StatColumn(label: '이번 빵집 소모', value: '${leg.arrivedStop!.caloriesBurned}'),
-            StatColumn(label: '이번 빵집 섭취', value: '${leg.estimatedCalories}'),
-            StatColumn(label: '투어 밸런스', value: '${controller.runningBalanceKcal}'),
+            StatColumn(label: '이번 빵집 소모', value: '${leg.arrivedStop!.caloriesBurned}kcal'),
+            StatColumn(label: '이번 빵집 섭취', value: '${leg.estimatedCalories}kcal'),
+            StatColumn(label: '투어 밸런스', value: '${controller.runningBalanceKcal}kcal'),
           ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          '${controller.stops.length}번째 빵집까지 마쳤어요. 더 걷고 싶다면 다음 빵집으로!',
-          style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: AppSpacing.md),
         Row(

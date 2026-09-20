@@ -32,9 +32,9 @@ class CalorieBalanceCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           StatRow(
             children: [
-              StatColumn(label: '목표', value: '${balance.dailyGoalCalories}'),
-              StatColumn(label: '섭취', value: '${balance.consumedCalories}'),
-              StatColumn(label: '소모', value: '${balance.burnedCalories}'),
+              StatColumn(label: '목표', value: '${balance.dailyGoalCalories}kcal'),
+              StatColumn(label: '섭취', value: '${balance.consumedCalories}kcal'),
+              StatColumn(label: '소모', value: '${balance.burnedCalories}kcal'),
             ],
           ),
         ],

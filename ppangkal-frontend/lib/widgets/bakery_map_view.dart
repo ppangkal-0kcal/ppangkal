@@ -9,6 +9,10 @@ import '../theme/app_theme.dart';
 import 'glass_card.dart';
 import 'network_photo.dart';
 
+/// Naver 지도 앱 마커와 같은 계열의 짙은 브랜드 그린 — 테마의 primary(seed:
+/// 빵 베이지)를 그대로 쓰면 핀이 형광색으로 튀어서 지도 위에서 따로 고정했다.
+const _pinColor = Color(0xFF03A54A);
+
 /// Bakery pins on a Naver map (list screen's 지도 mode). Tapping a pin shows
 /// a preview card; tapping the card opens the bakery detail.
 ///
@@ -68,14 +72,13 @@ class _NaverBakeryMapState extends State<_NaverBakeryMap> {
   Future<void> _syncMarkers() async {
     final controller = _controller;
     if (controller == null) return;
-    final pinColor = Theme.of(context).colorScheme.primary;
     await controller.clearOverlays(type: NOverlayType.marker);
 
     final markers = widget.bakeries.map((bakery) {
       final marker = NMarker(
         id: bakery.id,
         position: NLatLng(bakery.latitude, bakery.longitude),
-        iconTintColor: pinColor,
+        iconTintColor: _pinColor,
         caption: NOverlayCaption(text: bakery.name, textSize: 12),
         isHideCollidedCaptions: true,
       );

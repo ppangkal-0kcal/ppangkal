@@ -168,13 +168,33 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
             ),
             const SizedBox(height: AppSpacing.sm),
             if (!_showMap)
-              SegmentedButton<String>(
-                showSelectedIcon: false,
-                segments: _sortOptions.entries
-                    .map((e) => ButtonSegment(value: e.key, label: Text(e.value)))
-                    .toList(),
-                selected: {_sort},
-                onSelectionChanged: (selection) => _changeSort(selection.first),
+              SizedBox(
+                height: 36,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _sortOptions.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
+                  itemBuilder: (context, i) {
+                    final entry = _sortOptions.entries.elementAt(i);
+                    final selected = entry.key == _sort;
+                    return ChoiceChip(
+                      label: Text(entry.value),
+                      selected: selected,
+                      showCheckmark: false,
+                      shape: const StadiumBorder(),
+                      side: BorderSide(
+                        color: selected ? Colors.transparent : Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                      labelStyle: TextStyle(
+                        color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                      selectedColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      onSelected: (_) => _changeSort(entry.key),
+                    );
+                  },
+                ),
               ),
             if (_usingFallbackLocation) ...[
               const SizedBox(height: AppSpacing.sm),
