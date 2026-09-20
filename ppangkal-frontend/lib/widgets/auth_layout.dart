@@ -41,15 +41,33 @@ class AuthLayout extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: BoxShape.circle,
+                  // The designer icon is a full-bleed square (the 0-kcal badge and the
+                  // knife handle run to the edges), so it's clipped to a squircle rather
+                  // than a circle — a circular crop would cut both off.
+                  // Center keeps the 72px mark from being stretched by the column's
+                  // CrossAxisAlignment.stretch.
+                  Center(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.asset(
+                          'assets/app_icon.png',
+                          width: 72,
+                          height: 72,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                    child: Icon(Icons.bakery_dining, size: 40, color: theme.colorScheme.onPrimary),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(

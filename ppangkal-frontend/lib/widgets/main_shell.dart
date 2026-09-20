@@ -17,39 +17,37 @@ class MainShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      // 상단 콘텐츠와 시각적으로 분리되도록 위쪽 모서리만 둥글게 처리
-      // (2026-09 디자인 가이드: rounded top corners).
-      bottomNavigationBar: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: NavigationBar(
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: (index) => navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
+      // 모서리는 각지게 둔다 — 둥글리면 그 바깥으로 이 Scaffold의 배경이 흰
+      // 삼각형으로 드러난다(페이지 그라데이션은 각 페이지가 칠하므로 셸까지
+      // 닿지 않는다).
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        // 탭을 누르면 그 탭의 첫 화면으로 되돌린다. 빵을 고른 뒤 홈으로 넘어간
+        // 상태에서 빵집 탭을 누르면 빵 메뉴 화면이 그대로 남아 있어, 목록을 다시
+        // 보려면 뒤로가기를 눌러야 했다.
+        onDestinationSelected: (index) => navigationShell.goBranch(index, initialLocation: true),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: '홈',
           ),
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: '홈',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.bakery_dining_outlined),
-              selectedIcon: Icon(Icons.bakery_dining),
-              label: '빵집',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.bar_chart_outlined),
-              selectedIcon: Icon(Icons.bar_chart),
-              label: '통계',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: '마이페이지',
-            ),
-          ],
-        ),
+          NavigationDestination(
+            icon: Icon(Icons.bakery_dining_outlined),
+            selectedIcon: Icon(Icons.bakery_dining),
+            label: '빵집',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: '통계',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: '마이페이지',
+          ),
+        ],
       ),
     );
   }

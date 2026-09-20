@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../widgets/page_title.dart';
 import 'tour_flow_screen.dart';
 
 /// Debug-only entry points into the raw API-verification screens (tour
@@ -22,7 +23,7 @@ class DebugScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('디버그')),
+      appBar: PageAppBar('디버그'),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(

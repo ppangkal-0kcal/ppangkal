@@ -14,6 +14,7 @@ import '../widgets/bakery_map_view.dart';
 import '../widgets/empty_view.dart';
 import '../widgets/error_view.dart';
 import '../widgets/loading_view.dart';
+import '../widgets/page_title.dart';
 
 // 위치 권한이 없거나 GPS를 못 잡을 때 쓰는 대전 시내 중심 좌표.
 const double _fallbackLat = 36.3504;
@@ -131,8 +132,8 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('빵집'),
+      appBar: PageAppBar(
+        '빵집',
         actions: [
           IconButton(
             tooltip: _showMap ? '목록으로 보기' : '지도로 보기',
@@ -142,7 +143,7 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -152,8 +153,15 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
               onChanged: (value) => setState(() => _query = value),
               decoration: InputDecoration(
                 hintText: '빵집 이름이나 주소로 검색',
-                prefixIcon: const Icon(Icons.search),
-                isDense: true,
+                // isDense를 쓰면 입력 영역만 납작해지고 아이콘은 그대로라 돋보기와
+                // 힌트 글자의 중심선이 어긋난다 — 대신 contentPadding으로 높이를
+                // 잡고, prefixIcon은 고정 폭 안에서 세로 가운데 정렬한다.
+                contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                prefixIconConstraints: const BoxConstraints(minWidth: 52, minHeight: 52),
+                prefixIcon: const Center(
+                  widthFactor: 1,
+                  child: Icon(Icons.search, size: 28),
+                ),
                 suffixIcon: _query.isEmpty
                     ? null
                     : IconButton(
@@ -166,10 +174,10 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
                       ),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             if (!_showMap)
               SizedBox(
-                height: 36,
+                height: 40,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _sortOptions.length,
@@ -181,6 +189,15 @@ class _BakeryListScreenState extends State<BakeryListScreen> {
                       label: Text(entry.value),
                       selected: selected,
                       showCheckmark: false,
+                      // 기본 탭 타깃(48px)이 36px 칩보다 커서 라벨이 위로 밀려
+                      // 보였다 — shrinkWrap으로 없애고 좌우/상하 여백을 직접 준다.
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.standard,
+                      labelPadding: EdgeInsets.zero,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
                       shape: const StadiumBorder(),
                       side: BorderSide(
                         color: selected ? Colors.transparent : Theme.of(context).colorScheme.outlineVariant,

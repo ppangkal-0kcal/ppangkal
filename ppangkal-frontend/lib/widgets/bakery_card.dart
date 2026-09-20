@@ -19,7 +19,6 @@ class BakeryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final walk = bakery.suggestedWalk;
 
     return InkWell(
       onTap: onTap,
@@ -70,14 +69,6 @@ class BakeryCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (bakery.walkRecommended == false && walk != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                '도보 대신 ${walk.title} 왕복 산책 추천 '
-                '(${walk.roundTripDistanceM}m, 약 ${walk.estimatedCaloriesBurned}kcal)',
-                style: textTheme.bodySmall,
-              ),
-            ],
           ],
         ),
       ),

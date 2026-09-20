@@ -7,6 +7,55 @@ import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/auth_layout.dart';
 
+/// Two soft-outlined pills with a field label above, so the gender choice
+/// reads as part of the form instead of a stray full-width toggle.
+class _GenderField extends StatelessWidget {
+  final String value;
+  final ValueChanged<String> onChanged;
+
+  const _GenderField({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+          child: Text(
+            '성별',
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ),
+        SegmentedButton<String>(
+          showSelectedIcon: false,
+          segments: const [
+            ButtonSegment(value: 'female', label: Text('여성')),
+            ButtonSegment(value: 'male', label: Text('남성')),
+          ],
+          selected: {value},
+          onSelectionChanged: (s) => onChanged(s.first),
+          style: SegmentedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            foregroundColor: scheme.onSurfaceVariant,
+            selectedBackgroundColor: scheme.primaryContainer,
+            selectedForegroundColor: scheme.onPrimaryContainer,
+            side: BorderSide(color: scheme.outlineVariant),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(14)),
+            ),
+            textStyle: theme.textTheme.bodyMedium,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Navigating to `/home` on success is handled by the router's redirect
 /// (`lib/router/app_router.dart`), not here.
 class SignupScreen extends StatefulWidget {
@@ -82,14 +131,14 @@ class _SignupScreenState extends State<SignupScreen> {
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               autofillHints: const [AutofillHints.email],
-              decoration: const InputDecoration(labelText: '이메일', helperText: '로그인할 때 사용해요'),
+              decoration: const InputDecoration(labelText: '이메일'),
               validator: Validators.email,
             ),
             TextFormField(
               controller: _passwordController,
               obscureText: true,
               autofillHints: const [AutofillHints.newPassword],
-              decoration: const InputDecoration(labelText: '비밀번호', helperText: '8자 이상'),
+              decoration: const InputDecoration(labelText: '비밀번호'),
               validator: Validators.password,
             ),
             TextFormField(
@@ -105,15 +154,11 @@ class _SignupScreenState extends State<SignupScreen> {
               validator: (v) => (v == null || v.trim().isEmpty) ? '이름을 입력하세요' : null,
             ),
             const SizedBox(height: AppSpacing.md),
-            SegmentedButton<String>(
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(value: 'female', label: Text('여성')),
-                ButtonSegment(value: 'male', label: Text('남성')),
-              ],
-              selected: {_gender},
-              onSelectionChanged: (s) => setState(() => _gender = s.first),
+            _GenderField(
+              value: _gender,
+              onChanged: (v) => setState(() => _gender = v),
             ),
+            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 Expanded(
@@ -148,7 +193,7 @@ class _SignupScreenState extends State<SignupScreen> {
               initialValue: _activityLevel,
               decoration: const InputDecoration(labelText: '여행 스타일 (활동 수준)'),
               items: ActivityLevel.values
-                  .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                  .map((v) => DropdownMenuItem(value: v, child: Text(ActivityLevel.label(v))))
                   .toList(),
               onChanged: (v) => setState(() => _activityLevel = v!),
             ),

@@ -63,6 +63,11 @@ class CalorieStatusColors extends ThemeExtension<CalorieStatusColors> {
 @immutable
 class GlassStyle extends ThemeExtension<GlassStyle> {
   final double blurSigma;
+
+  /// The fill tint before [backgroundOpacity] is applied. White rather than
+  /// `colorScheme.surface` — the seeded surface is a warm cream, and over the
+  /// beige page gradient it read as a grey-beige box instead of a card.
+  final Color backgroundColor;
   final double backgroundOpacity;
   final Color borderColor;
   final double borderWidth;
@@ -71,6 +76,7 @@ class GlassStyle extends ThemeExtension<GlassStyle> {
 
   const GlassStyle({
     required this.blurSigma,
+    required this.backgroundColor,
     required this.backgroundOpacity,
     required this.borderColor,
     required this.borderWidth,
@@ -82,8 +88,9 @@ class GlassStyle extends ThemeExtension<GlassStyle> {
   /// (2026-09 디자인 가이드: `0 2px 8px rgba(0,0,0,0.05)`).
   static const GlassStyle standard = GlassStyle(
     blurSigma: 16,
-    backgroundOpacity: 0.55,
-    borderColor: Color(0x33FFFFFF),
+    backgroundColor: Color(0xFFFFFFFF),
+    backgroundOpacity: 0.60,
+    borderColor: Color(0x66FFFFFF),
     borderWidth: 1,
     shadows: [
       BoxShadow(color: Color(0x0D000000), blurRadius: 8, offset: Offset(0, 2)),
@@ -94,6 +101,7 @@ class GlassStyle extends ThemeExtension<GlassStyle> {
   @override
   GlassStyle copyWith({
     double? blurSigma,
+    Color? backgroundColor,
     double? backgroundOpacity,
     Color? borderColor,
     double? borderWidth,
@@ -102,6 +110,7 @@ class GlassStyle extends ThemeExtension<GlassStyle> {
   }) {
     return GlassStyle(
       blurSigma: blurSigma ?? this.blurSigma,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
       backgroundOpacity: backgroundOpacity ?? this.backgroundOpacity,
       borderColor: borderColor ?? this.borderColor,
       borderWidth: borderWidth ?? this.borderWidth,
@@ -115,6 +124,7 @@ class GlassStyle extends ThemeExtension<GlassStyle> {
     if (other is! GlassStyle) return this;
     return GlassStyle(
       blurSigma: lerpDouble(blurSigma, other.blurSigma, t) ?? blurSigma,
+      backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       backgroundOpacity: lerpDouble(backgroundOpacity, other.backgroundOpacity, t) ?? backgroundOpacity,
       borderColor: Color.lerp(borderColor, other.borderColor, t)!,
       borderWidth: lerpDouble(borderWidth, other.borderWidth, t) ?? borderWidth,
@@ -169,6 +179,24 @@ ThemeData buildAppTheme() {
       GlassStyle.standard,
       AppBackground.brand,
     ],
+    // 화면 제목을 페이지 타이틀처럼 읽히게 한다 — 기본 높이(56)/굵기로는 좌상단
+    // 구석에 파묻혀 보이지 않아서, 바를 높여 제목을 아래로 내리고 좌측 여백과
+    // 굵기를 키웠다. 배경 투명 처리는 [BrandBackground]가 이어서 덮어쓴다.
+    appBarTheme: AppBarTheme(
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      toolbarHeight: 76,
+      titleSpacing: AppSpacing.lg,
+      foregroundColor: colorScheme.onSurface,
+      titleTextStyle: TextStyle(
+        color: colorScheme.onSurface,
+        fontSize: 30,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.5,
+        height: 1.2,
+      ),
+    ),
     // 선택된 탭만 포인트 컬러로 강조하고 나머지는 회색 — pill 인디케이터 없이
     // 아이콘/라벨 색과 굵기만으로 활성 상태를 표시한다 (2026-09 디자인 가이드).
     navigationBarTheme: NavigationBarThemeData(

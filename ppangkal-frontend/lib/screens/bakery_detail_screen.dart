@@ -13,6 +13,7 @@ import '../widgets/error_view.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/loading_view.dart';
 import '../widgets/network_photo.dart';
+import '../widgets/page_title.dart';
 import '../widgets/tour_info_section.dart';
 
 /// Bakery detail (`GET /bakeries/:id` + `GET /bakeries/:id/items` —
@@ -50,7 +51,7 @@ class _BakeryDetailScreenState extends State<BakeryDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('빵집 상세')),
+      appBar: PageAppBar('빵집 상세'),
       body: FutureBuilder<(Bakery, List<BreadItem>)>(
         future: _future,
         builder: (context, snapshot) {
@@ -74,7 +75,7 @@ class _BakeryDetailScreenState extends State<BakeryDetailScreen> {
           final tourInfo = bakery.tourInfo;
 
           return ListView(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
             children: [
               _BasicInfoCard(bakery: bakery),
               if (tourInfo != null && !tourInfo.isEmpty) ...[
@@ -229,7 +230,6 @@ class _MenuPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final estimatedCount = items.where((i) => i.isCalorieEstimated).length;
 
     return GlassCard(
       child: Column(
@@ -250,15 +250,6 @@ class _MenuPreviewCard extends StatelessWidget {
                 itemBuilder: (context, i) => _MenuThumb(item: items[i]),
               ),
             ),
-          if (estimatedCount > 0) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              estimatedCount == items.length
-                  ? '이 빵집은 칼로리를 공개하지 않아 전부 유사 제품 기준 추정치예요.'
-                  : '"추정" 표시된 칼로리는 유사 제품 기준 추정치예요.',
-              style: textTheme.bodySmall,
-            ),
-          ],
           const SizedBox(height: AppSpacing.md),
           SizedBox(
             width: double.infinity,

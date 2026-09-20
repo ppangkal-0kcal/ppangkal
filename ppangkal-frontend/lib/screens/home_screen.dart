@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/tour_flow_controller.dart';
@@ -15,6 +13,8 @@ import '../widgets/calorie_balance_card.dart';
 import '../widgets/error_view.dart';
 import '../widgets/loading_view.dart';
 import '../widgets/nearby_spots_section.dart';
+import '../widgets/page_title.dart';
+import '../widgets/tour_started_banner.dart';
 
 /// Home tab. Today's calorie balance from `GET /calories/balance`
 /// (FRONTEND_API_GUIDE.md §2 step 7), the active tour itself
@@ -50,19 +50,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _reloadIfStale(context);
     final user = context.watch<AuthProvider>().user;
     final pickedBakery = context.select<TourFlowController, Bakery?>((c) => c.currentLeg?.bakery);
+    final isTouring = context.select<TourFlowController, bool>((c) => c.isStarted);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('빵칼'),
-        actions: [
-          if (kDebugMode)
-            IconButton(
-              icon: const Icon(Icons.bug_report_outlined),
-              tooltip: '디버그',
-              onPressed: () => context.push('/debug'),
-            ),
-        ],
-      ),
+      appBar: PageAppBar('빵칼'),
       body: user == null
           ? const LoadingView()
           : RefreshIndicator(
@@ -76,14 +67,23 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(AppSpacing.md),
+                // 좌우 여백은 AppBar의 titleSpacing과 같은 값으로 맞춰 화면 제목과
+                // 본문이 같은 세로선에서 시작하게 한다. 위쪽은 AppBar가 이미 여백을
+                // 들고 있어 0.
+                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.md),
                 children: [
-                  Text('안녕하세요, ${user.name}님', style: Theme.of(context).textTheme.headlineSmall),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '오늘도 걷고, 맛있게 먹고, 0kcal 맞춰봐요.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                  // 투어 중에는 인사말 대신 배너를 띄워, 홈을 열자마자 지금
+                  // 투어가 돌아가는 중인지 한눈에 보이게 한다.
+                  if (isTouring)
+                    const TourStartedBanner()
+                  else ...[
+                    Text('안녕하세요, ${user.name}님', style: Theme.of(context).textTheme.headlineSmall),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      '먹은 만큼 걸으면, 오늘도 0kcal',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.lg),
                   _BalanceSection(future: _future, onRetry: () => setState(_load)),
                   const SizedBox(height: AppSpacing.md),

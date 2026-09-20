@@ -17,6 +17,7 @@ import '../widgets/error_view.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/loading_view.dart';
 import '../widgets/network_photo.dart';
+import '../widgets/page_title.dart';
 import '../widgets/quantity_stepper.dart';
 
 /// Bread-menu selection for one bakery (`GET /bakeries/:id/items` —
@@ -93,7 +94,7 @@ class _BreadMenuScreenState extends State<BreadMenuScreen> {
     final isTouring = context.select<TourFlowController, bool>((c) => c.isStarted);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('빵 메뉴 선택')),
+      appBar: PageAppBar('빵 메뉴 선택'),
       body: FutureBuilder<(Bakery, List<BreadItem>)>(
         future: _future,
         builder: (context, snapshot) {
@@ -125,7 +126,7 @@ class _BreadMenuScreenState extends State<BreadMenuScreen> {
               if (categories.length > 1)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
                   child: Row(
                     children: [
                       for (final category in [null, ...categories])
@@ -144,7 +145,7 @@ class _BreadMenuScreenState extends State<BreadMenuScreen> {
                 ),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
                   children: [
                     if (items.isEmpty)
                       const Padding(

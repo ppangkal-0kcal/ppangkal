@@ -5,6 +5,7 @@ import '../controllers/tour_flow_controller.dart';
 import '../models/bread_selection.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/page_title.dart';
 
 /// Data-verification only — drives [TourFlowController] through the full
 /// step 1/7/8 tour sequence (start → arrive at a stop → log food → check
@@ -104,7 +105,7 @@ class _TourFlowScreenState extends State<TourFlowScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('투어 플로우 확인 (디자인 없음)')),
+      appBar: PageAppBar('투어 플로우 확인 (디자인 없음)'),
       body: Column(
         children: [
           Padding(

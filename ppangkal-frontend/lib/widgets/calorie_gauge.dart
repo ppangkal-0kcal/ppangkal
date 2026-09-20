@@ -27,16 +27,18 @@ class CalorieGauge extends StatelessWidget {
   }
 
   String get _statusLabel => switch (balance.status) {
-        'green' => '안전',
+        'green' => '여유',
         'yellow' => '주의',
-        'red' => '초과',
+        // 'red'는 잔액이 목표의 10% 미만일 때라 실제로 목표를 넘기지 않은 경우도
+        // 포함한다 — '초과' 대신 남은 잔액이 적다는 뜻의 '비상'을 쓴다.
+        'red' => '비상',
         _ => balance.status,
       };
 
   String get _statusMessage => switch (balance.status) {
-        'green' => '오늘 페이스가 좋아요',
-        'yellow' => '칼로리 잔액이 얼마 안 남았어요',
-        'red' => '오늘 목표를 넘었어요',
+        'green' => '빵 한 조각쯤은 거뜬해요',
+        'yellow' => '슬슬 걸어볼까요?',
+        'red' => '이제는 걸어야 할 시간',
         _ => '',
       };
 
@@ -88,7 +90,7 @@ class CalorieGauge extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
           decoration: BoxDecoration(

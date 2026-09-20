@@ -9,6 +9,7 @@ import '../models/user.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/page_title.dart';
 import '../widgets/stat_column.dart';
 
 /// 마이페이지 tab — profile summary (`GET /users/me`, already cached on
@@ -24,11 +25,11 @@ class ProfileScreen extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('마이페이지')),
+      appBar: PageAppBar('마이페이지'),
       body: user == null
           ? const SizedBox.shrink()
           : ListView(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
               children: [
                 GlassCard(
                   child: Column(
@@ -67,7 +68,10 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       if (user.activityLevel != null) ...[
                         const SizedBox(height: AppSpacing.md),
-                        Text('활동 수준: ${user.activityLevel}', style: textTheme.bodyMedium),
+                        Text(
+                          '활동 수준: ${ActivityLevel.label(user.activityLevel!)}',
+                          style: textTheme.bodyMedium,
+                        ),
                       ],
                       const Divider(height: AppSpacing.xl),
                       if (user.email != null)
@@ -115,18 +119,31 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                // 접근권한 고지는 최초 실행 때 한 번 뜨지만, 가이드라인이 언제든
-                // 다시 확인할 수 있도록 요구해서 여기에도 둔다.
-                OutlinedButton.icon(
-                  onPressed: () => context.push('/permissions'),
-                  icon: const Icon(Icons.shield_outlined),
-                  label: const Text('앱 접근권한 안내'),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                OutlinedButton.icon(
-                  onPressed: () => context.read<AuthProvider>().logout(),
-                  icon: const Icon(Icons.logout),
-                  label: const Text('로그아웃'),
+                // 외곽선 버튼 두 개를 세로로 쌓으면 설정 항목이 아니라 주요 동작처럼
+                // 보인다 — 카드 하나 안의 목록 행으로 두고, 로그아웃만 색으로 구분한다.
+                // (접근권한 고지는 최초 실행 때 한 번 뜨지만, 가이드라인이 언제든 다시
+                // 확인할 수 있도록 요구해서 여기에도 둔다.)
+                GlassCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        onTap: () => context.push('/permissions'),
+                        leading: const Icon(Icons.shield_outlined),
+                        title: const Text('앱 접근권한 안내'),
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                      ),
+                      Divider(height: 1, indent: AppSpacing.md, endIndent: AppSpacing.md),
+                      ListTile(
+                        onTap: () => context.read<AuthProvider>().logout(),
+                        leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
+                        title: Text(
+                          '로그아웃',
+                          style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -338,7 +355,9 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
             DropdownButtonFormField<String>(
               initialValue: _activityLevel,
               decoration: const InputDecoration(labelText: '활동 수준'),
-              items: ActivityLevel.values.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+              items: ActivityLevel.values
+                  .map((v) => DropdownMenuItem(value: v, child: Text(ActivityLevel.label(v))))
+                  .toList(),
               onChanged: (v) => setState(() => _activityLevel = v!),
             ),
             TextFormField(

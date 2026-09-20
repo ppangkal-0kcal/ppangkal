@@ -64,7 +64,10 @@ class _NearbySpotsSectionState extends State<NearbySpotsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('${widget.bakery.name} 주변 갈만한 곳', style: textTheme.titleMedium),
+        Text(
+          '${widget.bakery.name} 주변 갈만한 곳',
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: AppSpacing.xs),
         Text('빵 먹고 걸어서 들러 보세요 · 한국관광공사 제공', style: textTheme.bodySmall),
         const SizedBox(height: AppSpacing.sm),

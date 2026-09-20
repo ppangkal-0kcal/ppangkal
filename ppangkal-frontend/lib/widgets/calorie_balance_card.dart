@@ -23,13 +23,10 @@ class CalorieBalanceCard extends StatelessWidget {
     return GlassCard(
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text('오늘의 칼로리 잔액', style: textTheme.titleMedium),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          CalorieGauge(balance: balance),
+          Text('오늘의 칼로리 잔액', style: textTheme.titleMedium),
           const SizedBox(height: AppSpacing.lg),
+          CalorieGauge(balance: balance),
+          const SizedBox(height: AppSpacing.xl),
           StatRow(
             children: [
               StatColumn(label: '목표', value: '${balance.dailyGoalCalories}kcal'),

@@ -38,7 +38,7 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).extension<GlassStyle>() ?? GlassStyle.standard;
-    final surfaceColor = Theme.of(context).colorScheme.surface.withValues(alpha: style.backgroundOpacity);
+    final surfaceColor = style.backgroundColor.withValues(alpha: style.backgroundOpacity);
 
     final decorated = Container(
       padding: padding,

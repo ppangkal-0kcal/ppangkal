@@ -22,9 +22,9 @@ class TourHistoryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('지난 투어 리포트', style: textTheme.titleMedium),
+          Text('지난 투어 리포트', style: textTheme.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w700),),
+          const SizedBox(height: AppSpacing.md),
           if (tours.isEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
             Text('아직 끝낸 투어가 없어요. 투어를 마치면 여기에 리포트가 쌓여요.', style: textTheme.bodySmall),
           ],
           for (final tour in tours)

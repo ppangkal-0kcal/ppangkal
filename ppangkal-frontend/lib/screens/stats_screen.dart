@@ -15,6 +15,7 @@ import '../widgets/error_view.dart';
 import '../widgets/expandable_tile.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/loading_view.dart';
+import '../widgets/page_title.dart';
 import '../widgets/stat_column.dart';
 import '../widgets/tour_history_card.dart';
 import '../widgets/weekly_bar_chart.dart';
@@ -58,9 +59,9 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget build(BuildContext context) {
     _reloadIfStale(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('통계')),
+      appBar: PageAppBar('통계'),
       body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
         child: _StatsSection(future: _future, onRetry: () => setState(_load)),
       ),
     );
@@ -103,7 +104,10 @@ class _StatsSection extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('최근 7일', style: textTheme.titleMedium),
+                      Text(
+                        '최근 7일',
+                        style: textTheme.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w700),
+                      ),
                       _AchievementBadge(rate: weekly.goalAchievementRate),
                     ],
                   ),
@@ -117,8 +121,8 @@ class _StatsSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('오늘', style: textTheme.titleMedium),
-                  const SizedBox(height: AppSpacing.md),
+                  Text('오늘', style: textTheme.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w700),),
+                  const SizedBox(height: AppSpacing.lg),
                   StatRow(
                     children: [
                       StatColumn(label: '목표', value: '${daily.goalCalories}'),
@@ -158,8 +162,8 @@ class _TodayBreadCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('오늘 고른 빵집과 빵', style: textTheme.titleMedium),
-          const SizedBox(height: AppSpacing.sm),
+          Text('오늘 고른 빵집과 빵', style: textTheme.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w700),),
+          const SizedBox(height: AppSpacing.md),
           if (visits.isEmpty && pendingLeg == null)
             Text('아직 기록이 없어요. 빵투어를 떠나 보세요!', style: textTheme.bodySmall),
           for (final visit in visits)

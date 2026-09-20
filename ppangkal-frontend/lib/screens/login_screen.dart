@@ -7,10 +7,8 @@ import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/auth_layout.dart';
 
-/// Email + password login. Accounts created by app 1.0.0 only have a user
-/// ID, so an "기존 ID로 로그인" mode stays available until they link an email
-/// from 마이페이지. Navigating to `/home` on success is handled by the
-/// router's redirect (`lib/router/app_router.dart`), not here.
+/// Email + password login. Navigating to `/home` on success is handled by
+/// the router's redirect (`lib/router/app_router.dart`), not here.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -22,15 +20,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _userIdController = TextEditingController();
-  bool _legacyIdMode = false;
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _userIdController.dispose();
     super.dispose();
   }
 
@@ -38,9 +33,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final auth = context.read<AuthProvider>();
-    final ok = _legacyIdMode
-        ? await auth.loginWithUserId(_userIdController.text.trim())
-        : await auth.login(email: _emailController.text.trim(), password: _passwordController.text);
+    final ok = await auth.login(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
 
     if (!mounted) return;
     if (!ok) {
@@ -67,50 +63,35 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_legacyIdMode)
-              TextFormField(
-                controller: _userIdController,
-                textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => isLoading ? null : _submit(),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'ID를 입력하세요' : null,
-                decoration: const InputDecoration(
-                  labelText: '사용자 ID',
-                  helperText: '이전 버전에서 발급받은 ID (마이페이지에서 이메일 로그인으로 바꿀 수 있어요)',
-                  helperMaxLines: 2,
-                  prefixIcon: Icon(Icons.person_outline),
-                ),
-              )
-            else ...[
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
-                textInputAction: TextInputAction.next,
-                validator: Validators.email,
-                decoration: const InputDecoration(
-                  labelText: '이메일',
-                  prefixIcon: Icon(Icons.mail_outline),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+              textInputAction: TextInputAction.next,
+              validator: Validators.email,
+              decoration: const InputDecoration(
+                labelText: '이메일',
+                prefixIcon: Icon(Icons.mail_outline),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              autofillHints: const [AutofillHints.password],
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => isLoading ? null : _submit(),
+              validator: (v) => (v == null || v.isEmpty) ? '비밀번호를 입력하세요' : null,
+              decoration: InputDecoration(
+                labelText: '비밀번호',
+                prefixIcon: const Icon(Icons.lock_outline),
+                suffixIcon: IconButton(
+                  tooltip: _obscurePassword ? '비밀번호 보기' : '비밀번호 숨기기',
+                  icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                autofillHints: const [AutofillHints.password],
-                textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => isLoading ? null : _submit(),
-                validator: (v) => (v == null || v.isEmpty) ? '비밀번호를 입력하세요' : null,
-                decoration: InputDecoration(
-                  labelText: '비밀번호',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    tooltip: _obscurePassword ? '비밀번호 보기' : '비밀번호 숨기기',
-                    icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                ),
-              ),
-            ],
+            ),
             const SizedBox(height: AppSpacing.lg),
             FilledButton(
               onPressed: isLoading ? null : _submit,
@@ -122,10 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Text('로그인'),
-            ),
-            TextButton(
-              onPressed: isLoading ? null : () => setState(() => _legacyIdMode = !_legacyIdMode),
-              child: Text(_legacyIdMode ? '이메일로 로그인' : '이전 버전 ID로 로그인'),
             ),
           ],
         ),

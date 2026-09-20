@@ -73,7 +73,7 @@ class _ActiveTourCardState extends State<ActiveTourCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _LegHeader(leg: leg, controller: controller),
-          const Divider(height: AppSpacing.lg),
+          const Divider(height: AppSpacing.xl),
           if (leg.arrivedStop == null)
             ..._walkingSteps(controller, token, leg)
           else if (!leg.foodConfirmed)
@@ -88,7 +88,7 @@ class _ActiveTourCardState extends State<ActiveTourCard> {
   /// 빵집으로 이동 중 — live sensor numbers + 도착 기록.
   List<Widget> _walkingSteps(TourFlowController controller, String token, TourLeg leg) => [
         LiveProgressCard(controller: controller),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
             Expanded(
@@ -107,19 +107,19 @@ class _ActiveTourCardState extends State<ActiveTourCard> {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.md),
         _SecondaryActions(leg: leg, busy: _busy, onEnd: () => _endTour(controller, token)),
       ];
 
   /// 도착했고 아직 먹은 빵을 확정하지 않은 상태.
   List<Widget> _arrivedSteps(TourFlowController controller, String token, TourLeg leg) => [
         ArrivalResultCard(stop: leg.arrivedStop!),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         FilledButton(
           onPressed: _busy ? null : () => showFoodConfirmSheet(context, leg: leg),
           child: const Text('먹은 빵 확정하기'),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.md),
         _SecondaryActions(leg: leg, busy: _busy, onEnd: () => _endTour(controller, token)),
       ];
 
@@ -132,7 +132,7 @@ class _ActiveTourCardState extends State<ActiveTourCard> {
             StatColumn(label: '투어 밸런스', value: '${controller.runningBalanceKcal}kcal'),
           ],
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
             Expanded(
@@ -179,6 +179,11 @@ class _LegHeader extends StatelessWidget {
     return '빵집으로 이동 중';
   }
 
+  /// `stops`에는 **도착을 기록한** 빵집만 쌓인다. 첫 빵집으로 가는 동안에는 아직
+  /// 비어 있어 그대로 쓰면 "0번째 빵집"이 된다 — 도착 전이면 지금 향하는 곳까지
+  /// 세어 1부터 시작하게 한다.
+  int get _legNumber => controller.stops.length + (leg.arrivedStop == null ? 1 : 0);
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -195,15 +200,16 @@ class _LegHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(leg.bakery.name, style: textTheme.titleMedium),
-                  Text('$_status · ${controller.stops.length}번째 빵집', style: textTheme.labelSmall),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text('$_status · $_legNumber번째 빵집', style: textTheme.labelSmall),
                 ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.lg),
         Text('고른 빵 · 예상 ${leg.estimatedCalories}kcal', style: textTheme.labelMedium),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         if (leg.selections.isEmpty)
           Text('아직 고른 빵이 없어요. "빵 다시 고르기"로 골라 보세요.', style: textTheme.bodySmall),
         for (final selection in leg.selections)
@@ -232,18 +238,29 @@ class _SecondaryActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Expanded로 양 끝에 밀어 놓으면 둘이 한 쌍으로 안 읽힌다 — 가운데로 모으고
+    // 사이에 구분점을 둬서 보조 동작 한 묶음으로 보이게 한다.
+    // 양쪽을 Expanded로 반씩 나눠 각각 구분점 쪽으로 붙인다 — 버튼 글자 수가
+    // 달라도 구분점은 항상 카드 정중앙에 온다.
     return Row(
       children: [
         Expanded(
-          child: TextButton(
-            onPressed: busy ? null : () => context.go('/bakeries/${leg.bakery.id}/menu'),
-            child: const Text('빵 다시 고르기'),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: busy ? null : () => context.go('/bakeries/${leg.bakery.id}/menu'),
+              child: const Text('빵 다시 고르기'),
+            ),
           ),
         ),
+        Text('·', style: Theme.of(context).textTheme.bodySmall),
         Expanded(
-          child: TextButton(
-            onPressed: busy ? null : onEnd,
-            child: const Text('투어 종료'),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: busy ? null : onEnd,
+              child: const Text('투어 종료'),
+            ),
           ),
         ),
       ],
@@ -264,13 +281,9 @@ class _IdleCard extends StatelessWidget {
           Icon(Icons.bakery_dining_outlined, size: 36, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('빵투어 떠나기', style: textTheme.titleMedium),
-                const SizedBox(height: AppSpacing.xs),
-                Text('빵집과 빵을 고르면 여기서 투어를 진행해요.', style: textTheme.bodySmall),
-              ],
+            child: Text(
+              '빵투어 떠나기',
+              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),

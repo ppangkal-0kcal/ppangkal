@@ -8,6 +8,7 @@ import '../models/app_permission.dart';
 import '../providers/permission_notice_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/page_title.dart';
 
 /// 앱 접근권한 사전 고지 (정보통신망법 제22조의2 / 방송미디어통신위원회
 /// 「앱 접근권한 동의 가이드라인」). 최초 실행 시 로그인보다 먼저 한 번 뜨고,
@@ -31,10 +32,7 @@ class PermissionNoticeScreen extends StatelessWidget {
     final optional = appPermissions.where((p) => !p.required).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('앱 접근권한 안내'),
-        automaticallyImplyLeading: !isFirstRun,
-      ),
+      appBar: PageAppBar('앱 접근권한 안내', automaticallyImplyLeading: !isFirstRun),
       body: SafeArea(
         child: Column(
           children: [

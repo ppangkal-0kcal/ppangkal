@@ -12,6 +12,7 @@ import '../widgets/empty_view.dart';
 import '../widgets/error_view.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/loading_view.dart';
+import '../widgets/page_title.dart';
 import '../widgets/stat_column.dart';
 import '../widgets/tour_balance_card.dart';
 
@@ -51,7 +52,7 @@ class _TourReportScreenState extends State<TourReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('투어 리포트')),
+      appBar: PageAppBar('투어 리포트'),
       body: widget.tourId == null ? _buildLiveTour(context) : _buildFetchedTour(),
     );
   }
@@ -99,7 +100,7 @@ class _TourReportBody extends StatelessWidget {
     final stops = tour.stops ?? const [];
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
       children: [
         if (tour.completedAt != null) ...[
           Text(_formatDate(tour.completedAt!), style: textTheme.bodySmall),
